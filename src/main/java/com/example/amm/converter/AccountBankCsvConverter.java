@@ -1,0 +1,113 @@
+package com.example.amm.converter;
+
+import com.example.amm.domain.entity.AccountDO;
+import com.example.amm.domain.entity.BankDO;
+import com.example.amm.domain.request.AccountBankCsvRequest;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
+
+@Mapper
+public interface AccountBankCsvConverter {
+
+    AccountBankCsvConverter INSTANCE = Mappers.getMapper(AccountBankCsvConverter.class);
+
+
+    @Mapping(source = "accountDeleteStatus", target = "accountDeleteStatus")
+    @Mapping(source = "accountGroupId", target = "groupId")
+    @Mapping(source = "accountStatus", target = "accountStatus")
+    @Mapping(source = "accountUnblockeStatus", target = "unblockeStatus")
+    @Mapping(source = "accountUnblockeCount", target = "unblockeCount")
+    @Mapping(source = "accountApplicationTime", target = "accountApplicationTime")
+    @Mapping(source = "accountEmail", target = "email")
+    @Mapping(source = "accountEmailPassword", target = "emailPassword")
+    @Mapping(source = "accountUsername", target = "username")
+    @Mapping(source = "accountPassword", target = "password")
+    @Mapping(source = "accountBalance", target = "balance")
+    @Mapping(source = "accountPayMeLink", target = "payMeLink")
+    @Mapping(source = "accountFirstName", target = "firstName")
+    @Mapping(source = "accountMiddleName", target = "middleName")
+    @Mapping(source = "accountLastName", target = "lastName")
+    @Mapping(source = "accountGender", target = "gender")
+    @Mapping(source = "accountCreditScore", target = "creditScore")
+    @Mapping(source = "accountSsn", target = "ssn")
+    @Mapping(source = "accountMonthBirthday", target = "monthBirthday")
+    @Mapping(source = "accountDayBirthday", target = "dayBirthday")
+    @Mapping(source = "accountYearBirthday", target = "yearBirthday")
+    @Mapping(source = "accountStreet", target = "street")
+    @Mapping(source = "accountSteetApt", target = "steetApt")
+    @Mapping(source = "accountCity", target = "city")
+    @Mapping(source = "accountState", target = "state")
+    @Mapping(source = "accountZipcode", target = "zipcode")
+    @Mapping(source = "accountCounty", target = "county")
+    @Mapping(source = "accountPhoneNumber", target = "phoneNumber")
+    @Mapping(source = "accountHistoryPhone", target = "historyPhone")
+    @Mapping(source = "accountDlNumber", target = "dlNumber")
+    @Mapping(source = "accountDlStreet", target = "dlStreet")
+    @Mapping(source = "accountDlSteetApt", target = "dlSteetApt")
+    @Mapping(source = "accountDlCity", target = "dlCity")
+    @Mapping(source = "accountDlState", target = "dlState")
+    @Mapping(source = "accountDlZipcode", target = "dlZipcode")
+    @Mapping(source = "accountDlDate", target = "dlDate")
+    @Mapping(source = "accountDlExpDate", target = "dlExpDate")
+    @Mapping(source = "accountFileUrl", target = "fileUrl")
+    @Mapping(source = "accountFileName", target = "fileName")
+    @Mapping(source = "accountFileHistoryPath", target = "fileHistoryPath")
+    @Mapping(source = "accountCreditBalance", target = "creditBalance")
+    @Mapping(source = "accountCreditStatus", target = "creditStatus")
+    @Mapping(source = "accountCreditReason", target = "creditReason")
+    @Mapping(source = "accountCreditDate", target = "creditDate")
+    @Mapping(source = "accountCashBankStatus", target = "cashBankStatus")
+    @Mapping(source = "accountCashBankReason", target = "cashBankReason")
+    @Mapping(source = "accountCashBankDate", target = "cashBankDate")
+    @Mapping(source = "accountCashBankBalance", target = "cashBankBalance")
+    @Mapping(source = "accountAnnualIncome", target = "annualIncome")
+    @Mapping(source = "accountRemark", target = "remark")
+    AccountDO csv2AccountDO(AccountBankCsvRequest accountBankCsvRequest);
+
+    @Mapping(source = "bankAccountDeleteStatus", target = "accountDeleteStatus")
+    @Mapping(source = "bankStatus", target = "status")
+    @Mapping(source = "bankUsername", target = "username")
+    @Mapping(source = "bankPassword", target = "password")
+    @Mapping(source = "bankPhoneNumber", target = "phoneNumber")
+    @Mapping(source = "bankHistoryPhone", target = "historyPhone")
+    @Mapping(source = "bankEmail", target = "email")
+    @Mapping(source = "bankEmailPassword", target = "emailPassword")
+    @Mapping(source = "bankRoutingNumber", target = "routingNumber")
+    @Mapping(source = "bankAccount", target = "bankAccount")
+    @Mapping(source = "bankCardNumber", target = "cardNumber")
+    @Mapping(source = "bankExpDate", target = "expDate")
+    @Mapping(source = "bankCvv", target = "cvv")
+    @Mapping(source = "bankCardType", target = "cardType")
+    @Mapping(source = "bankBalance", target = "balance")
+    @Mapping(source = "bankFirstName", target = "firstName")
+    @Mapping(source = "bankMiddleName", target = "middleName")
+    @Mapping(source = "bankLastName", target = "lastName")
+    @Mapping(source = "bankGender", target = "gender")
+    @Mapping(source = "bankCreditScore", target = "creditScore")
+    @Mapping(source = "bankSsn", target = "ssn")
+    @Mapping(source = "bankMonthBirthday", target = "monthBirthday")
+    @Mapping(source = "bankDayBirthday", target = "dayBirthday")
+    @Mapping(source = "bankYearBirthday", target = "yearBirthday")
+    @Mapping(source = "bankStreet", target = "street")
+    @Mapping(source = "bankSteetApt", target = "steetApt")
+    @Mapping(source = "bankCity", target = "city")
+    @Mapping(source = "bankState", target = "state")
+    @Mapping(source = "bankZipcode", target = "zipcode")
+    @Mapping(source = "bankCounty", target = "county")
+    @Mapping(source = "bankDlNumber", target = "dlNumber")
+    @Mapping(source = "bankDlStreet", target = "dlStreet")
+    @Mapping(source = "bankDlSteetApt", target = "dlSteetApt")
+    @Mapping(source = "bankDlCity", target = "dlCity")
+    @Mapping(source = "bankDlState", target = "dlState")
+    @Mapping(source = "bankDlZipcode", target = "dlZipcode")
+    @Mapping(source = "bankDlDate", target = "dlDate")
+    @Mapping(source = "bankDlExpDate", target = "dlExpDate")
+    @Mapping(source = "bankFileUrl", target = "fileUrl")
+    @Mapping(source = "bankFileName", target = "fileName")
+    @Mapping(source = "bankFileHistoryPath", target = "fileHistoryPath")
+    @Mapping(source = "bankRemark", target = "remark")
+    BankDO csv2BankDO(AccountBankCsvRequest accountBankCsvRequest);
+
+
+}

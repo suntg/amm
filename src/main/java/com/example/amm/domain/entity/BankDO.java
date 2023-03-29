@@ -1,5 +1,6 @@
 package com.example.amm.domain.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.amm.common.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@TableName("t_bank")
 public class BankDO extends BaseEntity {
 
     /**
@@ -82,7 +84,7 @@ public class BankDO extends BaseEntity {
      * 路由账号
      */
     @Schema(description = "路由账号")
-    private String bankCccount;
+    private String bankAccount;
 
     /**
      * 卡号

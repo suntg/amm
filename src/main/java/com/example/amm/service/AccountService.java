@@ -1,15 +1,18 @@
 package com.example.amm.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.amm.domain.entity.AccountDO;
+import com.example.amm.domain.query.PageQuery;
+import com.example.amm.domain.request.AccountBankCsvRequest;
 
 import java.util.List;
 
 public interface AccountService extends IService<AccountDO> {
 
+    void csvImport(List<AccountBankCsvRequest> list);
 
-    void csvImport(List list);
-
+    Page<AccountDO> listPage(PageQuery pageQuery);
 
     int deleteByPrimaryKey(Long id);
 

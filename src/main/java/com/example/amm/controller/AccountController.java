@@ -2,13 +2,17 @@ package com.example.amm.controller;
 
 import cn.hutool.core.text.csv.CsvReader;
 import cn.hutool.core.text.csv.CsvUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.amm.common.BizException;
+import com.example.amm.domain.entity.AccountDO;
+import com.example.amm.domain.query.PageQuery;
 import com.example.amm.domain.request.AccountBankCsvRequest;
 import com.example.amm.service.AccountService;
 import com.example.amm.service.BankService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,7 +46,34 @@ public class AccountController {
         } catch (IOException e) {
             throw new BizException("CSV文件异常");
         }
-        accountService.csvImport(null);
+        accountService.csvImport(accountBankCsvRequestList);
+    }
+
+
+    @Operation(summary = "分页查询")
+    @GetMapping("listPage")
+    public Page<AccountDO> listPage(PageQuery pageQuery) {
+        return accountService.listPage(pageQuery);
+    }
+
+    @GetMapping("getById")
+    public AccountDO getById(Long id) {
+        return accountService.selectByPrimaryKey(id);
+    }
+
+    @PostMapping("deleteById")
+    public void deleteById(Long id) {
+        accountService.deleteByPrimaryKey(id);
+    }
+
+    @PostMapping("insert")
+    public void insert(AccountDO record) {
+        accountService.insert(record);
+    }
+
+    @PostMapping("update")
+    public void update(AccountDO record) {
+        accountService.updateById(record);
     }
 
 

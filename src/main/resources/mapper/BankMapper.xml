@@ -16,7 +16,7 @@
         <result column="email" jdbcType="VARCHAR" property="email"/>
         <result column="email_password" jdbcType="VARCHAR" property="emailPassword"/>
         <result column="routing_number" jdbcType="VARCHAR" property="routingNumber"/>
-        <result column="bank_cccount" jdbcType="VARCHAR" property="bankCccount"/>
+        <result column="bank_account" jdbcType="VARCHAR" property="bankAccount"/>
         <result column="card_number" jdbcType="VARCHAR" property="cardNumber"/>
         <result column="exp_date" jdbcType="VARCHAR" property="expDate"/>
         <result column="cvv" jdbcType="VARCHAR" property="cvv"/>
@@ -153,8 +153,8 @@
             <if test="routingNumber != null">
                 routing_number,
             </if>
-            <if test="bankCccount != null">
-                bank_cccount,
+            <if test="bankAccount != null">
+                bank_account,
             </if>
             <if test="cardNumber != null">
                 card_number,
@@ -293,8 +293,8 @@
             <if test="routingNumber != null">
                 #{routingNumber,jdbcType=VARCHAR},
             </if>
-            <if test="bankCccount != null">
-                #{bankCccount,jdbcType=VARCHAR},
+            <if test="bankAccount != null">
+                #{bankAccount,jdbcType=VARCHAR},
             </if>
             <if test="cardNumber != null">
                 #{cardNumber,jdbcType=VARCHAR},
@@ -437,8 +437,8 @@
             <if test="routingNumber != null">
                 routing_number = #{routingNumber,jdbcType=VARCHAR},
             </if>
-            <if test="bankCccount != null">
-                bank_cccount = #{bankCccount,jdbcType=VARCHAR},
+            <if test="bankAccount != null">
+                bank_account = #{bankAccount,jdbcType=VARCHAR},
             </if>
             <if test="cardNumber != null">
                 card_number = #{cardNumber,jdbcType=VARCHAR},
@@ -559,7 +559,7 @@
             email                 = #{email,jdbcType=VARCHAR},
             email_password        = #{emailPassword,jdbcType=VARCHAR},
             routing_number        = #{routingNumber,jdbcType=VARCHAR},
-            bank_cccount          = #{bankCccount,jdbcType=VARCHAR},
+            bank_account          = #{bankAccount,jdbcType=VARCHAR},
             card_number           = #{cardNumber,jdbcType=VARCHAR},
             exp_date              = #{expDate,jdbcType=VARCHAR},
             cvv                   = #{cvv,jdbcType=VARCHAR},

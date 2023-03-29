@@ -1,9 +1,14 @@
 package com.example.amm.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.entity.BankDO;
+import com.example.amm.domain.query.PageQuery;
 
 public interface BankService extends IService<BankDO> {
+
+    Page<BankDO> listPage(PageQuery pageQuery);
 
 
     int deleteByPrimaryKey(Long id);

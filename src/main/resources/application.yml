@@ -1,0 +1,25 @@
+server:
+  shutdown: graceful
+  port: 11888
+
+spring:
+  application:
+    name: amm
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  datasource:
+    name: LPM
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  profiles:
+    active: test
+
+
+mybatis-plus:
+  type-aliases-package: com.example.amm
+  mapper-locations: classpath:/mapper/**.xml
+  configuration:
+    default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler

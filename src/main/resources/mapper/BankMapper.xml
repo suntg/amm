@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.amm.mapper.BankMapper">
+    <resultMap id="BaseResultMap" type="com.example.amm.domain.entity.BankDO">
+        <!--@mbg.generated-->
+        <!--@Table xtzn_amm.t_bank-->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="account_delete_status" jdbcType="INTEGER" property="accountDeleteStatus"/>
+        <result column="bank_type_id" jdbcType="BIGINT" property="bankTypeId"/>
+        <result column="account_id" jdbcType="BIGINT" property="accountId"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="phone_number" jdbcType="VARCHAR" property="phoneNumber"/>
+        <result column="history_phone" jdbcType="VARCHAR" property="historyPhone"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="email_password" jdbcType="VARCHAR" property="emailPassword"/>
+        <result column="routing_number" jdbcType="VARCHAR" property="routingNumber"/>
+        <result column="bank_cccount" jdbcType="VARCHAR" property="bankCccount"/>
+        <result column="card_number" jdbcType="VARCHAR" property="cardNumber"/>
+        <result column="exp_date" jdbcType="VARCHAR" property="expDate"/>
+        <result column="cvv" jdbcType="VARCHAR" property="cvv"/>
+        <result column="card_type" jdbcType="VARCHAR" property="cardType"/>
+        <result column="balance" jdbcType="VARCHAR" property="balance"/>
+        <result column="first_name" jdbcType="VARCHAR" property="firstName"/>
+        <result column="middle_Name" jdbcType="VARCHAR" property="middleName"/>
+        <result column="last_name" jdbcType="VARCHAR" property="lastName"/>
+        <result column="gender" jdbcType="VARCHAR" property="gender"/>
+        <result column="credit_score" jdbcType="VARCHAR" property="creditScore"/>
+        <result column="ssn" jdbcType="VARCHAR" property="ssn"/>
+        <result column="month_birthday" jdbcType="VARCHAR" property="VARCHAR"/>
+        <result column="day_birthday" jdbcType="VARCHAR" property="dayBirthday"/>
+        <result column="year_birthday" jdbcType="VARCHAR" property="yearBirthday"/>
+        <result column="street" jdbcType="VARCHAR" property="street"/>
+        <result column="steet_apt" jdbcType="VARCHAR" property="steetApt"/>
+        <result column="city" jdbcType="VARCHAR" property="city"/>
+        <result column="state" jdbcType="VARCHAR" property="state"/>
+        <result column="zipcode" jdbcType="VARCHAR" property="zipcode"/>
+        <result column="county" jdbcType="VARCHAR" property="county"/>
+        <result column="dl_number" jdbcType="VARCHAR" property="dlNumber"/>
+        <result column="dl_street" jdbcType="VARCHAR" property="dlStreet"/>
+        <result column="dl_steet_Apt" jdbcType="VARCHAR" property="dlSteetApt"/>
+        <result column="dl_city" jdbcType="VARCHAR" property="dlCity"/>
+        <result column="dl_state" jdbcType="VARCHAR" property="dlState"/>
+        <result column="dl_zipcode" jdbcType="VARCHAR" property="dlZipcode"/>
+        <result column="dl_date" jdbcType="VARCHAR" property="dlDate"/>
+        <result column="dl_exp_date" jdbcType="VARCHAR" property="dlExpDate"/>
+        <result column="file_url" jdbcType="VARCHAR" property="fileUrl"/>
+        <result column="file_name" jdbcType="VARCHAR" property="fileName"/>
+        <result column="file_history_path" jdbcType="VARCHAR" property="fileHistoryPath"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id,
+        account_delete_status,
+        bank_type_id,
+        account_id,
+        `status`,
+        username,
+        `password`,
+        phone_number,
+        history_phone,
+        email,
+        email_password,
+        routing_number,
+        bank_cccount,
+        card_number,
+        exp_date,
+        cvv,
+        card_type,
+        balance,
+        first_name,
+        middle_Name,
+        last_name,
+        gender,
+        credit_score,
+        ssn,
+        month_birthday,
+        day_birthday,
+        year_birthday,
+        street,
+        steet_apt,
+        city,
+        `state`,
+        zipcode,
+        county,
+        dl_number,
+        dl_street,
+        dl_steet_Apt,
+        dl_city,
+        dl_state,
+        dl_zipcode,
+        dl_date,
+        dl_exp_date,
+        file_url,
+        file_name,
+        file_history_path,
+        remark,
+        create_time,
+        update_time
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        <!--@mbg.generated-->
+        select
+        <include refid="Base_Column_List"/>
+        from xtzn_amm.t_bank
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        <!--@mbg.generated-->
+        delete
+        from xtzn_amm.t_bank
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.example.amm.domain.entity.BankDO"
+            useGeneratedKeys="true">
+        <!--@mbg.generated-->
+        insert into xtzn_amm.t_bank
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="accountDeleteStatus != null">
+                account_delete_status,
+            </if>
+            <if test="bankTypeId != null">
+                bank_type_id,
+            </if>
+            <if test="accountId != null">
+                account_id,
+            </if>
+            <if test="status != null">
+                `status`,
+            </if>
+            <if test="username != null">
+                username,
+            </if>
+            <if test="password != null">
+                `password`,
+            </if>
+            <if test="phoneNumber != null">
+                phone_number,
+            </if>
+            <if test="historyPhone != null">
+                history_phone,
+            </if>
+            <if test="email != null">
+                email,
+            </if>
+            <if test="emailPassword != null">
+                email_password,
+            </if>
+            <if test="routingNumber != null">
+                routing_number,
+            </if>
+            <if test="bankCccount != null">
+                bank_cccount,
+            </if>
+            <if test="cardNumber != null">
+                card_number,
+            </if>
+            <if test="expDate != null">
+                exp_date,
+            </if>
+            <if test="cvv != null">
+                cvv,
+            </if>
+            <if test="cardType != null">
+                card_type,
+            </if>
+            <if test="balance != null">
+                balance,
+            </if>
+            <if test="firstName != null">
+                first_name,
+            </if>
+            <if test="middleName != null">
+                middle_Name,
+            </if>
+            <if test="lastName != null">
+                last_name,
+            </if>
+            <if test="gender != null">
+                gender,
+            </if>
+            <if test="creditScore != null">
+                credit_score,
+            </if>
+            <if test="ssn != null">
+                ssn,
+            </if>
+            <if test="monthBirthday != null">
+                month_birthday,
+            </if>
+            <if test="dayBirthday != null">
+                day_birthday,
+            </if>
+            <if test="yearBirthday != null">
+                year_birthday,
+            </if>
+            <if test="street != null">
+                street,
+            </if>
+            <if test="steetApt != null">
+                steet_apt,
+            </if>
+            <if test="city != null">
+                city,
+            </if>
+            <if test="state != null">
+                `state`,
+            </if>
+            <if test="zipcode != null">
+                zipcode,
+            </if>
+            <if test="county != null">
+                county,
+            </if>
+            <if test="dlNumber != null">
+                dl_number,
+            </if>
+            <if test="dlStreet != null">
+                dl_street,
+            </if>
+            <if test="dlSteetApt != null">
+                dl_steet_Apt,
+            </if>
+            <if test="dlCity != null">
+                dl_city,
+            </if>
+            <if test="dlState != null">
+                dl_state,
+            </if>
+            <if test="dlZipcode != null">
+                dl_zipcode,
+            </if>
+            <if test="dlDate != null">
+                dl_date,
+            </if>
+            <if test="dlExpDate != null">
+                dl_exp_date,
+            </if>
+            <if test="fileUrl != null">
+                file_url,
+            </if>
+            <if test="fileName != null">
+                file_name,
+            </if>
+            <if test="fileHistoryPath != null">
+                file_history_path,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="accountDeleteStatus != null">
+                #{accountDeleteStatus,jdbcType=INTEGER},
+            </if>
+            <if test="bankTypeId != null">
+                #{bankTypeId,jdbcType=BIGINT},
+            </if>
+            <if test="accountId != null">
+                #{accountId,jdbcType=BIGINT},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="username != null">
+                #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null">
+                #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="phoneNumber != null">
+                #{phoneNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="historyPhone != null">
+                #{historyPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null">
+                #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="emailPassword != null">
+                #{emailPassword,jdbcType=VARCHAR},
+            </if>
+            <if test="routingNumber != null">
+                #{routingNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="bankCccount != null">
+                #{bankCccount,jdbcType=VARCHAR},
+            </if>
+            <if test="cardNumber != null">
+                #{cardNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="expDate != null">
+                #{expDate,jdbcType=VARCHAR},
+            </if>
+            <if test="cvv != null">
+                #{cvv,jdbcType=VARCHAR},
+            </if>
+            <if test="cardType != null">
+                #{cardType,jdbcType=VARCHAR},
+            </if>
+            <if test="balance != null">
+                #{balance,jdbcType=VARCHAR},
+            </if>
+            <if test="firstName != null">
+                #{firstName,jdbcType=VARCHAR},
+            </if>
+            <if test="middleName != null">
+                #{middleName,jdbcType=VARCHAR},
+            </if>
+            <if test="lastName != null">
+                #{lastName,jdbcType=VARCHAR},
+            </if>
+            <if test="gender != null">
+                #{gender,jdbcType=VARCHAR},
+            </if>
+            <if test="creditScore != null">
+                #{creditScore,jdbcType=VARCHAR},
+            </if>
+            <if test="ssn != null">
+                #{ssn,jdbcType=VARCHAR},
+            </if>
+            <if test="monthBirthday != null">
+                #{monthBirthday,jdbcType=VARCHAR},
+            </if>
+            <if test="dayBirthday != null">
+                #{dayBirthday,jdbcType=INTEGER},
+            </if>
+            <if test="yearBirthday != null">
+                #{yearBirthday,jdbcType=INTEGER},
+            </if>
+            <if test="street != null">
+                #{street,jdbcType=VARCHAR},
+            </if>
+            <if test="steetApt != null">
+                #{steetApt,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null">
+                #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null">
+                #{state,jdbcType=VARCHAR},
+            </if>
+            <if test="zipcode != null">
+                #{zipcode,jdbcType=VARCHAR},
+            </if>
+            <if test="county != null">
+                #{county,jdbcType=VARCHAR},
+            </if>
+            <if test="dlNumber != null">
+                #{dlNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="dlStreet != null">
+                #{dlStreet,jdbcType=VARCHAR},
+            </if>
+            <if test="dlSteetApt != null">
+                #{dlSteetApt,jdbcType=VARCHAR},
+            </if>
+            <if test="dlCity != null">
+                #{dlCity,jdbcType=VARCHAR},
+            </if>
+            <if test="dlState != null">
+                #{dlState,jdbcType=VARCHAR},
+            </if>
+            <if test="dlZipcode != null">
+                #{dlZipcode,jdbcType=VARCHAR},
+            </if>
+            <if test="dlDate != null">
+                #{dlDate,jdbcType=VARCHAR},
+            </if>
+            <if test="dlExpDate != null">
+                #{dlExpDate,jdbcType=VARCHAR},
+            </if>
+            <if test="fileUrl != null">
+                #{fileUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="fileName != null">
+                #{fileName,jdbcType=VARCHAR},
+            </if>
+            <if test="fileHistoryPath != null">
+                #{fileHistoryPath,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.example.amm.domain.entity.BankDO">
+        <!--@mbg.generated-->
+        update xtzn_amm.t_bank
+        <set>
+            <if test="accountDeleteStatus != null">
+                account_delete_status = #{accountDeleteStatus,jdbcType=INTEGER},
+            </if>
+            <if test="bankTypeId != null">
+                bank_type_id = #{bankTypeId,jdbcType=BIGINT},
+            </if>
+            <if test="accountId != null">
+                account_id = #{accountId,jdbcType=BIGINT},
+            </if>
+            <if test="status != null">
+                `status` = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="username != null">
+                username = #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null">
+                `password` = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="phoneNumber != null">
+                phone_number = #{phoneNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="historyPhone != null">
+                history_phone = #{historyPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null">
+                email = #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="emailPassword != null">
+                email_password = #{emailPassword,jdbcType=VARCHAR},
+            </if>
+            <if test="routingNumber != null">
+                routing_number = #{routingNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="bankCccount != null">
+                bank_cccount = #{bankCccount,jdbcType=VARCHAR},
+            </if>
+            <if test="cardNumber != null">
+                card_number = #{cardNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="expDate != null">
+                exp_date = #{expDate,jdbcType=VARCHAR},
+            </if>
+            <if test="cvv != null">
+                cvv = #{cvv,jdbcType=VARCHAR},
+            </if>
+            <if test="cardType != null">
+                card_type = #{cardType,jdbcType=VARCHAR},
+            </if>
+            <if test="balance != null">
+                balance = #{balance,jdbcType=VARCHAR},
+            </if>
+            <if test="firstName != null">
+                first_name = #{firstName,jdbcType=VARCHAR},
+            </if>
+            <if test="middleName != null">
+                middle_Name = #{middleName,jdbcType=VARCHAR},
+            </if>
+            <if test="lastName != null">
+                last_name = #{lastName,jdbcType=VARCHAR},
+            </if>
+            <if test="gender != null">
+                gender = #{gender,jdbcType=VARCHAR},
+            </if>
+            <if test="creditScore != null">
+                credit_score = #{creditScore,jdbcType=VARCHAR},
+            </if>
+            <if test="ssn != null">
+                ssn = #{ssn,jdbcType=VARCHAR},
+            </if>
+            <if test="monthBirthday != null">
+                month_birthday = #{monthBirthday,jdbcType=VARCHAR},
+            </if>
+            <if test="dayBirthday != null">
+                day_birthday = #{dayBirthday,jdbcType=INTEGER},
+            </if>
+            <if test="yearBirthday != null">
+                year_birthday = #{yearBirthday,jdbcType=INTEGER},
+            </if>
+            <if test="street != null">
+                street = #{street,jdbcType=VARCHAR},
+            </if>
+            <if test="steetApt != null">
+                steet_apt = #{steetApt,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null">
+                city = #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null">
+                `state` = #{state,jdbcType=VARCHAR},
+            </if>
+            <if test="zipcode != null">
+                zipcode = #{zipcode,jdbcType=VARCHAR},
+            </if>
+            <if test="county != null">
+                county = #{county,jdbcType=VARCHAR},
+            </if>
+            <if test="dlNumber != null">
+                dl_number = #{dlNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="dlStreet != null">
+                dl_street = #{dlStreet,jdbcType=VARCHAR},
+            </if>
+            <if test="dlSteetApt != null">
+                dl_steet_Apt = #{dlSteetApt,jdbcType=VARCHAR},
+            </if>
+            <if test="dlCity != null">
+                dl_city = #{dlCity,jdbcType=VARCHAR},
+            </if>
+            <if test="dlState != null">
+                dl_state = #{dlState,jdbcType=VARCHAR},
+            </if>
+            <if test="dlZipcode != null">
+                dl_zipcode = #{dlZipcode,jdbcType=VARCHAR},
+            </if>
+            <if test="dlDate != null">
+                dl_date = #{dlDate,jdbcType=VARCHAR},
+            </if>
+            <if test="dlExpDate != null">
+                dl_exp_date = #{dlExpDate,jdbcType=VARCHAR},
+            </if>
+            <if test="fileUrl != null">
+                file_url = #{fileUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="fileName != null">
+                file_name = #{fileName,jdbcType=VARCHAR},
+            </if>
+            <if test="fileHistoryPath != null">
+                file_history_path = #{fileHistoryPath,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.example.amm.domain.entity.BankDO">
+        <!--@mbg.generated-->
+        update xtzn_amm.t_bank
+        set account_delete_status = #{accountDeleteStatus,jdbcType=INTEGER},
+            bank_type_id             = #{bankTypeId,jdbcType=BIGINT},
+            account_id            = #{accountId,jdbcType=BIGINT},
+            `status`              = #{status,jdbcType=VARCHAR},
+            username              = #{username,jdbcType=VARCHAR},
+            `password`            = #{password,jdbcType=VARCHAR},
+            phone_number          = #{phoneNumber,jdbcType=VARCHAR},
+            history_phone         = #{historyPhone,jdbcType=VARCHAR},
+            email                 = #{email,jdbcType=VARCHAR},
+            email_password        = #{emailPassword,jdbcType=VARCHAR},
+            routing_number        = #{routingNumber,jdbcType=VARCHAR},
+            bank_cccount          = #{bankCccount,jdbcType=VARCHAR},
+            card_number           = #{cardNumber,jdbcType=VARCHAR},
+            exp_date              = #{expDate,jdbcType=VARCHAR},
+            cvv                   = #{cvv,jdbcType=VARCHAR},
+            card_type             = #{cardType,jdbcType=VARCHAR},
+            balance               = #{balance,jdbcType=VARCHAR},
+            first_name            = #{firstName,jdbcType=VARCHAR},
+            middle_Name           = #{middleName,jdbcType=VARCHAR},
+            last_name             = #{lastName,jdbcType=VARCHAR},
+            gender                = #{gender,jdbcType=VARCHAR},
+            credit_score          = #{creditScore,jdbcType=VARCHAR},
+            ssn                   = #{ssn,jdbcType=VARCHAR},
+            month_birthday        = #{monthBirthday,jdbcType=VARCHAR},
+            day_birthday          = #{dayBirthday,jdbcType=INTEGER},
+            year_birthday         = #{yearBirthday,jdbcType=INTEGER},
+            street                = #{street,jdbcType=VARCHAR},
+            steet_apt             = #{steetApt,jdbcType=VARCHAR},
+            city                  = #{city,jdbcType=VARCHAR},
+            `state`               = #{state,jdbcType=VARCHAR},
+            zipcode               = #{zipcode,jdbcType=VARCHAR},
+            county                = #{county,jdbcType=VARCHAR},
+            dl_number             = #{dlNumber,jdbcType=VARCHAR},
+            dl_street             = #{dlStreet,jdbcType=VARCHAR},
+            dl_steet_Apt          = #{dlSteetApt,jdbcType=VARCHAR},
+            dl_city               = #{dlCity,jdbcType=VARCHAR},
+            dl_state              = #{dlState,jdbcType=VARCHAR},
+            dl_zipcode            = #{dlZipcode,jdbcType=VARCHAR},
+            dl_date               = #{dlDate,jdbcType=VARCHAR},
+            dl_exp_date           = #{dlExpDate,jdbcType=VARCHAR},
+            file_url              = #{fileUrl,jdbcType=VARCHAR},
+            file_name             = #{fileName,jdbcType=VARCHAR},
+            file_history_path     = #{fileHistoryPath,jdbcType=VARCHAR},
+            remark                = #{remark,jdbcType=VARCHAR},
+            create_time           = #{createTime,jdbcType=TIMESTAMP},
+            update_time           = #{updateTime,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+</mapper>

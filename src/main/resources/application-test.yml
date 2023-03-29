@@ -5,7 +5,7 @@ spring:
     password: JGOp&7%XPb
 
 mybatis-plus:
-  type-aliases-package: com.example.amm.entity
+  type-aliases-package: com.example.amm.domain.entity
   configuration:
     # mybatis-plus配置控制台打印完整带参数SQL语句
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

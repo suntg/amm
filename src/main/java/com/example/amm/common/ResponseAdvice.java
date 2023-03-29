@@ -17,7 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  * 解决集成Swagger出现404问题，配置统一响应处理器拦截的范围，只拦截本项目的Controller类
  */
 @Slf4j
-@RestControllerAdvice(basePackages = "com.example.lpm")
+@RestControllerAdvice(basePackages = "com.example.amm")
 @RequiredArgsConstructor
 public class ResponseAdvice implements ResponseBodyAdvice<Object> {
 

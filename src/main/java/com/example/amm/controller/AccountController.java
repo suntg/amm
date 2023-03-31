@@ -12,10 +12,7 @@ import com.example.amm.service.BankService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -67,12 +64,12 @@ public class AccountController {
     }
 
     @PostMapping("insert")
-    public void insert(AccountDO record) {
+    public void insert(@RequestBody AccountDO record) {
         accountService.insert(record);
     }
 
     @PostMapping("update")
-    public void update(AccountDO record) {
+    public void update(@RequestBody AccountDO record) {
         accountService.updateById(record);
     }
 

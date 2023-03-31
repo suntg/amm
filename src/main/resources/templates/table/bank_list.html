@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="ThemeBucket">
+    <link rel="shortcut icon" href="#" type="image/png">
+
+    <title>银行列表</title>
+    <!--data table-->
+    <link rel="stylesheet" href="js/data-tables/DT_bootstrap.css"/>
+    <style>
+        .inputStyle {
+            width: 250px;
+        }
+
+        .el-table .danger-row {
+            background: #FF8C69;
+        }
+
+        .el-table .primary-row {
+            background: #98F5FF;
+        }
+
+        body {
+            padding-right: 0px !important;
+            overflow: hidden;
+        }
+        .el-table__wrapper  {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+    </style>
+    <div th:include="common :: commonheader"></div>
+</head>
+
+<body class="sticky-header">
+
+<section>
+
+    <div th:replace="common :: #leftmenu"></div>
+
+    <!-- main content start-->
+    <div class="main-content">
+
+        <div th:replace="common :: headermenu"></div>
+
+        <!-- page heading start-->
+        <div class="page-heading">
+            <h3>
+                银行列表
+            </h3>
+            <ul class="breadcrumb">
+                <li>
+                    <a href="#">Dashboard</a>
+                </li>
+                <li>
+                    <a href="#">Data Table</a>
+                </li>
+                <li class="active">银行列表</li>
+            </ul>
+        </div>
+        <!-- page heading end-->
+
+        <!--body wrapper start-->
+        <div class="wrapper" id="app">
+            <div class="row">
+                <div class="col-sm-12">
+                    <section class="panel">
+                        <header class="panel-heading">
+                            银行列表
+                        </header>
+
+                        <div class="panel-body">
+                            <div class="adv-table editable-table el-table__wrapper">
+
+                                <table class="table table-striped table-hover table-bordered"
+                                       id="editable-sample"
+                                >
+                                    <tbody>
+                                    <template>
+                                        <el-table
+                                                :data="banks"
+                                                border
+                                                style="width: 100%"
+                                                ref="table"
+                                                row-key="id"
+                                                @cell-dblclick="handleEdit"
+                                        >
+<!--                                            <el-table-column type="selection" width="55" :reserve-selection="true">-->
+<!--                                            </el-table-column>-->
+                                            <el-table-column
+                                                    prop="id"
+                                                    label="ID"
+                                            >
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="bankTypeId"
+                                                    label="银行类型"
+                                            >
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="accountId"
+                                                    label="账号id">
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="status"
+                                                    label="状态">
+                                                <template scope="scope">
+                                                    <span v-if="scope.row.status=== 0">正常</span>
+                                                    <span v-else-if="scope.row.status=== 1">被封</span>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="username"
+                                                    label="银行用户名">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.username }}</div>
+                                                    <el-input v-else v-model="scope.row.username" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="password"
+                                                    label="银行密码">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.password }}</div>
+                                                    <el-input v-else v-model="scope.row.password" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="phoneNumber"
+                                                    label="手机号码">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.phoneNumber }}</div>
+                                                    <el-input v-else v-model="scope.row.phoneNumber" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="historyPhone"
+                                                    label="背调电话">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.historyPhone }}</div>
+                                                    <el-input v-else v-model="scope.row.historyPhone" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="email"
+                                                    label="邮箱">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.email }}</div>
+                                                    <el-input v-else v-model="scope.row.email" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="emailPassword"
+                                                    label="邮箱密码">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.emailPassword }}</div>
+                                                    <el-input v-else v-model="scope.row.emailPassword" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="routingNumber"
+                                                    label="路由号">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.routingNumber }}</div>
+                                                    <el-input v-else v-model="scope.row.routingNumber" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="bankAccount"
+                                                    label="路由账号">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.bankAccount }}</div>
+                                                    <el-input v-else v-model="scope.row.bankAccount" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="cardNumber"
+                                                    label="卡号">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.cardNumber }}</div>
+                                                    <el-input v-else v-model="scope.row.cardNumber" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="expDate"
+                                                    label="卡过期日期">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.expDate }}</div>
+                                                    <el-input v-else v-model="scope.row.expDate" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="cvv"
+                                                    label="安全码(3位)">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.cvv }}</div>
+                                                    <el-input v-else v-model="scope.row.cvv" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="cardType"
+                                                    label="卡类型">
+                                                <template scope="scope">
+                                                    <div v-if="!scope.row.isEditing">
+                                                        <span v-if="scope.row.cardType == 1">Visa</span>
+                                                        <span v-else-if="scope.row.cardType == 2">Mastercard</span>
+                                                    </div>
+                                                    <el-input v-else v-model="scope.row.cardType" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="balance"
+                                                    label="账户余额">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.balance }}</div>
+                                                    <el-input v-else v-model="scope.row.balance" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="firstName"
+                                                    label="名">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.firstName }}</div>
+                                                    <el-input v-else v-model="scope.row.firstName" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="middleName"
+                                                    label="中间名">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.middleName }}</div>
+                                                    <el-input v-else v-model="scope.row.middleName" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="lastName"
+                                                    label="姓">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.lastName }}</div>
+                                                    <el-input v-else v-model="scope.row.lastName" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="gender"
+                                                    label="性别">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.gender }}</div>
+                                                    <el-input v-else v-model="scope.row.gender" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="creditScore"
+                                                    label="个人信用分">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.creditScore }}</div>
+                                                    <el-input v-else v-model="scope.row.creditScore" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="ssn"
+                                                    label="社保号">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.ssn }}</div>
+                                                    <el-input v-else v-model="scope.row.ssn" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="monthBirthday"
+                                                    label="生日-月">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.monthBirthday }}</div>
+                                                    <el-input v-else v-model="scope.row.monthBirthday" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="dayBirthday"
+                                                    label="生日-日">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.dayBirthday }}</div>
+                                                    <el-input v-else v-model="scope.row.dayBirthday" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="yearBirthday"
+                                                    label="生日-年">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.yearBirthday }}</div>
+                                                    <el-input v-else v-model="scope.row.yearBirthday" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="street"
+                                                    label="街道">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.street }}</div>
+                                                    <el-input v-else v-model="scope.row.street" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="steetApt"
+                                                    label="单元号(可为空)">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.steetApt }}</div>
+                                                    <el-input v-else v-model="scope.row.steetApt" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="city"
+                                                    label="城市">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.city }}</div>
+                                                    <el-input v-else v-model="scope.row.city" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="state"
+                                                    label="州">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.state }}</div>
+                                                    <el-input v-else v-model="scope.row.state" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="zipcode"
+                                                    label="邮编">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.zipcode }}</div>
+                                                    <el-input v-else v-model="scope.row.zipcode" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="county"
+                                                    label="国家">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.county }}</div>
+                                                    <el-input v-else v-model="scope.row.county" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="dlNumber"
+                                                    label="驾照号">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.dlNumber }}</div>
+                                                    <el-input v-else v-model="scope.row.dlNumber" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="dlStreet"
+                                                    label="驾照-街道">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.dlStreet }}</div>
+                                                    <el-input v-else v-model="scope.row.dlStreet" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="dlSteetApt"
+                                                    label="驾照-街道单元号">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.dlSteetApt }}</div>
+                                                    <el-input v-else v-model="scope.row.dlSteetApt" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="dlCity"
+                                                    label="驾照-城市">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.dlCity }}</div>
+                                                    <el-input v-else v-model="scope.row.dlCity" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="dlState"
+                                                    label="驾照-州">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.dlState }}</div>
+                                                    <el-input v-else v-model="scope.row.dlState" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="dlZipcode"
+                                                    label="驾照-邮编">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.dlZipcode }}</div>
+                                                    <el-input v-else v-model="scope.row.dlZipcode" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="dlDate"
+                                                    label="驾照-申领日期">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.dlDate }}</div>
+                                                    <el-input v-else v-model="scope.row.dlDate" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="dlExpDate"
+                                                    label="驾照-过期日期">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.dlExpDate }}</div>
+                                                    <el-input v-else v-model="scope.row.dlExpDate" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="fileUrl"
+                                                    label="文件路径">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.fileUrl }}</div>
+                                                    <el-input v-else v-model="scope.row.fileUrl" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="fileName"
+                                                    label="文件名">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.fileName }}</div>
+                                                    <el-input v-else v-model="scope.row.fileName" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="fileHistoryPath"
+                                                    label="历史路径">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.fileHistoryPath }}</div>
+                                                    <el-input v-else v-model="scope.row.fileHistoryPath" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="remark"
+                                                    label="账号总体概述">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.remark }}</div>
+                                                    <el-input v-else v-model="scope.row.remark" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    label="操作"
+                                                    align="center"
+                                                    min-width="100">
+                                                <template slot-scope="scope">
+                                                    <el-button type="danger" @click="deleteById(scope)">删除</el-button>
+                                                </template>
+                                            </el-table-column>
+                                        </el-table>
+                                    </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <el-pagination
+                                background
+                                :page-sizes="[50, 10, 20, 100]"
+                                :page-size="pageSize"
+                                :current-page="pageNum"
+                                @size-change="handleSizeChange"
+                                @current-change="handleCurrentChange"
+                                layout="total, sizes, prev, pager, next"
+                                :total="total">
+                        </el-pagination>
+                    </section>
+                </div>
+            </div>
+        </div>
+        <!--body wrapper end-->
+
+        <!--footer section start-->
+        <!--<footer>
+            2020 &copy; AdminEx by ThemeBucket </a>
+        </footer>-->
+        <!--footer section end-->
+
+
+    </div>
+    <!-- main content end-->
+</section>
+
+<!-- Placed js at the end of the document so the pages load faster -->
+<script src="js/jquery-1.10.2.min.js"></script>
+<script src="js/jquery-ui-1.9.2.custom.min.js"></script>
+<script src="js/jquery-migrate-1.2.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/modernizr.min.js"></script>
+<script src="js/jquery.nicescroll.js"></script>
+<!--<script src="js/Date.js"></script>-->
+
+<!--data table-->
+<script type="text/javascript" src="js/data-tables/jquery.dataTables.js"></script>
+<script type="text/javascript" src="js/data-tables/DT_bootstrap.js"></script>
+
+<!--common scripts for all pages-->
+<script src="js/scripts.js"></script>
+
+<script src="js/vue.js"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!-- 引入样式 -->
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<!--script for editable table-->
+<!-- END JAVASCRIPTS -->
+<script>
+    /*    jQuery(document).ready(function() {
+            EditableTable.init();
+        });*/
+    // let baseUrl = "http://192.168.100.119:8080";
+    var app = new Vue({
+        el: '#app',
+        data () {
+            let data = {
+                banks:[],
+                fileList: [],
+                summary: '',
+                total: 0,
+                pageNum: 1,
+                pageSize: 50,
+                options: [{
+                    value: 0,
+                    label: '否'
+                }, {
+                    value: 1,
+                    label: '是'
+                }],
+        }
+            return data
+        },
+
+        methods: {
+            onSubmit() {
+                axios.get(baseUrl + '/bank/listPage',
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {
+                            pageNum: this.pageNum,
+                            pageSize: this.pageSize
+                        }
+                    })
+                    .then((response) => {
+                        console.log("responose是：" + response.data);
+                        this.banks = response.data.data.records
+                        if (response.data != null) {
+                            this.total = response.data.data.total
+                        }
+                    })
+            },
+            resetCondition() {
+                this.ip = '',
+                this.country = '',
+                this.state = '',
+                this.city= '',
+                this.zipCode = '';
+            },
+            handleSizeChange(val) {
+                this.pageSize = val;
+                this.pageNum = 1;
+                this.onSubmit();
+            },
+            handleCurrentChange(val) {
+                this.pageNum = val;
+                this.onSubmit();
+            },
+            timeFormatter(row, column) {
+                return this.timestampToTime(row.confirmedTimestamp);
+            },
+            /**
+             * 计算时间返回 yyyy-MM-dd h:m:s 格式的⽅法
+             * timestamp 时间戳
+             */
+            timestampToTime(timestamp) {
+                // 计算年⽉⽇时分的函数
+                var date = new Date(timestamp * 1000)
+                console.log(date);
+                var Y = date.getFullYear() + '-'
+                var M = (date.getMonth() + 1) + '-'
+                var D = date.getDate() + ' '
+                var h = date.getHours() + ':'
+                var m = date.getMinutes() + ':'
+                var s = date.getSeconds()
+                return Y + M + D + h + m + s
+            },
+            search() {
+                this.onSubmit();
+            },
+            deleteById({row, column}) {
+                //保存Vue指针
+                var that = this;
+                const loading = this.$loading({
+                    lock: true,
+                    text: '删除中...',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 0, 0, 0.7)'
+                });
+                axios.post(baseUrl + '/bank/deleteById', {}, {
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                        'Access-Control-Allow-Credentials': 'true', //解决session问题
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为json类型
+                    },
+                    withCredentials: true,
+                    params: {
+                        id: row.id
+                    }
+                })
+                    .then(function (response) {
+                        loading.close();
+                        that.$alert(response.data.message, '操作结果', {
+                            confirmButtonText: '确定',
+                            callback: action => {
+                                that.$message({
+                                    type: 'info',
+                                    message: response.data.message
+                                });
+                            }
+                        });
+                        this.onSubmit();
+                    })
+                    .catch(function (error) {
+                        loading.close();
+                        that.$alert(error.data.message, '操作结果', {
+                            confirmButtonText: '确定',
+                            type: 'error',
+                            callback: action => {
+                                that.$message.error('异常错误：' + error.data.message);
+                            }
+                        });
+                    });
+            },
+            handleEdit(row) {
+                // 将当前行设置为编辑状态
+                Vue.set(row, 'isEditing', true);
+            },
+            handleSave(row) {
+                // 保存当前行的修改
+                // 可以将修改后的数据提交到后台进行保存
+                axios.post(baseUrl + '/bank/update',
+
+                    JSON.stringify(row)
+                    , {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/json; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true
+                    }).then((response) => {
+
+                    console.log(response)
+                    this.$message({
+                        message: response.data.message,
+                        type: 'success'
+                    });
+                })
+
+                // 将当前行的 isEditing 属性设置为 false，表示该行不再处于编辑状态
+                Vue.set(row, 'isEditing', false);
+            }
+        },
+        mounted() {
+            this.onSubmit();
+        }
+    })
+</script>
+
+</body>
+</html>

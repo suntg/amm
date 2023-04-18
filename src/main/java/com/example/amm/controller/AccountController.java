@@ -1,24 +1,16 @@
 package com.example.amm.controller;
 
-import cn.hutool.core.text.csv.CsvReader;
-import cn.hutool.core.text.csv.CsvUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.amm.common.BizException;
 import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.query.PageQuery;
-import com.example.amm.domain.request.AccountBankCsvRequest;
 import com.example.amm.service.AccountService;
 import com.example.amm.service.BankService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.List;
 
 @Tag(name = "Account")
 @Slf4j
@@ -32,19 +24,19 @@ public class AccountController {
     @Resource
     private BankService bankService;
 
-    @Operation(summary = "CSV导入")
-    @PostMapping("/csvImport")
-    public void csvImport(MultipartFile file) {
-
-        List<AccountBankCsvRequest> accountBankCsvRequestList;
-        try {
-            CsvReader reader = CsvUtil.getReader();
-            accountBankCsvRequestList = reader.read(new InputStreamReader(file.getInputStream()), AccountBankCsvRequest.class);
-        } catch (IOException e) {
-            throw new BizException("CSV文件异常");
-        }
-        accountService.csvImport(accountBankCsvRequestList);
-    }
+    // @Operation(summary = "CSV导入")
+    // @PostMapping("/csvImport")
+    // public void csvImport(MultipartFile file) {
+    //
+    //     List<AccountBankCsvRequest> accountBankCsvRequestList;
+    //     try {
+    //         CsvReader reader = CsvUtil.getReader();
+    //         accountBankCsvRequestList = reader.read(new InputStreamReader(file.getInputStream()), AccountBankCsvRequest.class);
+    //     } catch (IOException e) {
+    //         throw new BizException("CSV文件异常");
+    //     }
+    //     accountService.csvImport(accountBankCsvRequestList);
+    // }
 
 
     @Operation(summary = "分页查询")
@@ -53,25 +45,24 @@ public class AccountController {
         return accountService.listPage(pageQuery);
     }
 
-    @GetMapping("getById")
-    public AccountDO getById(Long id) {
-        return accountService.selectByPrimaryKey(id);
+    @GetMapping("/{id}")
+    public AccountDO getById(@PathVariable Long id) {
+        return accountService.getById(id);
     }
 
-    @PostMapping("deleteById")
-    public void deleteById(Long id) {
-        accountService.deleteByPrimaryKey(id);
+    @DeleteMapping("/delete/{id}")
+    public boolean deleteById(@PathVariable Long id) {
+        return accountService.deleteById(id);
     }
 
-    @PostMapping("insert")
-    public void insert(@RequestBody AccountDO record) {
-        accountService.insert(record);
+    @PostMapping("/save")
+    public boolean saveAccount(@RequestBody AccountDO account) {
+        return accountService.saveAccount(account);
     }
 
-    @PostMapping("update")
-    public void update(@RequestBody AccountDO record) {
-        accountService.updateById(record);
+    @PutMapping("/update/{id}")
+    public boolean updateAccountById(@PathVariable Long id, @RequestBody AccountDO account) {
+        return accountService.updateUserById(id, user);
     }
-
 
 }

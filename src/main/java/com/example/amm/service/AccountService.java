@@ -14,16 +14,20 @@ public interface AccountService extends IService<AccountDO> {
 
     Page<AccountDO> listPage(PageQuery pageQuery);
 
-    int deleteByPrimaryKey(Long id);
+    AccountDO getById(Long id);
 
-    int insert(AccountDO record);
+    boolean deleteById(Long id);
 
-    int insertSelective(AccountDO record);
+    boolean saveAccount(AccountDO account);
 
-    AccountDO selectByPrimaryKey(Long id);
 
-    int updateByPrimaryKeySelective(AccountDO record);
+    boolean updateAccountById(Long id, AccountDO account);
 
-    int updateByPrimaryKey(AccountDO record);
+
+    int insertSelective(AccountDO account);
+
+    int updateByPrimaryKeySelective(AccountDO account);
+
+    int updateByPrimaryKey(AccountDO account);
 
 }

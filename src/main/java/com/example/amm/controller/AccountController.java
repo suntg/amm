@@ -65,8 +65,4 @@ public class AccountController {
         return accountService.updateAccountById(id, account);
     }
 
-
-
-
-
 }

@@ -62,7 +62,11 @@ public class AccountController {
 
     @PutMapping("/update/{id}")
     public boolean updateAccountById(@PathVariable Long id, @RequestBody AccountDO account) {
-        return accountService.updateUserById(id, user);
+        return accountService.updateAccountById(id, account);
     }
+
+
+
+
 
 }

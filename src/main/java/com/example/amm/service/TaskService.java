@@ -5,8 +5,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.amm.domain.entity.TaskDO;
 import com.example.amm.domain.query.PageQuery;
 
-import java.util.List;
-
 public interface TaskService extends IService<TaskDO> {
 
 
@@ -18,7 +16,6 @@ public interface TaskService extends IService<TaskDO> {
 
     TaskDO getTaskById(Long id);
 
-    Page<TaskDO> listPage(PageQuery pageQuery) ;
-
+    Page<TaskDO> listPage(PageQuery pageQuery);
 
 }

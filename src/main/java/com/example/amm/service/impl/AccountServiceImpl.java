@@ -1,5 +1,6 @@
 package com.example.amm.service.impl;
 
+import cn.hutool.core.date.LocalDateTimeUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -67,6 +68,9 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     @Override
     public boolean updateAccountById(Long id, AccountDO account) {
         account.setId(id);
+        if (account.getChangeTimeFlag() == 0) {
+            account.setUpdateTime(LocalDateTimeUtil.now());
+        }
         return accountMapper.updateById(account) > 0;
     }
 

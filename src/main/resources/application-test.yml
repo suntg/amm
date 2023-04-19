@@ -3,6 +3,17 @@ spring:
     url: jdbc:mysql://192.168.100.3:3306/xtzn_amm?serverTimezone=Asia/Shanghai&useSSL=false&useUnicode=true&allowPublicKeyRetrieval=true
     username: root
     password: JGOp&7%XPb
+  redis:
+    host: 192.168.100.3
+    port: 6379
+    password: root
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+
 
 mybatis-plus:
   type-aliases-package: com.example.amm.domain.entity

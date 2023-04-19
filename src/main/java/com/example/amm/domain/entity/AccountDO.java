@@ -1,5 +1,6 @@
 package com.example.amm.domain.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -9,6 +10,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Schema
@@ -86,6 +89,15 @@ public class AccountDO extends BaseEntity {
      */
     @Schema(description = "")
     private String remark;
+
+
+    @TableField(exist = false)
+    private int changeTimeFlag;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
 
     // /**
     //  * 默认值为:0(正常) ,1:软删除

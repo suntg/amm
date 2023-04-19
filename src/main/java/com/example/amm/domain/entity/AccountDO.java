@@ -1,5 +1,6 @@
 package com.example.amm.domain.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.amm.common.BaseEntity;
@@ -25,9 +26,10 @@ public class AccountDO extends BaseEntity {
     private String email;
 
     /**
-     * 分组身份ID
+     *
      */
-    @Schema(description = "分组身份ID")
+    @Schema(description = "分组")
+    @TableField("`group`")
     private Integer group;
 
 

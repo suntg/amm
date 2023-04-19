@@ -7,6 +7,7 @@ import com.example.amm.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -28,7 +29,7 @@ public class TaskController {
     }
 
     @PostMapping("/save")
-    public boolean saveTask(@RequestBody TaskDO task) {
+    public boolean saveTask(@RequestBody @Validated TaskDO task) {
         return taskService.saveTask(task);
     }
 

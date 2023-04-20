@@ -1,6 +1,5 @@
 package com.example.amm.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -74,7 +73,7 @@ public class AccountDO extends BaseEntity {
 
     private Integer status;
 
-    private Integer succTimesNum;
+    private int succTimes;
 
     private String succMoney;
 

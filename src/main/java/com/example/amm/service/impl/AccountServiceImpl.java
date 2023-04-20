@@ -1,7 +1,9 @@
 package com.example.amm.service.impl;
 
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.util.NumberUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.amm.domain.entity.AccountDO;
@@ -75,8 +77,23 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     }
 
     @Override
-    public int insertSelective(AccountDO record) {
-        return accountMapper.insertSelective(record);
+    public boolean updateMoneyAndTimesById(Long id, AccountDO account) {
+        AccountDO result = accountMapper.selectById(id);
+        if (result != null) {
+            String money = String.valueOf(NumberUtil.add(account.getSuccMoney(), result.getSuccMoney()));
+            int times = result.getSuccTimes();
+            result.setSuccTimes(++times);
+            LambdaUpdateWrapper<AccountDO> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+            lambdaUpdateWrapper.eq(AccountDO::getId, id).set(AccountDO::getSuccMoney, money).set(AccountDO::getSuccTimes, times);
+
+            return accountMapper.update(null, lambdaUpdateWrapper) > 0;
+        }
+        return false;
+    }
+
+    @Override
+    public int insertSelective(AccountDO account) {
+        return accountMapper.insertSelective(account);
     }
 
     @Override
@@ -85,13 +102,13 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     }
 
     @Override
-    public int updateByPrimaryKeySelective(AccountDO record) {
-        return accountMapper.updateByPrimaryKeySelective(record);
+    public int updateByPrimaryKeySelective(AccountDO account) {
+        return accountMapper.updateByPrimaryKeySelective(account);
     }
 
     @Override
-    public int updateByPrimaryKey(AccountDO record) {
-        return accountMapper.updateByPrimaryKey(record);
+    public int updateByPrimaryKey(AccountDO account) {
+        return accountMapper.updateByPrimaryKey(account);
     }
 
 }

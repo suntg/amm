@@ -22,6 +22,7 @@ public interface AccountService extends IService<AccountDO> {
 
 
     boolean updateAccountById(Long id, AccountDO account);
+    boolean updateMoneyAndTimesById(Long id, AccountDO account);
 
 
     int insertSelective(AccountDO account);

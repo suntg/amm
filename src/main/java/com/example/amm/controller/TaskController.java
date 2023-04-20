@@ -1,6 +1,8 @@
 package com.example.amm.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.amm.common.BizException;
+import com.example.amm.common.ReturnCode;
 import com.example.amm.domain.entity.TaskDO;
 import com.example.amm.domain.query.PageQuery;
 import com.example.amm.service.TaskService;
@@ -47,4 +49,19 @@ public class TaskController {
     public TaskDO getTaskById(@PathVariable Long id) {
         return taskService.getTaskById(id);
     }
+
+
+    @PostMapping("/createQuick")
+    public void createQuick(@RequestBody TaskDO task) {
+        if (Integer.parseInt(task.getMoney()) < 0) {
+            throw new BizException(ReturnCode.LIMIT_ERROR.getCode(), "金额 必须 > 0");
+        }
+
+        if (task.getType().length() < 2) {
+            throw new BizException(ReturnCode.LIMIT_ERROR.getCode(), "Type 类型不对");
+        }
+
+        taskService.createQuickTask(task);
+    }
 }
+

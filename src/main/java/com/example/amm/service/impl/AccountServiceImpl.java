@@ -1,22 +1,27 @@
 package com.example.amm.service.impl;
 
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.amm.constant.RedisKeyConstant;
 import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.query.PageQuery;
 import com.example.amm.domain.request.AccountBankCsvRequest;
+import com.example.amm.domain.vo.AccountVO;
 import com.example.amm.mapper.AccountMapper;
 import com.example.amm.service.AccountService;
-import com.example.amm.service.BankService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -26,7 +31,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     private AccountMapper accountMapper;
 
     @Resource
-    private BankService bankService;
+    private RedisTemplate<String, String> redisTemplate;
 
     @Override
     public void csvImport(List<AccountBankCsvRequest> list) {
@@ -109,6 +114,83 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     @Override
     public int updateByPrimaryKey(AccountDO account) {
         return accountMapper.updateByPrimaryKey(account);
+    }
+
+    @Override
+    public void uploadLog(Long id, String log) {
+
+        StringBuilder value = new StringBuilder();
+        value.append("[");
+        value.append(LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
+        value.append("]");
+        value.append(" => ");
+        value.append(log);
+
+
+        redisTemplate.opsForList().leftPush(RedisKeyConstant.LOG_ACCOUNT_KEY + id, String.valueOf(value));
+        redisTemplate.expire(RedisKeyConstant.LOG_ACCOUNT_KEY + id, 90, TimeUnit.DAYS);
+
+
+        AccountDO accountDO = accountMapper.selectById(id);
+
+        redisTemplate.opsForList().leftPush(RedisKeyConstant.LOG_GROUP_KEY + accountDO.getGroup(), String.valueOf(value));
+        redisTemplate.expire(RedisKeyConstant.LOG_GROUP_KEY + accountDO.getGroup(), 90, TimeUnit.DAYS);
+
+
+        accountDO.setRecentLog(log);
+        accountMapper.updateById(accountDO);
+    }
+
+    @Override
+    public int nextGroup(int group) {
+        AccountDO accountDO = accountMapper.selectOne(new QueryWrapper<AccountDO>().lambda()
+                .gt(AccountDO::getGroup, group)
+                .orderByAsc(AccountDO::getGroup).last(" LIMIT 1 "));
+        if (accountDO == null) {
+            return group;
+        }
+        return accountDO.getGroup();
+    }
+
+    @Override
+    public Long nextAccount(Long id) {
+        AccountDO accountDO = accountMapper.selectById(id);
+        AccountDO next = accountMapper.selectOne(new QueryWrapper<AccountDO>().lambda()
+                .ne(AccountDO::getGroup, accountDO.getGroup())
+                .ge(AccountDO::getId, id)
+                .orderByAsc(AccountDO::getId).last(" LIMIT 1 "));
+        if (next == null) {
+            int nextGroup = nextGroup(accountDO.getGroup());
+
+            next = accountMapper.selectOne(new QueryWrapper<AccountDO>().lambda().ne(AccountDO::getGroup, nextGroup)
+                    .orderByAsc(AccountDO::getId).last(" LIMIT 1 "));
+        }
+        return next.getId();
+    }
+
+    /**
+     * 在快捷创建task页面获取account信息
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public AccountVO getAccount(Long id) {
+        AccountDO accountDO = accountMapper.selectById(id);
+        List<AccountDO> accountDOList = accountMapper.selectList(new QueryWrapper<AccountDO>().lambda()
+                .eq(AccountDO::getGroup, accountDO.getGroup()));
+
+        AccountVO accountVO = new AccountVO();
+
+        accountVO.setCurrentAccount(accountDO);
+        accountVO.setAccountDOList(accountDOList);
+        int money = Math.round(NumberUtil.sub(accountDO.getBalance(), String.valueOf(RandomUtil.randomInt(1, 3))).floatValue());
+        if (money > 15){  //限定最大
+            money = 15;
+        }
+        accountVO.setMoney(money);
+
+        return accountVO;
     }
 
 }

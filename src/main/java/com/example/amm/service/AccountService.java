@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.query.PageQuery;
 import com.example.amm.domain.request.AccountBankCsvRequest;
+import com.example.amm.domain.vo.AccountVO;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ public interface AccountService extends IService<AccountDO> {
 
 
     boolean updateAccountById(Long id, AccountDO account);
+
     boolean updateMoneyAndTimesById(Long id, AccountDO account);
 
 
@@ -30,5 +32,14 @@ public interface AccountService extends IService<AccountDO> {
     int updateByPrimaryKeySelective(AccountDO account);
 
     int updateByPrimaryKey(AccountDO account);
+
+    void uploadLog(Long id, String log);
+
+    int nextGroup(int group);
+
+    Long nextAccount(Long id);
+
+
+    AccountVO getAccount(Long id);
 
 }

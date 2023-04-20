@@ -1,11 +1,10 @@
 package com.example.amm.controller;
 
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.LocalDateTimeUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.amm.constant.RedisKeyConstant;
 import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.query.PageQuery;
+import com.example.amm.domain.vo.AccountVO;
 import com.example.amm.service.AccountService;
 import com.example.amm.service.BankService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Tag(name = "Account")
 @Slf4j
@@ -51,27 +49,31 @@ public class AccountController {
         return accountService.listPage(pageQuery);
     }
 
+    @Operation(summary = "通过id查询")
     @GetMapping("/{id}")
     public AccountDO getById(@PathVariable Long id) {
         return accountService.getById(id);
     }
 
+    @Operation(summary = "通过id删除")
     @DeleteMapping("/delete/{id}")
     public boolean deleteById(@PathVariable Long id) {
         return accountService.deleteById(id);
     }
 
+    @Operation(summary = "新增Account")
     @PostMapping("/save")
     public boolean saveAccount(@RequestBody AccountDO account) {
         return accountService.saveAccount(account);
     }
 
+    @Operation(summary = "更新Account")
     @PutMapping("/update/{id}")
     public boolean updateAccountById(@PathVariable Long id, @RequestBody AccountDO account) {
         return accountService.updateAccountById(id, account);
     }
 
-
+    @Operation(summary = "更新money和times")
     @PutMapping("/updateMoneyAndTimes/{id}")
     public boolean updateMoneyAndTimesById(@PathVariable Long id, @RequestBody AccountDO account) {
         return accountService.updateMoneyAndTimesById(id, account);
@@ -80,36 +82,47 @@ public class AccountController {
     @Resource
     private RedisTemplate<String, String> redisTemplate;
 
+    @Operation(summary = "上传日志")
     @PostMapping("/uploadLog/{id}")
-    public void uploadLog(@PathVariable("id") String id, @RequestBody String log) {
-
-        StringBuilder value = new StringBuilder();
-        value.append("[");
-        value.append(LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
-        value.append("]");
-        value.append(" => ");
-        value.append(log);
-
-
-        redisTemplate.opsForList().leftPush(RedisKeyConstant.LOG_ACCOUNT_KEY + id, String.valueOf(value));
-        redisTemplate.expire(RedisKeyConstant.LOG_ACCOUNT_KEY + id, 90, TimeUnit.DAYS);
-
-
-        AccountDO accountDO = accountService.getById(id);
-
-        redisTemplate.opsForList().leftPush(RedisKeyConstant.LOG_GROUP_KEY + accountDO.getGroup(), String.valueOf(value));
-        redisTemplate.expire(RedisKeyConstant.LOG_GROUP_KEY + accountDO.getGroup(), 90, TimeUnit.DAYS);
-
+    public void uploadLog(@PathVariable("id") Long id, @RequestBody String log) {
+        accountService.uploadLog(id, log);
     }
 
+    @Operation(summary = "获取account log")
     @GetMapping("/accountLog/{id}")
     public List<String> getAccountLogListById(@PathVariable String id) {
         return redisTemplate.opsForList().range(RedisKeyConstant.LOG_ACCOUNT_KEY + id, 0, -1);
     }
 
-
+    @Operation(summary = "获取group log")
     @GetMapping("/groupLog/{id}")
     public List<String> getGroupLogListById(@PathVariable String id) {
         return redisTemplate.opsForList().range(RedisKeyConstant.LOG_GROUP_KEY + id, 0, -1);
     }
+
+    @Operation(summary = "获取next account")
+    @GetMapping("/nextAccount/{id}")
+    public Long nextAccount(@PathVariable Long id) {
+        return accountService.nextAccount(id);
+    }
+
+    @Operation(summary = "获取next group")
+    @GetMapping("/nextGroup/{group}")
+    public int nextGroup(@PathVariable int group) {
+        return accountService.nextGroup(group);
+    }
+
+
+    @Operation(summary = "获取getAccountInfo")
+    @GetMapping("/getAccountInfo/{id}")
+    public AccountVO getAccountInfo(@PathVariable Long id) {
+        return accountService.getAccount(id);
+    }
+
+
+
+
+
+
+
 }

@@ -44,4 +44,9 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
         return this.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()), new QueryWrapper<TaskDO>().lambda()
                 .orderByDesc(TaskDO::getCreateTime));
     }
+
+    @Override
+    public void createQuickTask(TaskDO task) {
+        taskMapper.insert(task);
+    }
 }

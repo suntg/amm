@@ -29,29 +29,32 @@ public class TaskController {
     @Resource
     private RedisTemplate<String, String> redisTemplate;
 
-    @Operation(summary = "分页查询")
+    @Operation(summary = "分页查询 index()")
     @GetMapping("/listPage")
     public Page<TaskDO> listPage(PageQuery pageQuery) {
         return taskService.listPage(pageQuery);
     }
 
+    @Operation(summary = "creat()")
     @PostMapping("/save")
     public boolean saveTask(@RequestBody @Validated TaskDO task) {
         return taskService.saveTask(task);
     }
 
+    @Operation(summary = "update()")
     @PutMapping("/update/{id}")
     public boolean updateTaskById(@PathVariable Long id, @RequestBody TaskDO task) {
         return taskService.updateTaskById(id, task);
     }
 
+    @Operation(summary = "del($id)")
     @DeleteMapping("/delete/{id}")
     public boolean removeTaskById(@PathVariable Long id) {
         redisTemplate.delete(RedisKeyConstant.TASK_LOG_KEY + id);
         return taskService.removeTaskById(id);
     }
 
-    @Operation(summary = "通过id查询 ")
+    @Operation(summary = "通过id查询 edit($id)")
     @GetMapping("/{id}")
     public TaskDO getTaskById(@PathVariable Long id) {
         return taskService.getTaskById(id);
@@ -85,12 +88,12 @@ public class TaskController {
     }
 
 
-    @Operation(summary = "一键清空已完成任务")
+    /*@Operation(summary = "一键清空已完成任务")
     @PostMapping("/setStatus/{id}/{status}")
     public int setStatus(@PathVariable Long id, @PathVariable int status) {
         taskService.setTaskStatus(id, status);
         return taskService.getTaskStatus(id);
-    }
+    }*/
 
 
     @Operation(summary = "一键清空已完成任务 delsuctask()")
@@ -100,7 +103,7 @@ public class TaskController {
     }
 
 
-    @Operation(summary = "一键清空所有任务")
+    @Operation(summary = "一键清空所有任务 delalltask()")
     @GetMapping("/delAllTask")
     public void delAllTask() {
         taskService.deleteAllTasks();
@@ -128,6 +131,14 @@ public class TaskController {
             executeTask(taskDO.getId());
         }
     }
+
+    @Operation(summary = "get_redis_queue()")
+    @GetMapping("/getTaskQueueElement")
+    public String getTaskQueueElement() {
+        String key = "auto_25_taskqueue";
+        return redisTemplate.opsForList().rightPop(key);
+    }
+
 
 }
 

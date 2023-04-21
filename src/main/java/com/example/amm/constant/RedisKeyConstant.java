@@ -3,10 +3,17 @@ package com.example.amm.constant;
 public class RedisKeyConstant {
 
 
-    public static String LOG_ACCOUNT_KEY = "amm:log:account:";
+    public static String ACCOUNT_LOG_KEY = "amm:account:log:";
 
-    public static String LOG_GROUP_KEY = "amm:log:group:";
+    public static String GROUP_LOG_KEY = "amm:group:log:";
 
-    public static String LOG_TASK_KEY = "amm:log:task:";
+    public static String TASK_LOG_KEY = "amm:task:log:";
+    
+    public static String AUTO_TASK_LOG_KEY = "amm:autoTask:log:";
 
+
+
+
+
+    public static String AUTO_TASK_USER_LOG_KEY = "amm:autoTask:log:";
 }

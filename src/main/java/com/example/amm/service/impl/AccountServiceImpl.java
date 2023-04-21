@@ -127,14 +127,14 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
         value.append(log);
 
 
-        redisTemplate.opsForList().leftPush(RedisKeyConstant.LOG_ACCOUNT_KEY + id, String.valueOf(value));
-        redisTemplate.expire(RedisKeyConstant.LOG_ACCOUNT_KEY + id, 30, TimeUnit.DAYS);
+        redisTemplate.opsForList().leftPush(RedisKeyConstant.ACCOUNT_LOG_KEY + id, String.valueOf(value));
+        redisTemplate.expire(RedisKeyConstant.ACCOUNT_LOG_KEY + id, 30, TimeUnit.DAYS);
 
 
         AccountDO accountDO = accountMapper.selectById(id);
 
-        redisTemplate.opsForList().leftPush(RedisKeyConstant.LOG_GROUP_KEY + accountDO.getGroup(), String.valueOf(value));
-        redisTemplate.expire(RedisKeyConstant.LOG_GROUP_KEY + accountDO.getGroup(), 90, TimeUnit.DAYS);
+        redisTemplate.opsForList().leftPush(RedisKeyConstant.GROUP_LOG_KEY + accountDO.getGroup(), String.valueOf(value));
+        redisTemplate.expire(RedisKeyConstant.GROUP_LOG_KEY + accountDO.getGroup(), 90, TimeUnit.DAYS);
 
 
         accountDO.setRecentLog(log);

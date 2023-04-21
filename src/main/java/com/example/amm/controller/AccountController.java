@@ -1,6 +1,9 @@
 package com.example.amm.controller;
 
+import cn.hutool.core.text.csv.CsvReader;
+import cn.hutool.core.text.csv.CsvUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.amm.common.BizException;
 import com.example.amm.constant.RedisKeyConstant;
 import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.query.PageQuery;
@@ -12,8 +15,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 
 @Tag(name = "Account")
@@ -26,7 +32,7 @@ public class AccountController {
     private AccountService accountService;
 
     @Resource
-    private BankService bankService;
+    private RedisTemplate<String, String> redisTemplate;
 
     // @Operation(summary = "CSV导入")
     // @PostMapping("/csvImport")
@@ -41,6 +47,7 @@ public class AccountController {
     //     }
     //     accountService.csvImport(accountBankCsvRequestList);
     // }
+
 
 
     @Operation(summary = "分页查询")
@@ -78,9 +85,6 @@ public class AccountController {
     public boolean updateMoneyAndTimesById(@PathVariable Long id, @RequestBody AccountDO account) {
         return accountService.updateMoneyAndTimesById(id, account);
     }
-
-    @Resource
-    private RedisTemplate<String, String> redisTemplate;
 
     @Operation(summary = "上传日志")
     @PostMapping("/uploadLog/{id}")
@@ -120,9 +124,16 @@ public class AccountController {
     }
 
 
-
-
-
+    @PostMapping("/importCsv")
+    public void importCsv(@RequestParam("file") MultipartFile file) {
+        try {
+            CsvReader reader = CsvUtil.getReader();
+            List<AccountDO> accountDOList = reader.read(new InputStreamReader(file.getInputStream()), AccountDO.class);
+            accountService.saveBatch(accountDOList);
+        } catch (IOException e) {
+            throw new BizException("CSV文件异常");
+        }
+    }
 
 
 }

@@ -23,4 +23,6 @@ public interface TaskService extends IService<TaskDO> {
 
     void createQuickTask(TaskDO task);
 
+    void uploadLog(Long id, String log);
+
 }

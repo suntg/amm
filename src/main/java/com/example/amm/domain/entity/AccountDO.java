@@ -79,9 +79,9 @@ public class AccountDO extends BaseEntity {
 
     private String recentLog;
 
-    private String ss;
+    private String affiliation;
 
-    private String pici;
+    private String batch;
 
     /**
      *

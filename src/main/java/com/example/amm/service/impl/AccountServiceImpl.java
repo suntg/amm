@@ -128,7 +128,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
 
 
         redisTemplate.opsForList().leftPush(RedisKeyConstant.LOG_ACCOUNT_KEY + id, String.valueOf(value));
-        redisTemplate.expire(RedisKeyConstant.LOG_ACCOUNT_KEY + id, 90, TimeUnit.DAYS);
+        redisTemplate.expire(RedisKeyConstant.LOG_ACCOUNT_KEY + id, 30, TimeUnit.DAYS);
 
 
         AccountDO accountDO = accountMapper.selectById(id);

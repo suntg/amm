@@ -1,22 +1,29 @@
 package com.example.amm.service.impl;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.amm.constant.RedisKeyConstant;
 import com.example.amm.domain.entity.TaskDO;
 import com.example.amm.domain.query.PageQuery;
 import com.example.amm.mapper.TaskMapper;
 import com.example.amm.service.TaskService;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements TaskService {
 
     @Resource
     private TaskMapper taskMapper;
-
+    @Resource
+    private RedisTemplate<String, String> redisTemplate;
 
     @Override
     public boolean saveTask(TaskDO taskDO) {
@@ -48,5 +55,23 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
     @Override
     public void createQuickTask(TaskDO task) {
         taskMapper.insert(task);
+    }
+
+    @Override
+    public void uploadLog(Long id, String log) {
+        String value = "[" +
+                LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN) +
+                "]" +
+                " => " +
+                log;
+
+
+        redisTemplate.opsForList().leftPush(RedisKeyConstant.LOG_TASK_KEY + id, value);
+        redisTemplate.expire(RedisKeyConstant.LOG_TASK_KEY + id, 24, TimeUnit.HOURS);
+
+        LambdaUpdateWrapper<TaskDO> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        lambdaUpdateWrapper.eq(TaskDO::getId, id)
+                .set(TaskDO::getRemark, log);
+        taskMapper.update(null, lambdaUpdateWrapper);
     }
 }

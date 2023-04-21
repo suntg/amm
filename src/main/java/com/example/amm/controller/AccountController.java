@@ -48,7 +48,6 @@ public class AccountController {
     // }
 
 
-
     @Operation(summary = "分页查询 index()")
     @GetMapping("listPage")
     public Page<AccountDO> listPage(PageQuery pageQuery) {
@@ -103,11 +102,11 @@ public class AccountController {
         return redisTemplate.opsForList().range(RedisKeyConstant.GROUP_LOG_KEY + id, 0, -1);
     }
 
-    /*@Operation(summary = "获取next account")
+    @Operation(summary = "获取next account")
     @GetMapping("/nextAccount/{id}")
     public Long nextAccount(@PathVariable Long id) {
         return accountService.nextAccount(id);
-    }*/
+    }
 
     /*@Operation(summary = "获取next group")
     @GetMapping("/nextGroup/{group}")
@@ -115,10 +114,24 @@ public class AccountController {
         return accountService.nextGroup(group);
     }*/
 
-
-    @Operation(summary = "获取getAccountInfo  qtask($id)")
+    @Operation(summary = "获取getAccountInfo  edit($id)")
     @GetMapping("/getAccountInfo/{id}")
     public AccountVO getAccountInfo(@PathVariable Long id) {
+        Long nextId = accountService.nextAccount(id);
+        if (nextId == null) {
+            throw new BizException("没有数据了");
+        }
+
+        AccountVO accountVO = new AccountVO();
+        accountVO.setNextId(nextId);
+        accountVO.setCurrentAccount(accountService.getById(id));
+        return accountVO;
+    }
+
+
+    @Operation(summary = "获取getAccountInfo  qtask($id)")
+    @GetMapping("/quickTaskInfo/{id}")
+    public AccountVO quickTaskInfo(@PathVariable Long id) {
         return accountService.getAccount(id);
     }
 

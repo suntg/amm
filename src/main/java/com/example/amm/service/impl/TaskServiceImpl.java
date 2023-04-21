@@ -1,20 +1,26 @@
 package com.example.amm.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.amm.constant.RedisKeyConstant;
+import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.entity.TaskDO;
 import com.example.amm.domain.query.PageQuery;
 import com.example.amm.mapper.TaskMapper;
+import com.example.amm.service.AccountService;
 import com.example.amm.service.TaskService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -22,6 +28,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
 
     @Resource
     private TaskMapper taskMapper;
+    @Resource
+    private AccountService accountService;
     @Resource
     private RedisTemplate<String, String> redisTemplate;
 
@@ -66,12 +74,98 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
                 log;
 
 
-        redisTemplate.opsForList().leftPush(RedisKeyConstant.LOG_TASK_KEY + id, value);
-        redisTemplate.expire(RedisKeyConstant.LOG_TASK_KEY + id, 24, TimeUnit.HOURS);
+        redisTemplate.opsForList().leftPush(RedisKeyConstant.TASK_LOG_KEY + id, value);
+        redisTemplate.expire(RedisKeyConstant.TASK_LOG_KEY + id, 24, TimeUnit.HOURS);
 
         LambdaUpdateWrapper<TaskDO> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
         lambdaUpdateWrapper.eq(TaskDO::getId, id)
                 .set(TaskDO::getRemark, log);
         taskMapper.update(null, lambdaUpdateWrapper);
+    }
+
+    @Override
+    public void setTaskStatus(Long id, int status) {
+        TaskDO task = taskMapper.selectById(id);
+        String type = task.getType();
+        // 处理type
+
+        // TODO
+        if (status == 6) { // 成功
+            AccountDO toAccount = accountService.getOne(
+                    new QueryWrapper<AccountDO>().eq("title", "X"));
+            if (toAccount.getTitle().equals("X")) {
+                accountService.update(toAccount,
+                        new UpdateWrapper<AccountDO>()
+                                // .set("group", newGroup)
+                                // .set("title", newTitle)
+                                .eq("id", toAccount.getId()));
+            }
+        }
+        task.setStatus(status);
+        taskMapper.updateById(task);
+    }
+
+    @Override
+    public int getTaskStatus(Long id) {
+        TaskDO taskDO = taskMapper.selectById(id);
+        return taskDO.getStatus();
+    }
+
+
+    @Override
+    public void deleteSucTasks() {
+        taskMapper.delete(new QueryWrapper<TaskDO>().lambda().eq(TaskDO::getStatus, 6));
+    }
+
+    @Override
+    public void deleteAllTasks() {
+        int user = 25;
+        List<TaskDO> taskList = taskMapper.selectList(Wrappers.<TaskDO>lambdaQuery().select(TaskDO::getId));
+        // 循环删除
+        for (TaskDO task : taskList) {
+            taskMapper.deleteById(task.getId()); // SQL删除
+            // autopp_tasklog_
+            redisTemplate.delete(RedisKeyConstant.AUTO_TASK_LOG_KEY + task.getId());
+            // Redis移除队列
+            remRedisQueue(task.getId(), user);
+        }
+        // Redis直接删除队列Key
+        // autopp_25_taskqueue
+        String key = "autopp_" + user + "_taskqueue";
+        redisTemplate.delete(key);
+
+        // 清空自动日志的redis
+        redisTemplate.delete("autopp_25_autologs");
+    }
+
+
+    public void remRedisQueue(Long id, Integer user) {
+        // autopp_25_taskqueue
+        String key = "autopp_" + user + "_taskqueue";
+        redisTemplate.opsForList().remove(key, 1, id);
+    }
+
+    @Override
+    public void executeTask(Long id) {
+        List<String> taskQueue = redisTemplate.opsForList().range("auto_25_taskqueue", 0, -1);
+        if (CollUtil.isEmpty(taskQueue) || (CollUtil.isNotEmpty(taskQueue) && !taskQueue.contains(String.valueOf(id)))) {
+            redisTemplate.opsForList().leftPush("auto_25_taskqueue", String.valueOf(id));
+        }
+        updateStatus(id, 0);
+    }
+
+    @Override
+    public void updateStatus(Long id, int status) {
+        TaskDO task = new TaskDO();
+        task.setStatus(0);
+        LambdaUpdateWrapper<TaskDO> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(TaskDO::getId, id);
+        taskMapper.update(task, updateWrapper);
+    }
+
+    @Override
+    public void stopTask(Long id) {
+        redisTemplate.opsForList().remove("auto_25_taskqueue", 0, id);
+        updateStatus(id, 8);
     }
 }

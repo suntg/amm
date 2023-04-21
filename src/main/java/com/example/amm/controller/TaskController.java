@@ -1,5 +1,6 @@
 package com.example.amm.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.amm.common.BizException;
 import com.example.amm.common.ReturnCode;
@@ -46,15 +47,17 @@ public class TaskController {
 
     @DeleteMapping("/delete/{id}")
     public boolean removeTaskById(@PathVariable Long id) {
-        redisTemplate.delete(RedisKeyConstant.LOG_TASK_KEY + id);
+        redisTemplate.delete(RedisKeyConstant.TASK_LOG_KEY + id);
         return taskService.removeTaskById(id);
     }
 
+    @Operation(summary = "通过id查询 ")
     @GetMapping("/{id}")
     public TaskDO getTaskById(@PathVariable Long id) {
         return taskService.getTaskById(id);
     }
 
+    @Operation(summary = "creat_quick()")
     @PostMapping("/createQuick")
     public void createQuick(@RequestBody TaskDO task) {
         if (Integer.parseInt(task.getMoney()) < 0) {
@@ -68,17 +71,62 @@ public class TaskController {
         taskService.createQuickTask(task);
     }
 
-    @Operation(summary = "上传日志")
+    @Operation(summary = "上传日志  setlog($id,$value)")
     @PostMapping("/uploadLog/{id}")
     public void uploadLog(@PathVariable("id") Long id, @RequestBody String log) {
         taskService.uploadLog(id, log);
     }
 
 
-    @Operation(summary = "获取 log")
+    @Operation(summary = "获取 log  viewlog($id)")
     @GetMapping("/log/{id}")
     public List<String> getGroupLogListById(@PathVariable String id) {
-        return redisTemplate.opsForList().range(RedisKeyConstant.LOG_TASK_KEY + id, 0, -1);
+        return redisTemplate.opsForList().range(RedisKeyConstant.TASK_LOG_KEY + id, 0, -1);
+    }
+
+
+    @Operation(summary = "一键清空已完成任务")
+    @PostMapping("/setStatus/{id}/{status}")
+    public int setStatus(@PathVariable Long id, @PathVariable int status) {
+        taskService.setTaskStatus(id, status);
+        return taskService.getTaskStatus(id);
+    }
+
+
+    @Operation(summary = "一键清空已完成任务 delsuctask()")
+    @GetMapping("/delSucTask")
+    public void delSucTask() {
+        taskService.deleteSucTasks();
+    }
+
+
+    @Operation(summary = "一键清空所有任务")
+    @GetMapping("/delAllTask")
+    public void delAllTask() {
+        taskService.deleteAllTasks();
+    }
+
+
+    @Operation(summary = " gotorun($id)")
+    @GetMapping("/executeTask/{id}")
+    public void executeTask(@PathVariable Long id) {
+        taskService.executeTask(id);
+    }
+
+    @Operation(summary = " gotostop($id)")
+    @GetMapping("/stopTask/{id}")
+    public void stopTask(@PathVariable Long id) {
+        taskService.stopTask(id);
+    }
+
+
+    @Operation(summary = "allrun()")
+    @GetMapping("/executeAllTask")
+    public void executeAllTask() {
+        List<TaskDO> taskDOList = taskService.list(new QueryWrapper<TaskDO>().lambda().eq(TaskDO::getStatus, 9));
+        for (TaskDO taskDO : taskDOList) {
+            executeTask(taskDO.getId());
+        }
     }
 
 }

@@ -16,4 +16,7 @@ public class AccountVO {
 
     private int money;
 
+
+    private Long nextId;
+
 }

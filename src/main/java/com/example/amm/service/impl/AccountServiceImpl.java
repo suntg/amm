@@ -165,6 +165,9 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
             next = accountMapper.selectOne(new QueryWrapper<AccountDO>().lambda().ne(AccountDO::getGroup, nextGroup)
                     .orderByAsc(AccountDO::getId).last(" LIMIT 1 "));
         }
+        if (next == null) {
+            return null;
+        }
         return next.getId();
     }
 
@@ -185,7 +188,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
         accountVO.setCurrentAccount(accountDO);
         accountVO.setAccountDOList(accountDOList);
         int money = Math.round(NumberUtil.sub(accountDO.getBalance(), String.valueOf(RandomUtil.randomInt(1, 3))).floatValue());
-        if (money > 15){  //限定最大
+        if (money > 15) {  // 限定最大
             money = 15;
         }
         accountVO.setMoney(money);

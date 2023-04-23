@@ -33,8 +33,6 @@ public interface TaskService extends IService<TaskDO> {
 
     void deleteAllTasks();
 
-    void remRedisQueue(Long id, Integer user);
-
 
     void updateStatus(Long id, int status);
 

@@ -158,7 +158,11 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
             // autopp_tasklog_
             redisTemplate.delete(RedisKeyConstant.AUTO_TASK_LOG_KEY + task.getId());
             // Redis移除队列
-            remRedisQueue(task.getId(), user);
+            // remRedisQueue(task.getId(), user);
+
+            // autopp_25_taskqueue
+            String key = "autopp_" + user + "_taskqueue";
+            redisTemplate.opsForList().remove(key, 0, task.getId());
         }
         // Redis直接删除队列Key
         // autopp_25_taskqueue
@@ -169,12 +173,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
         redisTemplate.delete("autopp_25_autologs");
     }
 
-
-    public void remRedisQueue(Long id, Integer user) {
-        // autopp_25_taskqueue
-        String key = "autopp_" + user + "_taskqueue";
-        redisTemplate.opsForList().remove(key, 1, id);
-    }
 
     @Override
     public void executeTask(Long id) {

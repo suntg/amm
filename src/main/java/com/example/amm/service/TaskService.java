@@ -25,7 +25,7 @@ public interface TaskService extends IService<TaskDO> {
     void uploadLog(Long id, String log);
 
 
-    void setTaskStatus(Long id, int status);
+    int setTaskStatus(Long id, int status);
 
     int getTaskStatus(Long id);
 

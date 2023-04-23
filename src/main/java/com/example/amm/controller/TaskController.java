@@ -88,12 +88,11 @@ public class TaskController {
     }
 
 
-    /*@Operation(summary = "一键清空已完成任务")
+    @Operation(summary = "setstatus($id,$status)")
     @PostMapping("/setStatus/{id}/{status}")
     public int setStatus(@PathVariable Long id, @PathVariable int status) {
-        taskService.setTaskStatus(id, status);
-        return taskService.getTaskStatus(id);
-    }*/
+        return taskService.setTaskStatus(id, status);
+    }
 
 
     @Operation(summary = "一键清空已完成任务 delsuctask()")

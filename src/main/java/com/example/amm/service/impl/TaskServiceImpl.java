@@ -84,25 +84,56 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
     }
 
     @Override
-    public void setTaskStatus(Long id, int status) {
+    public int setTaskStatus(Long id, int status) {
         TaskDO task = taskMapper.selectById(id);
         String type = task.getType();
-        // 处理type
 
-        // TODO
-        if (status == 6) { // 成功
-            AccountDO toAccount = accountService.getOne(
-                    new QueryWrapper<AccountDO>().eq("title", "X"));
-            if (toAccount.getTitle().equals("X")) {
-                accountService.update(toAccount,
-                        new UpdateWrapper<AccountDO>()
-                                // .set("group", newGroup)
-                                // .set("title", newTitle)
-                                .eq("id", toAccount.getId()));
-            }
-        }
         task.setStatus(status);
         taskMapper.updateById(task);
+        AccountDO fromAccount;
+        AccountDO toAccount;
+        if (type.length() == 2) {
+            // AB模式
+            char from = type.charAt(0);
+            char to = type.charAt(1);
+
+            fromAccount = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
+                    .eq(AccountDO::getEmail, task.getGroup()).eq(AccountDO::getTitle, from));
+            toAccount = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
+                    .eq(AccountDO::getEmail, task.getGroup()).eq(AccountDO::getTitle, to));
+
+        } else {
+            String[] arr = type.split("->");
+            String from = arr[0];
+            String to = arr[1];
+            fromAccount = accountService.getById(Integer.parseInt(from));
+            toAccount = accountService.getById(Integer.parseInt(to));
+        }
+        if (status == 6) { // 成功
+            if ("X".equals(toAccount.getTitle())) {
+                Integer newGroup;
+                String newTitle;
+                if ("M".equals(fromAccount.getTitle())) {
+                    newTitle = "A";
+                    newGroup = accountService.getNewGroup();
+                } else if ("A".equals(fromAccount.getTitle())) {
+                    newTitle = "B";
+                    newGroup = fromAccount.getGroup();
+                } else if ("B".equals(fromAccount.getTitle())) {
+                    newTitle = "C";
+                    newGroup = fromAccount.getGroup();
+                } else {
+                    newTitle = "错误";
+                    newGroup = 1;
+                }
+                accountService.update(new AccountDO().setGroup(newGroup).setTitle(newTitle),
+                        new UpdateWrapper<AccountDO>().lambda().eq(AccountDO::getId, toAccount.getId()));
+
+            }
+
+        }
+        task = taskMapper.selectById(id);
+        return task.getStatus();
     }
 
     @Override

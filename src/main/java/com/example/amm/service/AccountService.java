@@ -42,4 +42,7 @@ public interface AccountService extends IService<AccountDO> {
 
     AccountVO getAccount(Long id);
 
+
+    int getNewGroup();
+
 }

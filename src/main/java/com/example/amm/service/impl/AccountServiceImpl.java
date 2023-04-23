@@ -171,6 +171,20 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
         return next.getId();
     }
 
+    @Override
+    public int getNewGroup() {
+        AccountDO account = accountMapper.selectOne(
+                new QueryWrapper<AccountDO>().lambda().gt(AccountDO::getGroup, 1)
+                        .select(AccountDO::getGroup)
+                        .orderByDesc(AccountDO::getGroup)
+                        .last("limit 1"));
+        if (account == null) {
+            return 2;
+        } else {
+            return account.getGroup() + 1;
+        }
+    }
+
     /**
      * 在快捷创建task页面获取account信息
      *

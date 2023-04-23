@@ -2,7 +2,6 @@ package com.example.amm.controller;
 
 import cn.hutool.core.text.csv.CsvReader;
 import cn.hutool.core.text.csv.CsvUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.amm.common.BizException;
 import com.example.amm.constant.RedisKeyConstant;
@@ -152,7 +151,7 @@ public class AccountController {
     @Operation(summary = "get_new_group()")
     @GetMapping("/getNewGroup")
     public int getNewGroup() {
-        accountService.getNewGroup();
+        return accountService.getNewGroup();
     }
 
 }

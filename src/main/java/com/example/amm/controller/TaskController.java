@@ -106,6 +106,8 @@ public class TaskController {
     @GetMapping("/delAllTask")
     public void delAllTask() {
         taskService.deleteAllTasks();
+        // 清空自动日志的redis
+        redisTemplate.delete("autopp_25_autologs");
     }
 
 

@@ -168,9 +168,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
         // autopp_25_taskqueue
         String key = "autopp_" + user + "_taskqueue";
         redisTemplate.delete(key);
-
-        // 清空自动日志的redis
-        redisTemplate.delete("autopp_25_autologs");
     }
 
 

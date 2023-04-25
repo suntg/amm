@@ -129,6 +129,11 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
                 accountService.update(new AccountDO().setGroup(newGroup).setTitle(newTitle),
                         new UpdateWrapper<AccountDO>().lambda().eq(AccountDO::getId, toAccount.getId()));
 
+                // 先检查first_time == 0
+                if (toAccount.getFirstTime() == null) {  // 更新时间
+                    accountService.update(new UpdateWrapper<AccountDO>().lambda().eq(AccountDO::getId, toAccount.getId())
+                            .set(AccountDO::getFirstTime, LocalDateTimeUtil.now()));
+                }
             }
 
         }

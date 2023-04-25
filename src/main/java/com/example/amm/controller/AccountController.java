@@ -1,7 +1,9 @@
 package com.example.amm.controller;
 
+import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.text.csv.CsvReader;
 import cn.hutool.core.text.csv.CsvUtil;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.amm.common.BizException;
 import com.example.amm.constant.RedisKeyConstant;
@@ -13,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -62,9 +65,14 @@ public class AccountController {
 
     @Operation(summary = "通过id删除 del($id)")
     @DeleteMapping("/delete/{id}")
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteById(@PathVariable Long id) {
+        accountService.update(new UpdateWrapper<AccountDO>().lambda().eq(AccountDO::getId, id)
+                .set(AccountDO::getDeleteTime, LocalDateTimeUtil.now()));
         return accountService.deleteById(id);
     }
+
+
 
     @Operation(summary = "新增Account add() creat()")
     @PostMapping("/save")
@@ -152,6 +160,19 @@ public class AccountController {
     @GetMapping("/getNewGroup")
     public int getNewGroup() {
         return accountService.getNewGroup();
+    }
+
+    @GetMapping("/groupStart/{id}")
+    public void groupStart(@PathVariable("id") Long id) {
+        accountService.update(new UpdateWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, id)
+                .set(AccountDO::getGroupStatus, 1).set(AccountDO::getUpdateTime, LocalDateTimeUtil.now()));
+
+    }
+
+    @GetMapping("/groupStop/{id}")
+    public void groupStop(@PathVariable("id") Long id) {
+        accountService.update(new UpdateWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, id)
+                .set(AccountDO::getGroupStatus, 0).set(AccountDO::getUpdateTime, LocalDateTimeUtil.now()));
     }
 
 }

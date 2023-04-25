@@ -665,7 +665,7 @@
             handleSave(row) {
                 // 保存当前行的修改
                 // 可以将修改后的数据提交到后台进行保存
-                axios.post(baseUrl + '/account/update',
+                axios.put(baseUrl + '/account/update',
 
                     JSON.stringify(row)
                     , {
@@ -887,7 +887,7 @@
                         //保存Vue指针
                         var that = this;
 
-                        axios.post(baseUrl + '/account/update/' + this.account.id, this.account)
+                        axios.put(baseUrl + '/account/update/' + this.account.id, this.account)
                             .then(function (response) {
                                 if (response.data.status == 100) {
                                     console.log(response.data.status);

@@ -286,7 +286,11 @@
                                         </el-dialog>
 
                                         <el-dialog title="分组日志" :visible.sync="groupLogVisible" width="70%">
+                                            <div style="margin-bottom:25px;">
+                                                <el-button type="warning" @click="groupStop" plain>停用该组</el-button>
 
+                                                <el-button type="success" @click="groupStart" plain>启用该组</el-button>
+                                            </div>
                                             <template>
                                                 <el-table
                                                         :data="groupLogs"
@@ -301,22 +305,22 @@
                                             <el-button @click="groupLogVisible = false">返 回</el-button>
                                         </el-dialog>
 
-                                        <el-dialog title="快接任务" :visible.sync="quickVisible" width="30%">
+                                        <el-dialog title="快捷任务" :visible.sync="quickVisible" width="30%">
                                             <el-form ref="newQuick" :model="newQuick" label-width="120px" :rules="quickRules">
                                                 <el-form-item label="Type" prop="type" required>
-                                                    <el-input v-model="newAccount.email"></el-input>
-                                                    <el-button
-                                                            :type="success"
-                                                            size="medium" round
-                                                            disable="true">
-                                                        {{ newQuick.title }}
-                                                    </el-button>
+                                                    <el-input v-model="newQuick.type" disable="true"></el-input>
+<!--                                                    <el-button-->
+<!--                                                            :type="success"-->
+<!--                                                            size="medium" round-->
+<!--                                                            disable="true">-->
+<!--                                                        {{ newQuick.title }}-->
+<!--                                                    </el-button>-->
                                                 </el-form-item>
                                                 <el-form-item label="分组" prop="group" required>
-                                                    <el-input v-model="newQuick.group"></el-input>
+                                                    <el-input v-model="newQuick.group"  disable="true"></el-input>
                                                 </el-form-item>
                                                 <el-form-item label="金额" prop="money" required>
-                                                    <el-input-number v-model="newQuick.balance" :min="-1" :max="9999999999999"></el-input-number>
+                                                    <el-input-number v-model="newQuick.money" :min="-1" :max="9999999999999"></el-input-number>
                                                 </el-form-item>
 
                                             </el-form>
@@ -778,6 +782,54 @@
                     })
                 // this.groupLogVisible = false;
             },
+            groupStart() {
+                //保存Vue指针
+                var that = this;
+                axios.get(baseUrl + '/account/groupStart/' + this.groupId,
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {}
+                    })
+                    .then((response) => {
+                        if (response.data.status == 100) {
+                            that.$message({
+                                showClose: true,
+                                offset: 250,
+                                message: "操作成功",
+                                type: 'success'
+                            });
+                        }
+                    })
+            },
+            groupStop() {
+                //保存Vue指针
+                var that = this;
+                axios.get(baseUrl + '/account/groupStop/' + this.groupId,
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {}
+                    })
+                    .then((response) => {
+                        if (response.data.status == 100) {
+                            that.$message({
+                                showClose: true,
+                                offset: 250,
+                                message: "操作成功",
+                                type: 'success'
+                            });
+                        }
+                    })
+            },
             showAccountLog({row, column}) {
 
                 this.accountLogVisible = true;
@@ -813,6 +865,8 @@
 
                 this.quickVisible = true;
                 this.newQuick.type = row.title;
+                this.newQuick.group = row.group;
+                this.newQuick.money = row.balance;
 
             },
             saveQuick() {
@@ -822,11 +876,11 @@
                         //保存Vue指针
                         var that = this;
                         let data = {
-                            title: this.newQuick.title,
+                            type: this.newQuick.title,
                             group: this.newQuick.group,
                             money: this.newQuick.money
                         };
-                        axios.post(baseUrl + '/account/createQuick', data)
+                        axios.post(baseUrl + '/task/createQuick', data)
                             .then(function (response) {
                                 if (response.data.status == 100) {
                                     console.log(response.data.status);

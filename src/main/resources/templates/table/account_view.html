@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="ThemeBucket">
+    <link rel="shortcut icon" href="#" type="image/png">
+
+    <title>账号列表</title>
+    <!--data table-->
+    <link rel="stylesheet" href="js/data-tables/DT_bootstrap.css"/>
+    <style>
+        .inputStyle {
+            width: 250px;
+        }
+
+        .el-table .danger-row {
+            background: #FF8C69;
+        }
+
+        .el-table .primary-row {
+            background: #98F5FF;
+        }
+
+        body {
+            padding-right: 0px !important;
+            overflow: hidden;
+        }
+        .el-table__wrapper  {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        .custom-tooltip {
+            white-space: nowrap;  /* 禁止换行 */
+            overflow: visible;   /* 允许内容超出容器 */
+        }
+        .listView .el-table .el-table__header-wrapper thead tr th {
+            white-space: nowrap!important;
+        }
+
+    </style>
+    <div th:include="common :: commonheader"></div>
+</head>
+
+<body class="sticky-header">
+
+<section>
+
+    <div th:replace="common :: #leftmenu"></div>
+
+    <!-- main content start-->
+    <div class="main-content">
+
+        <div th:replace="common :: headermenu"></div>
+
+        <!-- page heading start-->
+        <div class="page-heading">
+            <h3>
+                账号列表
+            </h3>
+            <ul class="breadcrumb">
+                <li>
+                    <a href="#">Dashboard</a>
+                </li>
+                <li>
+                    <a href="#">Data Table</a>
+                </li>
+                <li class="active">账号列表</li>
+            </ul>
+        </div>
+        <!-- page heading end-->
+
+        <!--body wrapper start-->
+        <div class="wrapper" id="app">
+            <div class="row">
+                <div class="col-sm-12">
+                    <section class="panel">
+                        <header class="panel-heading">
+                            账号列表
+                        </header>
+
+                        <div class="panel-body">
+                            <div class="adv-table editable-table el-table__wrapper">
+
+                                <div style="margin-bottom:25px;">
+                                    <el-upload
+                                            class="upload-demo"
+                                            ref="upload"
+                                            action="/account/csvImport"
+                                            :on-preview="handlePreview"
+                                            :on-remove="handleRemove"
+                                            :before-remove="beforeRemove"
+                                            :file-list="fileList"
+                                            :auto-upload="false">
+                                        <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                                        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+                                        <div slot="tip" class="el-upload__tip">只能上传CSV文件</div>
+                                    </el-upload>
+
+                                    <el-button type="primary" @click="showAddAccount">添加账号</el-button>
+                                </div>
+                                <hr>
+                                <table class="table table-striped table-hover table-bordered"
+                                       id="editable-sample"
+                                >
+                                    <tbody>
+                                    <template>
+                                        <el-table
+                                                :data="accounts"
+                                                border
+                                                style="width: 100%"
+                                                ref="table"
+                                                row-key="id"
+                                                @cell-dblclick="handleEdit"
+                                        >
+<!--                                            <el-table-column type="selection" width="55" :reserve-selection="true">-->
+<!--                                            </el-table-column>-->
+                                            <el-table-column
+                                                    prop="id"
+                                                    label="ID"
+                                            >
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="email"
+                                                    label="账号 - Email"
+                                            >
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.email }}</div>
+                                                    <el-input v-else v-model="scope.row.email" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="payme"
+                                                    label="PayMe">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.payme }}</div>
+                                                    <el-input v-else v-model="scope.row.payme" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="group"
+                                                    label="组">
+                                                <template slot-scope="scope">
+                                                        <el-button
+                                                                type="success"
+                                                                plain
+                                                                size="mini"
+                                                                @click="showGroupLog(scope)">
+                                                            {{ scope.row.group }}
+                                                        </el-button>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="title"
+                                                    label="身份">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.title }}</div>
+                                                    <el-input v-else v-model="scope.row.title" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="balance"
+                                                    label="余额">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.balance }}</div>
+                                                    <el-input v-else v-model="scope.row.balance" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+
+                                                    label="Quick">
+                                                <template slot-scope="scope">
+                                                    <el-button
+                                                            :type="scope.row.group % 2 == 1 ? 'success' : 'warning'"
+                                                            size="mini"
+                                                            @click="showQuick(scope)"
+                                                    >
+                                                        快捷
+                                                    </el-button>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="updateTime"
+                                                    label="更新时间">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.updateTime }}</div>
+                                                    <el-input v-else v-model="scope.row.updateTime" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="succTimes"
+                                                    label="次">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.succTimes }}</div>
+                                                    <el-input v-else v-model="scope.row.succTimes" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="succMoney"
+                                                    label="出">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.succMoney }}</div>
+                                                    <el-input v-else v-model="scope.row.succMoney" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="recentLog"
+                                                    label="最新日志">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.recentLog }}</div>
+                                                    <el-input v-else v-model="scope.row.recentLog" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="status"
+                                                    label="态">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.status }}</div>
+                                                    <el-input v-else v-model="scope.row.status" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="switchip"
+                                                    label="IP">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.switchip }}</div>
+                                                    <el-input v-else v-model="scope.row.switchip" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="packageNum"
+                                                    label="包">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.packageNum }}</div>
+                                                    <el-input v-else v-model="scope.row.packageNum" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+
+                                                    label="Log">
+                                                <template slot-scope="scope">
+                                                    <el-button
+                                                            type="success"
+                                                            size="mini"
+                                                            @click="showAccountLog(scope)">
+                                                        账号Log
+                                                    </el-button>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+
+                                                    label="改">
+                                                <template slot-scope="scope">
+                                                    <el-button
+                                                            type="primary"
+                                                            size="mini"
+                                                            @click="accountEdit(scope)">
+                                                        编辑
+                                                    </el-button>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    label="删">
+                                                <template slot-scope="scope">
+                                                    <el-button
+                                                            type="danger"
+                                                            size="mini"
+                                                            @click="deleteAccountByRow(scope)">
+                                                        删除
+                                                    </el-button>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="affiliation"
+                                                    label="所属">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.affiliation }}</div>
+                                                    <el-input v-else v-model="scope.row.affiliation" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="batch"
+                                                    label="批次">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.batch }}</div>
+                                                    <el-input v-else v-model="scope.row.batch" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                    prop="remark"
+                                                    label="备注">
+                                                <template slot-scope="scope">
+                                                    <div v-if="!scope.row.isEditing">{{ scope.row.remark }}</div>
+                                                    <el-input v-else v-model="scope.row.remark" @blur="handleSave(scope.row)" autofocus></el-input>
+                                                </template>
+                                            </el-table-column>
+                                        </el-table>
+
+                                        <el-dialog title="账号添加" :visible.sync="dialogVisible" width="30%">
+                                            <el-form ref="newAccount" :model="newAccount" label-width="120px" :rules="rules">
+                                                <el-form-item label="账号" prop="email" required>
+                                                    <el-input v-model="newAccount.email"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="分组" prop="group" required>
+                                                    <el-input v-model="newAccount.group"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="余额" prop="balance" required>
+                                                    <el-input-number v-model="newAccount.balance" :min="1" :max="9999999999999"></el-input-number>
+                                                </el-form-item>
+                                                <el-form-item label="身份" prop="title" required>
+                                                    <template>
+                                                        <el-radio v-model="newAccount.title" label="">无</el-radio>
+                                                        <el-radio v-model="newAccount.title" label="A">A号</el-radio>
+                                                        <el-radio v-model="newAccount.title" label="B">B号</el-radio>
+                                                        <el-radio v-model="newAccount.title" label="C">C号</el-radio>
+                                                        <el-radio v-model="newAccount.title" label="D">D号</el-radio>
+                                                        <el-radio v-model="newAccount.title" label="E">E号</el-radio>
+                                                    </template>
+                                                </el-form-item>
+
+                                                <el-form-item label="路径" prop="path" required>
+                                                    <el-input v-model="newAccount.path"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="切IP" prop="switchIp" required>
+                                                    <el-input v-model="newAccount.switchIp" ></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="包" prop="packageNum" required>
+                                                    <el-input v-model="newAccount.packageNum" ></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="备注" prop="remark" required>
+                                                    <el-input v-model="newAccount.remark" ></el-input>
+                                                </el-form-item>
+                                            </el-form>
+
+                                            <el-button @click="resetNewAccount('newAccount')">重置</el-button>
+                                            <el-button @click="dialogVisible = false">取 消</el-button>
+                                            <el-button type="primary" @click="addAccount()">确 定</el-button>
+                                        </el-dialog>
+
+                                        <el-dialog title="分组日志" :visible.sync="groupLogVisible" width="70%">
+
+                                            <template>
+                                                <el-table
+                                                        :data="groupLogs"
+                                                        stripe
+                                                        style="width: 100%">
+                                                    <el-table-column
+                                                            prop="log"
+                                                            label="日志">
+                                                    </el-table-column>
+                                                </el-table>
+                                            </template>
+                                            <el-button @click="groupLogVisible = false">返 回</el-button>
+                                        </el-dialog>
+
+                                        <el-dialog title="快接任务" :visible.sync="quickVisible" width="30%">
+                                            <el-form ref="newQuick" :model="newQuick" label-width="120px" :rules="quickRules">
+                                                <el-form-item label="Type" prop="type" required>
+                                                    <el-input v-model="newAccount.email"></el-input>
+                                                    <el-button
+                                                            :type="success"
+                                                            size="medium" round
+                                                            disable="true">
+                                                        {{ newQuick.title }}
+                                                    </el-button>
+                                                </el-form-item>
+                                                <el-form-item label="分组" prop="group" required>
+                                                    <el-input v-model="newQuick.group"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="金额" prop="money" required>
+                                                    <el-input-number v-model="newQuick.balance" :min="-1" :max="9999999999999"></el-input-number>
+                                                </el-form-item>
+
+                                            </el-form>
+
+                                            <el-button @click="resetNewAccount('newQuick')">重置</el-button>
+                                            <el-button @click="quickVisible = false">取 消</el-button>
+                                            <el-button type="primary" @click="saveQuick()">确 定</el-button>
+                                        </el-dialog>
+
+                                        <el-dialog title="账号日志" :visible.sync="accountLogVisible" width="70%">
+
+                                            <template>
+                                                <el-table
+                                                        :data="accountLogs"
+                                                        stripe
+                                                        style="width: 100%">
+                                                    <el-table-column
+                                                            prop="log"
+                                                            label="日志">
+                                                    </el-table-column>
+                                                </el-table>
+                                            </template>
+                                            <el-button @click="accountLogVisible = false">返 回</el-button>
+                                        </el-dialog>
+
+                                        <el-dialog title="账号 编辑" :visible.sync="accountEditVisible" width="30%">
+                                            <el-form ref="account" :model="account" label-width="120px">
+                                                <el-form-item label="账号" prop="email">
+                                                    <el-input v-model="account.email"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="分组" prop="group">
+                                                    <el-input v-model="account.group"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="身份" prop="title">
+                                                    <el-input v-model="account.title"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="账号余额" prop="balance">
+                                                    <el-input v-model="account.balance"></el-input>
+                                                </el-form-item>
+
+                                                <el-form-item label="状态" prop="status">
+                                                    <el-input v-model="account.status"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="改变时间" prop="changeTimeFlag">
+                                                    <el-input v-model="account.changeTimeFlag"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="路径" prop="path">
+                                                    <el-input v-model="account.path"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="PayMe" prop="payme">
+                                                    <el-input v-model="account.payme"></el-input>
+                                                </el-form-item>
+
+                                                <el-form-item label="包名" prop="packageNum">
+                                                    <el-input v-model="account.packageNum"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="所属" prop="affiliation">
+                                                    <el-input v-model="account.affiliation"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="批次" prop="batch">
+                                                    <el-input v-model="account.batch"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="备注" prop="remark">
+                                                    <el-input v-model="account.remark"></el-input>
+                                                </el-form-item>
+
+                                            </el-form>
+
+                                            <el-button type="success" @click="updateAccount()">更 新</el-button>
+                                            <el-button @click="resetToOriginalAccount()">重 置</el-button>
+                                            <el-button @click="accountEditVisible = false">取 消</el-button>
+                                            <el-button type="danger" @click="deleteAccount()">删 除</el-button>
+                                            <el-button type="info" @click="nextAccount()">下一条</el-button>
+
+                                        </el-dialog>
+
+                                    </template>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <el-pagination
+                                background
+                                :page-sizes="[50, 10, 20, 100]"
+                                :page-size="pageSize"
+                                :current-page="pageNum"
+                                @size-change="handleSizeChange"
+                                @current-change="handleCurrentChange"
+                                layout="total, sizes, prev, pager, next"
+                                :total="total">
+                        </el-pagination>
+                    </section>
+                </div>
+            </div>
+        </div>
+        <!--body wrapper end-->
+
+        <!--footer section start-->
+        <!--<footer>
+            2020 &copy; AdminEx by ThemeBucket </a>
+        </footer>-->
+        <!--footer section end-->
+
+
+    </div>
+    <!-- main content end-->
+</section>
+
+<!-- Placed js at the end of the document so the pages load faster -->
+<script src="js/jquery-1.10.2.min.js"></script>
+<script src="js/jquery-ui-1.9.2.custom.min.js"></script>
+<script src="js/jquery-migrate-1.2.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/modernizr.min.js"></script>
+<script src="js/jquery.nicescroll.js"></script>
+<!--<script src="js/Date.js"></script>-->
+
+<!--data table-->
+<script type="text/javascript" src="js/data-tables/jquery.dataTables.js"></script>
+<script type="text/javascript" src="js/data-tables/DT_bootstrap.js"></script>
+
+<!--common scripts for all pages-->
+<script src="js/scripts.js"></script>
+
+<script src="js/vue.js"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!-- 引入样式 -->
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<!--script for editable table-->
+<!-- END JAVASCRIPTS -->
+<script>
+    /*    jQuery(document).ready(function() {
+            EditableTable.init();
+        });*/
+    // let baseUrl = "http://192.168.100.119:8080";
+    var app = new Vue({
+        el: '#app',
+        data () {
+            let data = {
+                accounts:[],
+                groupLogs:[],
+                accountLogs:[],
+                fileList: [],
+                account: {},
+                originalAccount:{},
+                summary: '',
+                total: 0,
+                pageNum: 1,
+                pageSize: 50,
+                options: [{
+                    value: 0,
+                    label: '否'
+                }, {
+                    value: 1,
+                    label: '是'
+                }],
+                dialogVisible: false,
+                groupLogVisible: false,
+                quickVisible: false,
+                accountLogVisible: false,
+                accountEditVisible: false,
+                groupId: "",
+                accountId: "",
+                newAccount: {
+                    email: '',
+                    group: '',
+                    title: '',
+                    balance: '',
+                    path: '',
+                    switchIp: '',
+                    packageNum: '',
+                    remark: '',
+                },
+                rules: {
+                    email: [
+                        { required: true, message: '请输入账号', trigger: 'blur' },
+                    ],
+                    group: [
+                        { required: true, message: '请填写 分组', trigger: 'blur' }
+                    ],
+                    title: [
+                        {required: true, message: '请填写 身份', trigger: 'blur' }
+                    ],
+                    balance: [
+                        { required: true, message: '请填写 余额', trigger: 'blur' }
+                    ],
+                    path: [
+                        { required: true, message: '请填写 路径', trigger: 'blur' }
+                    ],
+                    switchIp: [
+                        { required: true, message: '请填写 切换IP', trigger: 'blur' }
+                    ],
+                    packageNum: [
+                        { required: true, message: '请填写 包', trigger: 'blur' }
+                    ],
+                    remark: [
+                        { required: true, message: '请填写 备注', trigger: 'blur' }
+                    ]
+                },
+                newQuick: {
+                    type: '',
+                    group: '',
+                    money: '',
+                },
+                quickRules: {
+                    type: [
+                        { required: true, message: '请确定 类型', trigger: 'blur' },
+                    ],
+                    group: [
+                        { required: true, message: '请填写 分组', trigger: 'blur' }
+                    ],
+                    money: [
+                        { required: true, message: '请填写 金额', trigger: 'blur' }
+                    ]
+                },
+            }
+            return data
+        },
+
+        methods: {
+            onSubmit() {
+                axios.get(baseUrl + '/account/listPage',
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {
+                            pageNum: this.pageNum,
+                            pageSize: this.pageSize
+                        }
+                    })
+                    .then((response) => {
+                        // console.log("responose是：" + response.data);
+                        this.accounts = response.data.data.records
+                        if (response.data != null) {
+                            this.total = response.data.data.total
+                        }
+                    })
+            },
+            resetCondition() {
+                this.ip = '',
+                this.country = '',
+                this.state = '',
+                this.city= '',
+                this.zipCode = '';
+            },
+            handleSizeChange(val) {
+                this.pageSize = val;
+                this.pageNum = 1;
+                this.onSubmit();
+            },
+            handleCurrentChange(val) {
+                this.pageNum = val;
+                this.onSubmit();
+            },
+            timeFormatter(row, column) {
+                return this.timestampToTime(row.confirmedTimestamp);
+            },
+            /**
+             * 计算时间返回 yyyy-MM-dd h:m:s 格式的⽅法
+             * timestamp 时间戳
+             */
+            timestampToTime(timestamp) {
+                // 计算年⽉⽇时分的函数
+                var date = new Date(timestamp * 1000)
+                console.log(date);
+                var Y = date.getFullYear() + '-'
+                var M = (date.getMonth() + 1) + '-'
+                var D = date.getDate() + ' '
+                var h = date.getHours() + ':'
+                var m = date.getMinutes() + ':'
+                var s = date.getSeconds()
+                return Y + M + D + h + m + s
+            },
+            search() {
+                this.onSubmit();
+            },
+            submitUpload() {
+                this.$refs.upload.submit();
+            },
+            handleRemove(file, fileList) {
+                console.log(file, fileList);
+            },
+            handlePreview(file) {
+                console.log(file);
+            },
+            beforeRemove(file, fileList) {
+                return this.$confirm(`确定移除 ${ file.name }？`);
+            },
+            deleteById({row, column}) {
+                //保存Vue指针
+                var that = this;
+                const loading = this.$loading({
+                    lock: true,
+                    text: '删除中...',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 0, 0, 0.7)'
+                });
+                axios.post(baseUrl + '/account/deleteById', {}, {
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                        'Access-Control-Allow-Credentials': 'true', //解决session问题
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为json类型
+                    },
+                    withCredentials: true,
+                    params: {
+                        id: row.id
+                    }
+                })
+                    .then(function (response) {
+                        loading.close();
+                        that.$alert(response.data.message, '操作结果', {
+                            confirmButtonText: '确定',
+                            callback: action => {
+                                that.$message({
+                                    type: 'info',
+                                    message: response.data.message
+                                });
+                            }
+                        });
+                        this.onSubmit();
+                    })
+                    .catch(function (error) {
+                        loading.close();
+                        that.$alert(error.data.message, '操作结果', {
+                            confirmButtonText: '确定',
+                            type: 'error',
+                            callback: action => {
+                                that.$message.error('异常错误：' + error.data.message);
+                            }
+                        });
+                    });
+            },
+            handleEdit(row) {
+                // 将当前行设置为编辑状态
+                Vue.set(row, 'isEditing', true);
+            },
+            handleSave(row) {
+                // 保存当前行的修改
+                // 可以将修改后的数据提交到后台进行保存
+                axios.post(baseUrl + '/account/update',
+
+                    JSON.stringify(row)
+                    , {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/json; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true
+                    }).then((response) => {
+
+                    console.log(response)
+                    this.$message({
+                        message: response.data.message,
+                        type: 'success'
+                    });
+                })
+
+                // 将当前行的 isEditing 属性设置为 false，表示该行不再处于编辑状态
+                Vue.set(row, 'isEditing', false);
+            },
+
+            showAddAccount() {
+
+                this.dialogVisible = true;
+
+            },
+
+            addAccount() {
+
+                this.$refs.newAccount.validate((valid) => {
+                    if (valid) {
+                        //保存Vue指针
+                        var that = this;
+                        let data = {
+                            email: this.newAccount.email,
+                            group: this.newAccount.group,
+                            title: this.newAccount.title,
+                            balance: this.newAccount.balance,
+                            path: this.newAccount.path,
+                            switchIp: this.newAccount.switchIp,
+                            packageNum: this.newAccount.packageNum,
+                            remark: this.newAccount.remark
+                        };
+                        axios.post(baseUrl + '/account/save', data)
+                            .then(function (response) {
+                                if (response.data.status == 100) {
+                                    console.log(response.data.status);
+                                    that.$message({
+                                        showClose: true,
+                                        offset: 250,
+                                        message: response.data.message,
+                                        type: 'success'
+                                    });
+                                } else {
+                                    that.$message({
+                                        showClose: true,
+                                        offset: 250,
+                                        message: response.data.message,
+                                        type: 'warning'
+                                    });
+                                }
+                            })
+                            .catch(function (error) {
+
+                                that.$message({
+                                    showClose: true,
+                                    offset: 250,
+                                    message: error.response.data.message,
+                                    type: 'error'
+                                });
+                            });
+                        this.dialogVisible = false;
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            resetNewAccount(formName) {
+                this.$refs[formName].resetFields();
+            },
+            showGroupLog({row, column}) {
+
+                this.groupLogVisible = true;
+                this.groupId = row.group;
+                this.getGroupLogListById();
+
+            },
+            getGroupLogListById() {
+                        //保存Vue指针
+                        var that = this;
+
+                axios.get(baseUrl + '/account/groupLog/' + this.groupId,
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {}
+                    })
+                    .then((response) => {
+                        // console.log("responose是：" + response.data);
+                        this.groupLogs = response.data.data.records.map(log => ({  // 生成对象
+                            log    // 生成log属性
+                            })
+                        );
+                        // this.groupLogs = response.data.data.records
+                    })
+                // this.groupLogVisible = false;
+            },
+            showAccountLog({row, column}) {
+
+                this.accountLogVisible = true;
+                this.accountId = row.id;
+                this.getAccountLogListById();
+
+            },
+            getAccountLogListById() {
+                //保存Vue指针
+                var that = this;
+
+                axios.get(baseUrl + '/account/accountLog/' + this.accountId,
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {}
+                    })
+                    .then((response) => {
+                        // console.log("responose是：" + response.data);
+                        this.accountLogs = response.data.data.records.map(log => ({  // 生成对象
+                                log    // 生成log属性
+                            })
+                        );
+                        // this.groupLogs = response.data.data.records
+                    })
+                // this.groupLogVisible = false;
+            },
+            showQuick({row, column}) {
+
+                this.quickVisible = true;
+                this.newQuick.type = row.title;
+
+            },
+            saveQuick() {
+
+                this.$refs.newQuick.validate((valid) => {
+                    if (valid) {
+                        //保存Vue指针
+                        var that = this;
+                        let data = {
+                            title: this.newQuick.title,
+                            group: this.newQuick.group,
+                            money: this.newQuick.money
+                        };
+                        axios.post(baseUrl + '/account/createQuick', data)
+                            .then(function (response) {
+                                if (response.data.status == 100) {
+                                    console.log(response.data.status);
+                                    that.$message({
+                                        showClose: true,
+                                        offset: 250,
+                                        message: response.data.message,
+                                        type: 'success'
+                                    });
+                                } else {
+                                    that.$message({
+                                        showClose: true,
+                                        offset: 250,
+                                        message: response.data.message,
+                                        type: 'warning'
+                                    });
+                                }
+                            })
+                            .catch(function (error) {
+
+                                that.$message({
+                                    showClose: true,
+                                    offset: 250,
+                                    message: error.response.data.message,
+                                    type: 'error'
+                                });
+                            });
+                        this.quickVisible = false;
+                    } else {
+                        return false;
+                    }
+                });
+            },
+
+            accountEdit({row, column}) {
+
+                this.accountEditVisible = true;
+
+                axios.get(baseUrl + '/account/' + row.id,
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {}
+                    })
+                    .then((response) => {
+                        console.log("更新Account的responose是： " + response.data);
+                        this.account = response.data.data;
+                        this.originalAccount = this.account;
+                    })
+
+            },
+            updateAccount() {
+
+                        //保存Vue指针
+                        var that = this;
+
+                        axios.post(baseUrl + '/account/update/' + this.account.id, this.account)
+                            .then(function (response) {
+                                if (response.data.status == 100) {
+                                    console.log(response.data.status);
+                                    that.$message({
+                                        showClose: true,
+                                        offset: 250,
+                                        message: response.data.message,
+                                        type: 'success'
+                                    });
+                                } else {
+                                    that.$message({
+                                        showClose: true,
+                                        offset: 250,
+                                        message: response.data.message,
+                                        type: 'warning'
+                                    });
+                                }
+                            })
+                            .catch(function (error) {
+
+                                that.$message({
+                                    showClose: true,
+                                    offset: 250,
+                                    message: error.response.data.message,
+                                    type: 'error'
+                                });
+                            });
+                        this.accountEditVisible = false;
+            },
+            deleteAccount({row, column}) {
+                //保存Vue指针
+                var that = this;
+
+                axios.delete(baseUrl + '/account/delete/' + this.account.id, {})
+                    .then(function (response) {
+                        if (response.data.status == 100) {
+                            console.log(response.data.status);
+                            that.$message({
+                                showClose: true,
+                                offset: 250,
+                                message: response.data.message,
+                                type: 'success'
+                            });
+                        } else {
+                            that.$message({
+                                showClose: true,
+                                offset: 250,
+                                message: response.data.message,
+                                type: 'warning'
+                            });
+                        }
+                    })
+                    .catch(function (error) {
+
+                        that.$message({
+                            showClose: true,
+                            offset: 250,
+                            message: error.response.data.message,
+                            type: 'error'
+                        });
+                    });
+                this.accountEditVisible = false;
+            },
+            deleteAccountByRow({row, column}) {
+                //保存Vue指针
+                var that = this;
+
+                axios.delete(baseUrl + '/account/delete/' + row.id, {})
+                    .then(function (response) {
+                        if (response.data.status == 100) {
+                            console.log(response.data.status);
+                            that.$message({
+                                showClose: true,
+                                offset: 250,
+                                message: response.data.message,
+                                type: 'success'
+                            });
+                        } else {
+                            that.$message({
+                                showClose: true,
+                                offset: 250,
+                                message: response.data.message,
+                                type: 'warning'
+                            });
+                        }
+                    })
+                    .catch(function (error) {
+
+                        that.$message({
+                            showClose: true,
+                            offset: 250,
+                            message: error.response.data.message,
+                            type: 'error'
+                        });
+                    });
+            },
+            resetToOriginalAccount() {
+                this.account = this.originalAccount;
+            },
+            nextAccount() {
+
+                this.accountEditVisible = true;
+                let nextId;
+                axios.get(baseUrl + '/account/nextAccount/' + this.account.id,
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {}
+                    })
+                    .then((response) => {
+                        console.log("下一个的responose是： " + response.data.data);
+                        nextId = response.data.data;
+                        if (nextId != null) {
+                            axios.get(baseUrl + '/account/' + nextId,
+                                {
+                                    headers: {
+                                        'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                                        'Access-Control-Allow-Credentials': 'true', //解决session问题
+                                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                                    },
+                                    withCredentials: true,
+                                    params: {}
+                                })
+                                .then((response) => {
+                                    // console.log("responose是：" + response.data);
+                                    this.account = response.data.data;
+                                    this.originalAccount = this.account;
+                                })
+                        }
+                    })
+
+
+            },
+        },
+        mounted() {
+            this.onSubmit();
+        }
+    })
+</script>
+
+</body>
+</html>

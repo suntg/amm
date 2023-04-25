@@ -19,25 +19,46 @@ public class IndexController {
 
 
     /**
-     * 去account_list页面
+     * 去account_view页面
      *
      * @return
      */
-    @GetMapping(value = {"/", "/account_list"})
+    @GetMapping(value = {"/", "/account_view"})
     public String accountList(HttpSession session, Model model) {
 
-        return "table/account_list";
+        return "table/account_view";
     }
 
     /**
-     * 去bank_list页面
+     * 去task_list页面
      *
      * @return
      */
-    @GetMapping("/bank_list")
+    @GetMapping("/task_list")
     public String bankList(HttpSession session, Model model) {
-        return "table/bank_list";
+        return "table/task_list";
     }
+
+//    /**
+//     * 去account_list页面
+//     *
+//     * @return
+//     */
+//    @GetMapping(value = {"/", "/account_list"})
+//    public String accountList(HttpSession session, Model model) {
+//
+//        return "table/account_list";
+//    }
+//
+//    /**
+//     * 去bank_list页面
+//     *
+//     * @return
+//     */
+//    @GetMapping("/bank_list")
+//    public String bankList(HttpSession session, Model model) {
+//        return "table/bank_list";
+//    }
 
 
     /**

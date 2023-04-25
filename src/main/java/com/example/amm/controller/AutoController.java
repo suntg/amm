@@ -8,9 +8,11 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.amm.common.BizException;
 import com.example.amm.domain.dto.AutoInfoDTO;
 import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.entity.TaskDO;
+import com.example.amm.domain.vo.AccountVO;
 import com.example.amm.service.AccountService;
 import com.example.amm.service.AutoService;
 import com.example.amm.service.TaskService;
@@ -290,7 +292,7 @@ public class AutoController {
             if ("MX".equals(doParamUpper)) {
                 taskDO.setType(from + "->" + x);
                 taskDO.setGroup(1);
-            } else if (CharSequenceUtil.equalsAny("AX","BX")) {
+            } else if (CharSequenceUtil.equalsAny("AX", "BX")) {
                 taskDO.setType(accountF.getId() + "->" + x);
                 taskDO.setGroup(from.intValue());
             }
@@ -348,6 +350,91 @@ public class AutoController {
         account.setUpdateTime(LocalDateTimeUtil.now());
         accountService.updateById(account);
         return account.getId();
+    }
+
+    @GetMapping("/index")
+    public AccountVO index() {
+        String key = "autopp_25_taskqueue";
+        String task = redisTemplate.opsForList().rightPop(key); // 读取队列
+
+        if (StrUtil.isBlank(task)) {
+            throw new BizException("错误：队列空！");
+        }
+
+
+        TaskDO taskDO = taskService.getOne(new QueryWrapper<TaskDO>().lambda().eq(TaskDO::getStatus, 0)
+                .eq(TaskDO::getId, task));
+
+        if (taskDO == null) {
+            throw new BizException("错误：没有需要执行的任务[1]！");
+        } else {
+
+            // 先改状态
+            taskService.updateById(new TaskDO().setId(taskDO.getId()).setStatus(1)); // 读取后更新状态为1
+        }
+
+        String type = taskDO.getType().trim(); // 去除空格
+
+        AccountDO fromAccount = null;
+        AccountDO toAccount = null;
+
+
+        if (type.length() == 2) {
+            String from = type.substring(0, 1); // 取值 第一
+            String to = type.substring(1); // 取值 最后
+
+            fromAccount = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
+                    .eq(AccountDO::getGroup, taskDO.getGroup())
+                    .eq(AccountDO::getTitle, from)
+                    .select(AccountDO.class, info -> !info.getColumn().equals("lastlog") &&
+                            !info.getColumn().equals("remarks") && !info.getColumn().equals("create_time") &&
+                            !info.getColumn().equals("update_time") && !info.getColumn().equals("delete_time")));
+
+            toAccount = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
+                    .eq(AccountDO::getGroup, taskDO.getGroup())
+                    .eq(AccountDO::getTitle, to)
+                    .select(AccountDO.class, info -> !info.getColumn().equals("lastlog") &&
+                            !info.getColumn().equals("remarks") && !info.getColumn().equals("create_time") &&
+                            !info.getColumn().equals("update_time") && !info.getColumn().equals("delete_time")));
+
+        } else {
+            String[] arr = type.split("->");
+
+            String from = arr[0]; // 取值
+            String to = arr[1]; // 取值
+
+            fromAccount = accountService.getById(from);
+
+            toAccount = accountService.getById(to);
+        }
+
+        if (fromAccount == null) {
+            // taskModel.setError(1);
+            // taskModel.setInfo("错误：From_Account 不存在！");
+            taskService.updateById(new TaskDO().setStatus(3).setId(taskDO.getId())); // 读取后更新状态为3错误
+
+            // Task tk = new Task();
+            // tk.setLog(taskModel.getId(), taskModel.getInfo());
+            taskService.uploadLog(taskDO.getId(), "错误：From_Account 不存在！");
+            throw new BizException("错误：From_Account 不存在！");
+        }
+
+        if (toAccount == null) {
+            taskService.updateById(new TaskDO().setStatus(3).setId(taskDO.getId())); // 读取后更新状态为3错误
+
+            // Task tk = new Task();
+            // tk.setLog(taskModel.getId(), taskModel.getInfo());
+
+            taskService.uploadLog(taskDO.getId(), "错误：To_Account 不存在！");
+            throw new BizException("错误：To_Account 不存在！");
+        }
+
+        AccountVO accountVO = new AccountVO();
+        accountVO.setFromAccount(fromAccount);
+        accountVO.setToAccount(toAccount);
+        taskService.updateById(new TaskDO().setStatus(1).setId(taskDO.getId())); // 读取后更新状态为1
+
+        return accountVO;
     }
 
 

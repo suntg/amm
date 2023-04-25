@@ -1,33 +1,47 @@
 package com.example.amm.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.example.amm.common.BaseEntity;
+import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
-@EqualsAndHashCode(callSuper = true)
 @Schema
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 @TableName("t_task")
-public class TaskDO extends BaseEntity {
+public class TaskDO {
+    /**
+     * 主键ID
+     */
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
+    /**
+     * 创建时间
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     */
+    @TableField(fill = FieldFill.UPDATE)
+    private LocalDateTime updateTime;
 
     @NotBlank(message = "type不能为空")
     private String type;
 
     /**
-     *
      * mybatis-plus中实体字段为mysql关键字时的解决方法—— @TableField("`group`")
-     *
+     * <p>
      * 在SQL中INSERT INTO t_task ( `group`) VALUES (0);
      */
     @Schema(description = "分组")

@@ -114,7 +114,7 @@
                                             >
                                             </el-table-column>
                                             <el-table-column
-                                                    prop="email"
+                                                    prop="type"
                                                     label="Type"
                                             >
                                             </el-table-column>
@@ -144,10 +144,10 @@
                                                     align="center"
                                                     min-width="180">
                                                 <template slot-scope="scope">
-                                                    <el-button size="small" type="primary" @click="deleteById(scope)">任务Log</el-button>
-                                                    <el-button size="small" type="success" @click="deleteById(scope)">执行{{scope.row.id}}</el-button>
-                                                    <el-button size="small" type="warning" @click="deleteById(scope)">停止</el-button>
-                                                    <el-button size="small" type="info" @click="deleteById(scope)">编辑</el-button>
+                                                    <el-button size="small" type="primary" @click="showLogById(scope)">任务Log</el-button>
+                                                    <el-button size="small" type="success" @click="executeTask(scope)">执行 {{scope.row.id}}</el-button>
+                                                    <el-button size="small" type="warning" @click="stopTask(scope)">停止</el-button>
+                                                    <el-button size="small" type="info" @click="showEditTask(scope)">编辑</el-button>
                                                     <el-button size="small" type="danger" @click="deleteById(scope)">删除</el-button>
                                                 </template>
                                             </el-table-column>
@@ -183,7 +183,7 @@
                                                 </el-form-item>
                                             </el-form>
 
-                                            <el-button @click="resetNewTask('newTask')">重置</el-button>
+<!--                                            <el-button @click="resetNewTask('newTask')">重置</el-button>-->
                                             <el-button @click="dialogVisible = false">取 消</el-button>
                                             <el-button type="primary" @click="addTask()">确 定</el-button>
                                             </span>
@@ -205,7 +205,7 @@
                                                     <el-button type="warning" @click="delAllTask" plain>清空任务</el-button>
                                                 </div>
                                                 <el-table
-                                                        :data="autoLogs"
+                                                        :data="autoLogList"
                                                         stripe
                                                         style="width: 100%">
                                                     <el-table-column
@@ -215,6 +215,45 @@
                                                 </el-table>
                                             </template>
                                             <el-button @click="autoLogVisible = false">返 回</el-button>
+                                        </el-dialog>
+
+                                        <el-dialog title="Task_log 日志记录" :visible.sync="logVisible" width="70%">
+
+                                            <template>
+                                                <el-table
+                                                        :data="logList"
+                                                        stripe
+                                                        style="width: 100%">
+                                                    <el-table-column
+                                                            prop="log"
+                                                            label="日志">
+                                                    </el-table-column>
+                                                </el-table>
+                                            </template>
+                                            <el-button @click="logVisible = false">返 回</el-button>
+                                        </el-dialog>
+
+                                        <el-dialog title="任务 编辑" :visible.sync="taskEditVisible" width="30%">
+                                            <el-form ref="editTask" :model="editTask" label-width="120px">
+                                                <el-form-item label="Type" prop="type">
+                                                    <el-input v-model="editTask.type"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="分组" prop="group" required>
+                                                    <el-input v-model="editTask.group"></el-input>
+                                                </el-form-item>
+                                                <el-form-item label="金额" prop="money" required>
+                                                    <el-input-number v-model="editTask.money" :min="1" :max="9999999999999"></el-input-number>
+                                                </el-form-item>
+                                                <el-form-item label="备注" prop="remark">
+                                                    <el-input v-model="editTask.remark" ></el-input>
+                                                </el-form-item>
+
+                                            </el-form>
+
+                                            <el-button type="success" @click="updateTask()">更 新</el-button>
+                                            <el-button @click="resetToOriginalTask()">重 置</el-button>
+                                            <el-button @click="taskEditVisible = false">取 消</el-button>
+
                                         </el-dialog>
                                     </template>
                                     </tbody>
@@ -320,8 +359,23 @@
                 groupLogs:[],
                 groupLogVisible: false,
                 groupId: "",
-                autoLogs:[],
+                autoLogList:[],
                 autoLogVisible: false,
+                logId:"",
+                logVisible: false,
+                logList:[],
+                taskEditVisible: false,
+                taskId:"",
+                editTask:{
+                    id: '',
+                    type: '',
+                    group: '',
+                    money: '',
+                    remark: '',
+                },
+                originalTask:{},
+
+
         }
             return data
         },
@@ -630,11 +684,38 @@
                     })
                     .then((response) => {
                         // console.log("responose是：" + response.data);
-                        this.autoLogs = response.data.data.records.map(log => ({  // 生成对象
+                        this.autoLogList = response.data.data.records.map(log => ({  // 生成对象
                                 log    // 生成log属性
                             })
                         );
                     })
+            },
+            autoRun() {
+                //保存Vue指针
+                var that = this;
+
+                axios.get(baseUrl + '/auto/autoRun/',
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {}
+                    })
+                    .then((response) => {
+                        if (response.data.status == 100) {
+                            console.log(response.data.status);
+                            that.$message({
+                                showClose: true,
+                                offset: 250,
+                                message: "执行 成功！" ,
+                                type: 'success'
+                            });
+                        }
+                    })
+                // this.groupLogVisible = false;
             },
             autoXXX(doParam) {
                 //保存Vue指针
@@ -742,6 +823,142 @@
                             });
                         }
                     })
+            },
+            showLogById({row, column}) {
+                this.logVisible = true;
+                this.logId = row.id;
+                this.getLogListById();
+            },
+            getLogListById() {
+                //保存Vue指针
+                var that = this;
+
+                axios.get(baseUrl + '/task/log/' + this.logId,
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {}
+                    })
+                    .then((response) => {
+                        // console.log("responose是：" + response.data);
+                        this.logList = response.data.data.map(log => ({  // 生成对象
+                                log    // 生成log属性
+                            })
+                        );
+                    })
+            },
+            executeTask({row, column}) {
+                //保存Vue指针
+                var that = this;
+
+                axios.get(baseUrl + '/task/executeTask/' + row.id,
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {}
+                    })
+                    .then((response) => {
+                        if (response.data.status == 100) {
+                            console.log(response.data.status);
+                            that.$message({
+                                showClose: true,
+                                offset: 250,
+                                message: "操作成功！",
+                                type: 'success'
+                            });
+                        }
+                    })
+            },
+            stopTask({row, column}) {
+                //保存Vue指针
+                var that = this;
+
+                axios.get(baseUrl + '/task/stopTask/' + row.id,
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {}
+                    })
+                    .then((response) => {
+                        if (response.data.status == 100) {
+                            console.log(response.data.status);
+                            that.$message({
+                                showClose: true,
+                                offset: 250,
+                                message: "操作成功！",
+                                type: 'success'
+                            });
+                        }
+                    })
+            },
+            showEditTask({row, column}) {
+                this.taskEditVisible = true;
+                axios.get(baseUrl + '/task/' + row.id,
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {}
+                    })
+                    .then((response) => {
+                        this.editTask = response.data.data;
+                        this.originalTask = response.data.data;
+                    })
+
+            },
+            updateTask() {
+
+                //保存Vue指针
+                var that = this;
+
+                axios.put(baseUrl + '/task/update/' + this.editTask.id, this.editTask)
+                    .then(function (response) {
+                        if (response.data.status == 100) {
+                            console.log(response.data.status);
+                            that.$message({
+                                showClose: true,
+                                offset: 250,
+                                message: response.data.message,
+                                type: 'success'
+                            });
+                        } else {
+                            that.$message({
+                                showClose: true,
+                                offset: 250,
+                                message: response.data.message,
+                                type: 'warning'
+                            });
+                        }
+                    })
+                    .catch(function (error) {
+
+                        that.$message({
+                            showClose: true,
+                            offset: 250,
+                            message: error.response.data.message,
+                            type: 'error'
+                        });
+                    });
+                this.taskEditVisible = false;
+                this.onSubmit();
+            },
+            resetToOriginalTask() {
+                this.editTask = this.originalTask;
             },
         },
         mounted() {

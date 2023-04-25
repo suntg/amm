@@ -125,18 +125,12 @@
                                                     prop="email"
                                                     label="账号 - Email"
                                             >
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.email }}</div>
-                                                    <el-input v-else v-model="scope.row.email" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
+
                                             </el-table-column>
                                             <el-table-column
                                                     prop="payme"
                                                     label="PayMe">
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.payme }}</div>
-                                                    <el-input v-else v-model="scope.row.payme" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
+
                                             </el-table-column>
                                             <el-table-column
                                                     prop="group"
@@ -154,18 +148,10 @@
                                             <el-table-column
                                                     prop="title"
                                                     label="身份">
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.title }}</div>
-                                                    <el-input v-else v-model="scope.row.title" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
                                             </el-table-column>
                                             <el-table-column
                                                     prop="balance"
                                                     label="余额">
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.balance }}</div>
-                                                    <el-input v-else v-model="scope.row.balance" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
                                             </el-table-column>
                                             <el-table-column
 
@@ -183,58 +169,31 @@
                                             <el-table-column
                                                     prop="updateTime"
                                                     label="更新时间">
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.updateTime }}</div>
-                                                    <el-input v-else v-model="scope.row.updateTime" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
                                             </el-table-column>
                                             <el-table-column
                                                     prop="succTimes"
                                                     label="次">
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.succTimes }}</div>
-                                                    <el-input v-else v-model="scope.row.succTimes" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
+
                                             </el-table-column>
                                             <el-table-column
                                                     prop="succMoney"
                                                     label="出">
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.succMoney }}</div>
-                                                    <el-input v-else v-model="scope.row.succMoney" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
                                             </el-table-column>
                                             <el-table-column
                                                     prop="recentLog"
                                                     label="最新日志">
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.recentLog }}</div>
-                                                    <el-input v-else v-model="scope.row.recentLog" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
                                             </el-table-column>
                                             <el-table-column
                                                     prop="status"
                                                     label="态">
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.status }}</div>
-                                                    <el-input v-else v-model="scope.row.status" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
                                             </el-table-column>
                                             <el-table-column
                                                     prop="switchip"
                                                     label="IP">
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.switchip }}</div>
-                                                    <el-input v-else v-model="scope.row.switchip" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
                                             </el-table-column>
                                             <el-table-column
                                                     prop="packageNum"
                                                     label="包">
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.packageNum }}</div>
-                                                    <el-input v-else v-model="scope.row.packageNum" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
                                             </el-table-column>
                                             <el-table-column
 
@@ -274,26 +233,14 @@
                                             <el-table-column
                                                     prop="affiliation"
                                                     label="所属">
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.affiliation }}</div>
-                                                    <el-input v-else v-model="scope.row.affiliation" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
                                             </el-table-column>
                                             <el-table-column
                                                     prop="batch"
                                                     label="批次">
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.batch }}</div>
-                                                    <el-input v-else v-model="scope.row.batch" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
                                             </el-table-column>
                                             <el-table-column
                                                     prop="remark"
                                                     label="备注">
-                                                <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.remark }}</div>
-                                                    <el-input v-else v-model="scope.row.remark" @blur="handleSave(scope.row)" autofocus></el-input>
-                                                </template>
                                             </el-table-column>
                                         </el-table>
 
@@ -439,7 +386,7 @@
                                             </el-form>
 
                                             <el-button type="success" @click="updateAccount()">更 新</el-button>
-                                            <el-button @click="resetToOriginalAccount()">重 置</el-button>
+<!--                                            <el-button @click="resetToOriginalAccount()">重 置</el-button>-->
                                             <el-button @click="accountEditVisible = false">取 消</el-button>
                                             <el-button type="danger" @click="deleteAccount()">删 除</el-button>
                                             <el-button type="info" @click="nextAccount()">下一条</el-button>
@@ -1038,7 +985,8 @@
                     });
             },
             resetToOriginalAccount() {
-                this.account = this.originalAccount;
+                let temp = this.originalAccount;
+                this.account = temp;
             },
             nextAccount() {
 
@@ -1071,7 +1019,7 @@
                                 .then((response) => {
                                     // console.log("responose是：" + response.data);
                                     this.account = response.data.data;
-                                    this.originalAccount = this.account;
+                                    this.originalAccount = response.data.data;
                                 })
                         }
                     })

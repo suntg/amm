@@ -31,6 +31,8 @@ public class AccountDO {
     @TableField("`group`")
     private Integer group;
 
+    private Integer groupStatus;
+
 
     @Schema(description = "邮箱")
     private String title;

@@ -241,7 +241,7 @@ public class AutoController {
                 if ("BX".equals(doParamUpper)) {
                     // 发送号
                     AccountDO accountTmp = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
-                            .eq(AccountDO::getGroup, from).eq(AccountDO::getTitle, "B").select(AccountDO::getId));
+                            .eq(AccountDO::getGroup, from).eq(AccountDO::getTitle, "B"));
                     if (accountTmp == null) {
                         continue; // 跳过
                     }

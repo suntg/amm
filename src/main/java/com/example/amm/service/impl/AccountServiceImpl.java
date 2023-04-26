@@ -59,7 +59,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     @Override
     public Page<AccountDO> listPage(PageQuery pageQuery) {
         return this.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()), new QueryWrapper<AccountDO>().lambda()
-                .gt(AccountDO::getGroupStatus, 0)
+                // .gt(AccountDO::getGroupStatus, 0)
                 .orderByDesc(AccountDO::getCreateTime));
     }
 

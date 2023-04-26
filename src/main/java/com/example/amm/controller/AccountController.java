@@ -3,6 +3,7 @@ package com.example.amm.controller;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.text.csv.CsvReader;
 import cn.hutool.core.text.csv.CsvUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.amm.common.BizException;
@@ -36,26 +37,28 @@ public class AccountController {
     @Resource
     private RedisTemplate<String, String> redisTemplate;
 
-    // @Operation(summary = "CSV导入")
-    // @PostMapping("/csvImport")
-    // public void csvImport(MultipartFile file) {
-    //
-    //     List<AccountBankCsvRequest> accountBankCsvRequestList;
-    //     try {
-    //         CsvReader reader = CsvUtil.getReader();
-    //         accountBankCsvRequestList = reader.read(new InputStreamReader(file.getInputStream()), AccountBankCsvRequest.class);
-    //     } catch (IOException e) {
-    //         throw new BizException("CSV文件异常");
-    //     }
-    //     accountService.csvImport(accountBankCsvRequestList);
-    // }
-
-
     @Operation(summary = "分页查询 index()")
     @GetMapping("listPage")
     public Page<AccountDO> listPage(PageQuery pageQuery) {
         return accountService.listPage(pageQuery);
     }
+
+    @Operation(summary = "list")
+    @GetMapping("list")
+    public List<AccountDO> list() {
+        return accountService.list(new QueryWrapper<AccountDO>().lambda()
+                .orderByDesc(AccountDO::getGroup));
+    }
+
+    @Operation(summary = "listNeMX")
+    @GetMapping("listNeMX")
+    public List<AccountDO> listNeMX() {
+        return accountService.list(new QueryWrapper<AccountDO>().lambda()
+                .ne(AccountDO::getTitle, "M")
+                .ne(AccountDO::getTitle, "X")
+                .orderByDesc(AccountDO::getGroup));
+    }
+
 
     @Operation(summary = "通过id查询 edit($id)")
     @GetMapping("/{id}")
@@ -71,8 +74,6 @@ public class AccountController {
                 .set(AccountDO::getDeleteTime, LocalDateTimeUtil.now()));
         return accountService.deleteById(id);
     }
-
-
 
     @Operation(summary = "新增Account add() creat()")
     @PostMapping("/save")
@@ -136,13 +137,11 @@ public class AccountController {
         return accountVO;
     }
 
-
     @Operation(summary = "获取getAccountInfo  qtask($id)")
     @GetMapping("/quickTaskInfo/{id}")
     public AccountVO quickTaskInfo(@PathVariable Long id) {
         return accountService.getAccount(id);
     }
-
 
     @Operation(summary = "导入CSV extosql()")
     @PostMapping("/importCsv")
@@ -150,6 +149,9 @@ public class AccountController {
         try {
             CsvReader reader = CsvUtil.getReader();
             List<AccountDO> accountDOList = reader.read(new InputStreamReader(file.getInputStream()), AccountDO.class);
+            for (AccountDO accountDO : accountDOList) {
+                accountDO.setDeleted(0);
+            }
             accountService.saveBatch(accountDOList);
         } catch (IOException e) {
             throw new BizException("CSV文件异常");

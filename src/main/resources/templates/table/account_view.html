@@ -774,7 +774,7 @@
                     })
                     .then((response) => {
                         // console.log("responose是：" + response.data);
-                        this.groupLogs = response.data.data.records.map(log => ({  // 生成对象
+                        this.groupLogs = response.data.data.map(log => ({  // 生成对象
                             log    // 生成log属性
                             })
                         );
@@ -853,7 +853,7 @@
                     })
                     .then((response) => {
                         // console.log("responose是：" + response.data);
-                        this.accountLogs = response.data.data.records.map(log => ({  // 生成对象
+                        this.accountLogs = response.data.data.map(log => ({  // 生成对象
                                 log    // 生成log属性
                             })
                         );

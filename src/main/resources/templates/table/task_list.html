@@ -703,8 +703,8 @@
                         params: {}
                     })
                     .then((response) => {
-                        console.log("autoLogs responose是：" + response.data.data.records);
-                        this.autoLogList = response.data.data.records.map(log => ({  // 生成对象
+                        // console.log("autoLogs responose是：" + response.data.data);
+                        this.autoLogList = response.data.data.map(log => ({  // 生成对象
                                 log    // 生成log属性
                             })
                         );

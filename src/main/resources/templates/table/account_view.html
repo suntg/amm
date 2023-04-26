@@ -106,141 +106,84 @@
                                 >
                                     <tbody>
                                     <template>
-                                        <el-table
-                                                :data="accounts"
-                                                border
-                                                style="width: 100%"
-                                                ref="table"
-                                                row-key="id"
-                                                @cell-dblclick="handleEdit"
-                                        >
-<!--                                            <el-table-column type="selection" width="55" :reserve-selection="true">-->
-<!--                                            </el-table-column>-->
-                                            <el-table-column
-                                                    prop="id"
-                                                    label="ID"
-                                            >
+                                        <el-table :data="accounts" border style="width: 100%" ref="table" row-key="id" @cell-dblclick="handleEdit">
+                                            <!--                                            <el-table-column type="selection" width="55" :reserve-selection="true">-->
+                                            <!--                                            </el-table-column>-->
+                                            <el-table-column prop="id" label="ID" align="center" width="65">
                                             </el-table-column>
-                                            <el-table-column
-                                                    prop="email"
-                                                    label="账号 - Email"
-                                            >
+                                            <el-table-column prop="email" align="center" label="Email">
 
                                             </el-table-column>
-                                            <el-table-column
-                                                    prop="payme"
-                                                    label="PayMe">
+                                            <el-table-column prop="payme" align="center" label="PayMe链接">
 
                                             </el-table-column>
-                                            <el-table-column
-                                                    prop="group"
-                                                    label="组">
+                                            <el-table-column prop="group" align="center" label="分组" width="80">
                                                 <template slot-scope="scope">
-                                                        <el-button
-                                                                type="success"
-                                                                plain
-                                                                size="mini"
-                                                                @click="showGroupLog(scope)">
-                                                            {{ scope.row.group }}
-                                                        </el-button>
+                                                    <el-button type="success" plain size="mini" @click="showGroupLog(scope)">
+                                                        {{ scope.row.group }}
+                                                    </el-button>
                                                 </template>
                                             </el-table-column>
-                                            <el-table-column
-                                                    prop="title"
-                                                    label="身份">
+                                            <el-table-column prop="title" label="身份" align="center" width="50">
                                             </el-table-column>
-                                            <el-table-column
-                                                    prop="balance"
-                                                    label="余额">
+                                            <el-table-column prop="balance" align="center" label="余额" width="70">
                                             </el-table-column>
-                                            <el-table-column
 
-                                                    label="Quick">
+                                            <!-- <el-table-column label="Quick">
                                                 <template slot-scope="scope">
-                                                    <el-button
-                                                            :type="scope.row.group % 2 == 1 ? 'success' : 'warning'"
-                                                            size="mini"
-                                                            @click="showQuick(scope)"
-                                                    >
+                                                    <el-button :type="scope.row.group % 2 == 1 ? 'success' : 'warning'" size="mini" @click="showQuick(scope)">
                                                         快捷
                                                     </el-button>
                                                 </template>
+                                            </el-table-column> -->
+
+                                            <el-table-column prop="firstTime" align="center" label="首次时间" :formatter="firstTimeReplace">
                                             </el-table-column>
-                                            <el-table-column
-                                                    prop="updateTime"
-                                                    label="更新时间">
-                                            </el-table-column>
-                                            <el-table-column
-                                                    prop="succTimes"
-                                                    label="次">
+
+                                            <el-table-column prop="succTimes" align="center" label="转出次数" width="80">
 
                                             </el-table-column>
-                                            <el-table-column
-                                                    prop="succMoney"
-                                                    label="出">
+                                            <el-table-column prop="succMoney" align="center" label="转出总额" width="80">
                                             </el-table-column>
-                                            <el-table-column
-                                                    prop="recentLog"
-                                                    label="最新日志">
-                                            </el-table-column>
-                                            <el-table-column
-                                                    prop="status"
-                                                    label="态">
-                                            </el-table-column>
-                                            <el-table-column
-                                                    prop="switchip"
-                                                    label="IP">
-                                            </el-table-column>
-                                            <el-table-column
-                                                    prop="packageNum"
-                                                    label="包">
-                                            </el-table-column>
-                                            <el-table-column
 
-                                                    label="Log">
-                                                <template slot-scope="scope">
-                                                    <el-button
-                                                            type="success"
-                                                            size="mini"
-                                                            @click="showAccountLog(scope)">
-                                                        账号Log
-                                                    </el-button>
-                                                </template>
+                                            <el-table-column prop="recentLog" align="center" label="最新日志">
                                             </el-table-column>
-                                            <el-table-column
 
-                                                    label="改">
-                                                <template slot-scope="scope">
-                                                    <el-button
-                                                            type="primary"
-                                                            size="mini"
-                                                            @click="accountEdit(scope)">
-                                                        编辑
-                                                    </el-button>
-                                                </template>
+                                            <!-- <el-table-column prop="switchip" label="IP">
                                             </el-table-column>
-                                            <el-table-column
-                                                    label="删">
-                                                <template slot-scope="scope">
-                                                    <el-button
-                                                            type="danger"
-                                                            size="mini"
-                                                            @click="deleteAccountByRow(scope)">
-                                                        删除
-                                                    </el-button>
-                                                </template>
+                                            <el-table-column prop="packageNum" label="包">
+                                            </el-table-column> -->
+                                                <el-table-column label="账号日志" align="center">
+                                                    <template slot-scope="scope">
+                                                        <el-button type="success" size="mini" @click="showAccountLog(scope)">
+                                                            账号Log
+                                                        </el-button>
+                                                    </template>
+                                                </el-table-column>
+                                                <el-table-column label="编辑" align="center">
+                                                    <template slot-scope="scope">
+                                                        <el-button type="primary" size="mini" @click="accountEdit(scope)">
+                                                            编辑
+                                                        </el-button>
+                                                    </template>
+                                                </el-table-column>
+                                                <el-table-column label="删除" align="center">
+                                                    <template slot-scope="scope">
+                                                        <el-button type="danger" size="mini" @click="deleteAccountByRow(scope)">
+                                                            删除
+                                                        </el-button>
+                                                    </template>
+                                                </el-table-column>
+                                            <!-- <el-table-column prop="affiliation" label="所属" align="center">
+                                            </el-table-column>-->
+                                            <el-table-column prop="batch" label="批次" align="center" >
                                             </el-table-column>
-                                            <el-table-column
-                                                    prop="affiliation"
-                                                    label="所属">
+                                            <el-table-column prop="status" label="状态" align="center" width="50">
                                             </el-table-column>
-                                            <el-table-column
-                                                    prop="batch"
-                                                    label="批次">
                                             </el-table-column>
-                                            <el-table-column
-                                                    prop="remark"
-                                                    label="备注">
+                                            <el-table-column prop="updateTime" label="更新时间" align="center" :formatter="updateTimeReplace">
+                                            </el-table-column>
+                                            <el-table-column prop="remark" label="备注" align="center">
                                             </el-table-column>
                                         </el-table>
 
@@ -405,7 +348,7 @@
                         </div>
                         <el-pagination
                                 background
-                                :page-sizes="[50, 10, 20, 100]"
+                                :page-sizes="[10, 20, 50, 100]"
                                 :page-size="pageSize"
                                 :current-page="pageNum"
                                 @size-change="handleSizeChange"
@@ -474,7 +417,7 @@
                 summary: '',
                 total: 0,
                 pageNum: 1,
-                pageSize: 50,
+                pageSize: 10,
                 options: [{
                     value: 0,
                     label: '否'
@@ -1083,6 +1026,16 @@
                     })
 
 
+            },
+            updateTimeReplace(row, column) {
+                if (row.updateTime != null) {
+                    return row.updateTime.replace(/T/g, ' ').replace(/.[\d]{3}Z/, ' ').slice(0,16);
+                }
+            },
+            firstTimeReplace(row, column) {
+                if (row.firstTime != null) {
+                    return row.firstTime.replace(/T/g, ' ').replace(/.[\d]{3}Z/, ' ').slice(0,16);
+                }
             },
         },
         mounted() {

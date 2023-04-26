@@ -44,14 +44,14 @@ public class AccountController {
     }
 
     @Operation(summary = "list")
-    @GetMapping("list")
+    @GetMapping("/list")
     public List<AccountDO> list() {
         return accountService.list(new QueryWrapper<AccountDO>().lambda()
                 .orderByDesc(AccountDO::getGroup));
     }
 
     @Operation(summary = "listNeMX")
-    @GetMapping("listNeMX")
+    @GetMapping("/listNeMX")
     public List<AccountDO> listNeMX() {
         return accountService.list(new QueryWrapper<AccountDO>().lambda()
                 .ne(AccountDO::getTitle, "M")

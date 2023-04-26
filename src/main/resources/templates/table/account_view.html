@@ -111,6 +111,7 @@
                                 >
                                     <tbody>
                                     <template>
+                                        <el-scrollbar style="height: 900px;"  :thumb-size="70">
                                         <el-table :data="accounts" border style="width: 100%" ref="table" row-key="id" @cell-dblclick="handleEdit">
                                             <!--                                            <el-table-column type="selection" width="55" :reserve-selection="true">-->
                                             <!--                                            </el-table-column>-->
@@ -184,6 +185,7 @@
                                                 </template>
                                             </el-table-column>
                                         </el-table>
+                                        </el-scrollbar>
 
                                         <el-dialog title="账号添加" :visible.sync="dialogVisible" width="30%">
                                             <el-form ref="newAccount" :model="newAccount" label-width="120px" :rules="rules">

@@ -795,6 +795,8 @@
                                 message: "清空任务成功！",
                                 type: 'success'
                             });
+                            //刷新日志
+                            that.autoLogs()
                         }
                     })
             },
@@ -821,6 +823,7 @@
                                 message: "操作成功！",
                                 type: 'success'
                             });
+                            that.onSubmit();
                         }
                     })
             },
@@ -848,6 +851,7 @@
                                 message: "操作成功！",
                                 type: 'success'
                             });
+                            that.onSubmit();
                         }
                     })
             },
@@ -901,6 +905,7 @@
                                 message: "操作成功！",
                                 type: 'success'
                             });
+                            this.onSubmit();
                         }
                     })
             },

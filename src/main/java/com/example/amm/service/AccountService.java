@@ -33,7 +33,7 @@ public interface AccountService extends IService<AccountDO> {
 
     int updateByPrimaryKey(AccountDO account);
 
-    void uploadLog(Long id, String log);
+    void uploadLog(Long id, String logs);
 
     int nextGroup(int group);
 

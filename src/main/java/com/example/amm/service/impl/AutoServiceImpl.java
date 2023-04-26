@@ -32,7 +32,7 @@ public class AutoServiceImpl implements AutoService {
         value.append(LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
         value.append("]");
         value.append(" => ");
-        value.append(log);
+        value.append(logs);
 
         String key = "autopp_" + info.getUserId() + "_autologs";
 
@@ -64,9 +64,9 @@ public class AutoServiceImpl implements AutoService {
             // 最后一条信息更新到 任务面板lastlog备注
 
             UpdateWrapper<TaskDO> wrapper = new UpdateWrapper<>();
-            wrapper.lambda().set(TaskDO::getRemark, value).eq(TaskDO::getId, info.getTaskId());
+            wrapper.lambda().set(TaskDO::getRemark, String.valueOf(value)).eq(TaskDO::getId, info.getTaskId());
 
-            taskService.update(null, wrapper);
+             taskService.update(null, wrapper);
         }
     }
 

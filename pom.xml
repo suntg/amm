@@ -10,12 +10,12 @@
     </parent>
     <groupId>com.example</groupId>
     <artifactId>amm</artifactId>
-    <version>0.0.1</version>
+    <version>1.0.1</version>
     <name>amm</name>
     <description>amm</description>
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -123,8 +123,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
 
                     <!-- See https://maven.apache.org/plugins/maven-compiler-plugin/compile-mojo.html -->
                     <!-- Classpath elements to supply as annotation processor path. If specified, the compiler   -->

@@ -118,14 +118,14 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     }
 
     @Override
-    public void uploadLog(Long id, String log) {
+    public void uploadLog(Long id, String logs) {
 
         StringBuilder value = new StringBuilder();
         value.append("[");
         value.append(LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
         value.append("]");
         value.append(" => ");
-        value.append(log);
+        value.append(logs);
 
 
         redisTemplate.opsForList().leftPush(RedisKeyConstant.ACCOUNT_LOG_KEY + id, String.valueOf(value));
@@ -138,7 +138,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
         redisTemplate.expire(RedisKeyConstant.GROUP_LOG_KEY + accountDO.getGroup(), 90, TimeUnit.DAYS);
 
 
-        accountDO.setRecentLog(log);
+        accountDO.setRecentLog(logs);
         accountMapper.updateById(accountDO);
     }
 

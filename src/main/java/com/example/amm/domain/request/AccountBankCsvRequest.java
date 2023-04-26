@@ -3,6 +3,7 @@ package com.example.amm.domain.request;
 import cn.hutool.core.annotation.Alias;
 import lombok.Data;
 
+@Deprecated
 @Data
 public class AccountBankCsvRequest {
 

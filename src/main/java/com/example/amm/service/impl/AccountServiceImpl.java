@@ -11,7 +11,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.amm.constant.RedisKeyConstant;
 import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.query.PageQuery;
-import com.example.amm.domain.request.AccountBankCsvRequest;
 import com.example.amm.domain.vo.AccountVO;
 import com.example.amm.mapper.AccountMapper;
 import com.example.amm.service.AccountService;
@@ -34,33 +33,10 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     private RedisTemplate<String, String> redisTemplate;
 
     @Override
-    public void csvImport(List<AccountBankCsvRequest> list) {
-        // for (AccountBankCsvRequest accountBankCsvRequest : list) {
-        //     if (StrUtil.isBlank(accountBankCsvRequest.getAccountFileName())) {
-        //         throw new BizException("filename为空");
-        //     }
-        //     AccountDO result = accountMapper.selectOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getFileName, accountBankCsvRequest.getAccountFileName()));
-        //     if (result == null) {
-        //         AccountDO accountDO = AccountBankCsvConverter.INSTANCE.csv2AccountDO(accountBankCsvRequest);
-        //         accountMapper.insert(accountDO);
-        //
-        //         BankDO bankDO = AccountBankCsvConverter.INSTANCE.csv2BankDO(accountBankCsvRequest);
-        //         bankDO.setAccountId(accountDO.getId());
-        //         bankService.insert(bankDO);
-        //     } else {
-        //         BankDO bankDO = AccountBankCsvConverter.INSTANCE.csv2BankDO(accountBankCsvRequest);
-        //         bankDO.setAccountId(result.getId());
-        //         bankService.insert(bankDO);
-        //     }
-        //
-        // }
-    }
-
-    @Override
     public Page<AccountDO> listPage(PageQuery pageQuery) {
         return this.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()), new QueryWrapper<AccountDO>().lambda()
                 // .gt(AccountDO::getGroupStatus, 0)
-                .orderByDesc(AccountDO::getCreateTime));
+                .orderByDesc(AccountDO::getGroup));
     }
 
     @Override

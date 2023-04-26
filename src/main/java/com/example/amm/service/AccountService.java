@@ -4,14 +4,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.query.PageQuery;
-import com.example.amm.domain.request.AccountBankCsvRequest;
 import com.example.amm.domain.vo.AccountVO;
 
-import java.util.List;
-
 public interface AccountService extends IService<AccountDO> {
-
-    void csvImport(List<AccountBankCsvRequest> list);
 
     Page<AccountDO> listPage(PageQuery pageQuery);
 

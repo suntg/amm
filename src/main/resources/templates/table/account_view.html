@@ -83,13 +83,14 @@
                         <div class="panel-body">
                             <div class="adv-table editable-table el-table__wrapper">
 
-                                <div style="margin-bottom:25px;">
+                                <div style="margin-bottom:25px;width:400px">
                                     <el-upload
                                             class="upload-demo"
                                             ref="upload"
                                             action="/account/importCsv"
                                             :on-preview="handlePreview"
                                             :on-remove="handleRemove"
+                                            :on-success="handleSuccess"
                                             :before-remove="beforeRemove"
                                             :file-list="fileList"
                                             :auto-upload="false">
@@ -97,9 +98,9 @@
                                         <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
                                         <div slot="tip" class="el-upload__tip">只能上传CSV文件</div>
                                     </el-upload>
-
-                                    <el-button type="primary" @click="showAddAccount">添加账号</el-button>
                                 </div>
+                                    <el-button type="primary" @click="showAddAccount">添加账号</el-button>
+
                                 <hr>
                                 <table class="table table-striped table-hover table-bordered"
                                        id="editable-sample"
@@ -109,22 +110,23 @@
                                         <el-table :data="accounts" border style="width: 100%" ref="table" row-key="id" @cell-dblclick="handleEdit">
                                             <!--                                            <el-table-column type="selection" width="55" :reserve-selection="true">-->
                                             <!--                                            </el-table-column>-->
+
                                             <el-table-column prop="id" label="ID" align="center" width="65">
+                                            </el-table-column>
+                                            <el-table-column prop="group" align="center" label="分组" width="80">
+                                                <template slot-scope="scope">
+                                                    <el-button type="{{scope.row.group % 2 == 1 ? 'success' : 'warning'}}" plain size="mini" @click="showGroupLog(scope)">
+                                                        {{ scope.row.group }}
+                                                    </el-button>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column prop="title" label="身份" align="center" width="50">
                                             </el-table-column>
                                             <el-table-column prop="email" align="center" label="Email">
 
                                             </el-table-column>
                                             <el-table-column prop="payme" align="center" label="PayMe链接">
 
-                                            </el-table-column>
-                                            <el-table-column prop="group" align="center" label="分组" width="80">
-                                                <template slot-scope="scope">
-                                                    <el-button type="scope.row.group % 2 == 1 ? 'success' : 'warning'" plain size="mini" @click="showGroupLog(scope)">
-                                                        {{ scope.row.group }}
-                                                    </el-button>
-                                                </template>
-                                            </el-table-column>
-                                            <el-table-column prop="title" label="身份" align="center" width="50">
                                             </el-table-column>
                                             <el-table-column prop="balance" align="center" label="余额" width="70">
                                             </el-table-column>
@@ -546,6 +548,19 @@
             },
             handleRemove(file, fileList) {
                 console.log(file, fileList);
+            },
+            handleSuccess(response, file, fileList) {
+                console.log("测试" + response.status);
+                if (response.status == 100) {
+                    console.log("status 成功")
+                    this.$message({
+                        showClose: true,
+                        offset: 250,
+                        message: response.message,
+                        type: 'success'
+                    });
+                    this.onSubmit();
+                }
             },
             handlePreview(file) {
                 console.log(file);

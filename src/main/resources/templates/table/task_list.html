@@ -485,26 +485,16 @@
                 axios.delete(baseUrl + '/task/delete/' + row.id, {})
                     .then(function (response) {
                         loading.close();
-                        that.$alert(response.data.message, '操作结果', {
                             confirmButtonText: '确定',
-                            callback: action => {
                                 that.$message({
                                     type: 'info',
                                     message: response.data.message
                                 });
-                            }
-                        });
-                        this.onSubmit();
+                        that.onSubmit();
                     })
                     .catch(function (error) {
                         loading.close();
-                        that.$alert(error.data.message, '操作结果', {
-                            confirmButtonText: '确定',
-                            type: 'error',
-                            callback: action => {
-                                that.$message.error('异常错误：' + error.data.message);
-                            }
-                        });
+                        that.$message.error('异常错误：' + error.data.message);
                     });
             },
             handleEdit(row) {

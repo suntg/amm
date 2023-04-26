@@ -257,7 +257,7 @@ public class AutoController {
                 }
 
                 if (!diffTime(accountF.getUpdateTime(), 24 * 3600)) {
-                    msg = "[" + autoInfoDTO.getGroup() + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail()
+                    msg = "[" + from + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail()
                             + " 不满足24小时条件！上次: " + accountF.getUpdateTime();
                     autoService.setAutoLog(autoInfoDTO, msg);
                     continue;
@@ -302,8 +302,10 @@ public class AutoController {
             taskService.save(taskDO);
 
             autoInfoDTO.setTaskId(taskDO.getId());
-            autoService.setAutoLog(autoInfoDTO, msg);
 
+            // 写入日志
+            msg = "[" + taskDO.getGroup() + "] 组 -> 任务 => [" + taskDO.getType() + "] =>  金额：[" + taskDO.getMoney() + "] -> Auto" + doParamUpper + "添加完成！";
+            autoService.setAutoLog(autoInfoDTO, msg);
 
             // 增量计数
             v = v + 1;

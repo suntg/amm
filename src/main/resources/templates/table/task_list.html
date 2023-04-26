@@ -142,7 +142,7 @@
                                             <el-table-column
                                                     label="操作"
                                                     align="center"
-                                                    min-width="180">
+                                                    min-width="200">
                                                 <template slot-scope="scope">
                                                     <el-button size="small" type="primary" @click="showLogById(scope)">任务Log</el-button>
                                                     <el-button size="small" type="success" @click="executeTask(scope)">执行 {{scope.row.id}}</el-button>
@@ -703,7 +703,7 @@
                         params: {}
                     })
                     .then((response) => {
-                        // console.log("responose是：" + response.data);
+                        console.log("autoLogs responose是：" + response.data.data.records);
                         this.autoLogList = response.data.data.records.map(log => ({  // 生成对象
                                 log    // 生成log属性
                             })
@@ -733,6 +733,9 @@
                                 message: "执行 成功！" ,
                                 type: 'success'
                             });
+
+                            //刷新日志
+                            that.autoLogs()
                         }
                     })
                 // this.groupLogVisible = false;
@@ -762,6 +765,9 @@
                                 message: "执行 " + doParam + " 逻辑成功！" ,
                                 type: 'success'
                             });
+
+                            //刷新日志
+                            that.autoLogs()
                         }
                     })
             },

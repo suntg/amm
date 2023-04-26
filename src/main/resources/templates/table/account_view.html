@@ -119,7 +119,7 @@
                                             </el-table-column>
                                             <el-table-column prop="group" align="center" label="分组" width="80">
                                                 <template slot-scope="scope">
-                                                    <el-button type="success" plain size="mini" @click="showGroupLog(scope)">
+                                                    <el-button type="scope.row.group % 2 == 1 ? 'success' : 'warning'" plain size="mini" @click="showGroupLog(scope)">
                                                         {{ scope.row.group }}
                                                     </el-button>
                                                 </template>
@@ -153,27 +153,6 @@
                                             </el-table-column>
                                             <el-table-column prop="packageNum" label="包">
                                             </el-table-column> -->
-                                                <el-table-column label="账号日志" align="center">
-                                                    <template slot-scope="scope">
-                                                        <el-button type="success" size="mini" @click="showAccountLog(scope)">
-                                                            账号Log
-                                                        </el-button>
-                                                    </template>
-                                                </el-table-column>
-                                                <el-table-column label="编辑" align="center">
-                                                    <template slot-scope="scope">
-                                                        <el-button type="primary" size="mini" @click="accountEdit(scope)">
-                                                            编辑
-                                                        </el-button>
-                                                    </template>
-                                                </el-table-column>
-                                                <el-table-column label="删除" align="center">
-                                                    <template slot-scope="scope">
-                                                        <el-button type="danger" size="mini" @click="deleteAccountByRow(scope)">
-                                                            删除
-                                                        </el-button>
-                                                    </template>
-                                                </el-table-column>
                                             <!-- <el-table-column prop="affiliation" label="所属" align="center">
                                             </el-table-column>-->
                                             <el-table-column prop="batch" label="批次" align="center" >
@@ -184,6 +163,19 @@
                                             <el-table-column prop="updateTime" label="更新时间" align="center" :formatter="updateTimeReplace">
                                             </el-table-column>
                                             <el-table-column prop="remark" label="备注" align="center">
+                                            </el-table-column>
+                                            <el-table-column label="操作" align="center">
+                                                <template slot-scope="scope">
+                                                    <el-button type="success" size="mini" @click="showAccountLog(scope)">
+                                                        账号Log
+                                                    </el-button>
+                                                    <el-button type="primary" size="mini" @click="accountEdit(scope)">
+                                                        编辑
+                                                    </el-button>
+                                                    <el-button type="danger" size="mini" @click="deleteAccountByRow(scope)">
+                                                        删除
+                                                    </el-button>
+                                                </template>
                                             </el-table-column>
                                         </el-table>
 
@@ -212,12 +204,12 @@
                                                 <el-form-item label="路径" prop="path" required>
                                                     <el-input v-model="newAccount.path"></el-input>
                                                 </el-form-item>
-                                                <el-form-item label="切IP" prop="switchIp" required>
-                                                    <el-input v-model="newAccount.switchIp" ></el-input>
-                                                </el-form-item>
-                                                <el-form-item label="包" prop="packageNum" required>
-                                                    <el-input v-model="newAccount.packageNum" ></el-input>
-                                                </el-form-item>
+<!--                                                <el-form-item label="切IP" prop="switchIp" required>-->
+<!--                                                    <el-input v-model="newAccount.switchIp" ></el-input>-->
+<!--                                                </el-form-item>-->
+<!--                                                <el-form-item label="包" prop="packageNum" required>-->
+<!--                                                    <el-input v-model="newAccount.packageNum" ></el-input>-->
+<!--                                                </el-form-item>-->
                                                 <el-form-item label="备注" prop="remark" required>
                                                     <el-input v-model="newAccount.remark" ></el-input>
                                                 </el-form-item>
@@ -458,12 +450,12 @@
                     path: [
                         { required: true, message: '请填写 路径', trigger: 'blur' }
                     ],
-                    switchIp: [
-                        { required: true, message: '请填写 切换IP', trigger: 'blur' }
-                    ],
-                    packageNum: [
-                        { required: true, message: '请填写 包', trigger: 'blur' }
-                    ],
+                    // switchIp: [
+                    //     { required: true, message: '请填写 切换IP', trigger: 'blur' }
+                    // ],
+                    // packageNum: [
+                    //     { required: true, message: '请填写 包', trigger: 'blur' }
+                    // ],
                     remark: [
                         { required: true, message: '请填写 备注', trigger: 'blur' }
                     ]
@@ -653,8 +645,8 @@
                             title: this.newAccount.title,
                             balance: this.newAccount.balance,
                             path: this.newAccount.path,
-                            switchIp: this.newAccount.switchIp,
-                            packageNum: this.newAccount.packageNum,
+                            // switchIp: this.newAccount.switchIp,
+                            // packageNum: this.newAccount.packageNum,
                             remark: this.newAccount.remark
                         };
                         axios.post(baseUrl + '/account/save', data)
@@ -1029,7 +1021,7 @@
             },
             updateTimeReplace(row, column) {
                 if (row.updateTime != null) {
-                    return row.updateTime.replace(/T/g, ' ').replace(/.[\d]{3}Z/, ' ').slice(0,16);
+                    return row.updateTime.replace(/T/g, ' ').replace(/.[\d]{3}Z/, ' ');
                 }
             },
             firstTimeReplace(row, column) {

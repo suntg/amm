@@ -989,12 +989,12 @@
             },
             updateTimeReplace(row, column) {
                 if (row.updateTime != null) {
-                    return row.updateTime.replace(/T/g, ' ').replace(/.[\d]{3}Z/, ' ').slice(0,16);
+                    return row.updateTime.replace(/T/g, ' ').replace(/.[\d]{3}Z/, ' ');
                 }
             },
             createTimeReplace(row, column) {
                 if (row.createTime != null) {
-                    return row.createTime.replace(/T/g, ' ').replace(/.[\d]{3}Z/, ' ').slice(0,16);
+                    return row.createTime.replace(/T/g, ' ').replace(/.[\d]{3}Z/, ' ');
                 }
             },
         },

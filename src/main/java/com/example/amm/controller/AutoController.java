@@ -9,12 +9,16 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.amm.common.BizException;
+import com.example.amm.constant.BusinessType;
+import com.example.amm.constant.User;
 import com.example.amm.domain.dto.AutoInfoDTO;
 import com.example.amm.domain.entity.AccountDO;
+import com.example.amm.domain.entity.LogDO;
 import com.example.amm.domain.entity.TaskDO;
 import com.example.amm.domain.vo.AccountVO;
 import com.example.amm.service.AccountService;
 import com.example.amm.service.AutoService;
+import com.example.amm.service.LogService;
 import com.example.amm.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +33,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Tag(name = "Auto")
 @Slf4j
@@ -277,9 +281,17 @@ public class AutoController {
                         doParamUpper +
                         "任务！";
 
-                String key = "autopp_" + user + "_autologs";
-                redisTemplate.opsForList().leftPush(key, value);
-                redisTemplate.expire(key, 30, TimeUnit.DAYS);
+
+                LogDO logDO = new LogDO();
+                logDO.setBusinessId(User.USER_ID_25);
+                logDO.setMessage(value);
+                logDO.setBusiness(BusinessType.AUTO_USER.toString());
+                logDO.setLogTime(LocalDateTimeUtil.now());
+                logService.save(logDO);
+
+                // String key = "autopp_" + user + "_autologs";
+                // redisTemplate.opsForList().leftPush(key, value);
+                // redisTemplate.expire(key, 30, TimeUnit.DAYS);
                 return;
             }
 
@@ -292,7 +304,7 @@ public class AutoController {
             if ("MX".equals(doParamUpper)) {
                 taskDO.setType(from + "->" + x);
                 taskDO.setGroup(1);
-            } else if (CharSequenceUtil.equalsAny("AX", "BX")) {
+            } else if (CharSequenceUtil.equalsAny(doParamUpper, "AX", "BX")) {
                 taskDO.setType(accountF.getId() + "->" + x);
                 taskDO.setGroup(from.intValue());
             }
@@ -323,12 +335,18 @@ public class AutoController {
     @Resource
     private RedisTemplate<String, String> redisTemplate;
 
+    @Resource
+    private LogService logService;
+
     @Operation(summary = "查看自动日志 logs()")
     @GetMapping("/logs")
     public List<String> logs() {
-        int user = 25;
-        String key = "autopp_" + user + "_autologs";
-        return redisTemplate.opsForList().range(key, 0, -1);
+        // int user = 25;
+        // String key = "autopp_" + user + "_autologs";
+        // redisTemplate.opsForList().range(key, 0, -1);
+        return logService.list(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusinessId, User.USER_ID_25)
+                        .eq(LogDO::getBusiness, BusinessType.AUTO_USER.toString()).orderByDesc(LogDO::getLogTime).orderByDesc(LogDO::getId))
+                .stream().map(LogDO::getMessage).collect(Collectors.toList());
     }
 
 

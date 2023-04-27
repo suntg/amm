@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.amm.domain.entity.TaskDO;
 import com.example.amm.domain.query.PageQuery;
-import org.springframework.web.bind.annotation.PathVariable;
 
 public interface TaskService extends IService<TaskDO> {
 

@@ -8,19 +8,21 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.amm.constant.RedisKeyConstant;
+import com.example.amm.constant.BusinessType;
 import com.example.amm.domain.entity.AccountDO;
+import com.example.amm.domain.entity.LogDO;
 import com.example.amm.domain.query.PageQuery;
 import com.example.amm.domain.vo.AccountVO;
 import com.example.amm.mapper.AccountMapper;
 import com.example.amm.service.AccountService;
+import com.example.amm.service.LogService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -97,25 +99,43 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
         return accountMapper.updateByPrimaryKey(account);
     }
 
+
+    @Resource
+    private LogService logService;
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void uploadLog(Long id, String logs) {
 
-        StringBuilder value = new StringBuilder();
-        value.append("[");
-        value.append(LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
-        value.append("]");
-        value.append(" => ");
-        value.append(logs);
+        String value = "[" +
+                LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN) +
+                "]" +
+                " => " +
+                logs;
 
+        LogDO logDO = new LogDO();
+        logDO.setBusinessId(String.valueOf(id));
+        logDO.setMessage(value);
+        logDO.setBusiness(BusinessType.ACCOUNT.toString());
+        logDO.setLogTime(LocalDateTimeUtil.now());
+        logService.save(logDO);
 
-        redisTemplate.opsForList().leftPush(RedisKeyConstant.ACCOUNT_LOG_KEY + id, String.valueOf(value));
-        redisTemplate.expire(RedisKeyConstant.ACCOUNT_LOG_KEY + id, 30, TimeUnit.DAYS);
+        // TODO
+        // redisTemplate.opsForList().leftPush(RedisKeyConstant.ACCOUNT_LOG_KEY + id, value);
+        // redisTemplate.expire(RedisKeyConstant.ACCOUNT_LOG_KEY + id, 30, TimeUnit.DAYS);
 
 
         AccountDO accountDO = accountMapper.selectById(id);
 
-        redisTemplate.opsForList().leftPush(RedisKeyConstant.GROUP_LOG_KEY + accountDO.getGroup(), String.valueOf(value));
-        redisTemplate.expire(RedisKeyConstant.GROUP_LOG_KEY + accountDO.getGroup(), 90, TimeUnit.DAYS);
+
+        logDO.setId(null);
+        logDO.setBusinessId(String.valueOf(accountDO.getGroup()));
+        logDO.setBusiness(BusinessType.GROUP.toString());
+        logService.save(logDO);
+
+        // TODO
+        // redisTemplate.opsForList().leftPush(RedisKeyConstant.GROUP_LOG_KEY + accountDO.getGroup(), String.valueOf(value));
+        // redisTemplate.expire(RedisKeyConstant.GROUP_LOG_KEY + accountDO.getGroup(), 90, TimeUnit.DAYS);
 
 
         accountDO.setRecentLog(logs);

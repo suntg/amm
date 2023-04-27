@@ -333,10 +333,9 @@ public class AutoController {
 
 
     private boolean diffTime(LocalDateTime time, int diff) {
-        Duration between = LocalDateTimeUtil.between(LocalDateTimeUtil.now(), time);
+        Duration between = LocalDateTimeUtil.between(time, LocalDateTimeUtil.now());
         return between.getSeconds() > diff;
     }
-
 
     private Long getX() {
         QueryWrapper<AccountDO> queryWrapper = new QueryWrapper<>();

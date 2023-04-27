@@ -65,9 +65,13 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
             String money = String.valueOf(NumberUtil.add(account.getSuccMoney(), result.getSuccMoney()));
             int times = result.getSuccTimes();
             result.setSuccTimes(++times);
-            LambdaUpdateWrapper<AccountDO> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-            lambdaUpdateWrapper.eq(AccountDO::getId, id).set(AccountDO::getSuccMoney, money).set(AccountDO::getSuccTimes, times);
 
+            LambdaUpdateWrapper<AccountDO> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+            lambdaUpdateWrapper.eq(AccountDO::getId, id).set(AccountDO::getSuccMoney, money).set(AccountDO::getSuccTimes, times)
+                    .set(AccountDO::getUpdateTime, LocalDateTimeUtil.now());
+            if (result.getFirstTime() == null) {
+                lambdaUpdateWrapper.set(AccountDO::getFirstTime, LocalDateTimeUtil.now());
+            }
             return accountMapper.update(null, lambdaUpdateWrapper) > 0;
         }
         return false;

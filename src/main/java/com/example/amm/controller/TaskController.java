@@ -40,6 +40,13 @@ public class TaskController {
         return taskService.listPage(pageQuery);
     }
 
+    @Operation(summary = "list")
+    @GetMapping("/list")
+    public List<TaskDO> list() {
+        return taskService.list(new QueryWrapper<TaskDO>().lambda().orderByDesc(TaskDO::getCreateTime));
+    }
+
+
     @Operation(summary = "creat()")
     @PostMapping("/save")
     public boolean saveTask(@RequestBody @Validated TaskDO task) {

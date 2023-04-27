@@ -163,18 +163,19 @@
                                                     prop="createTime"
                                                     label="创建时间"
                                                     align="center"
-                                                    :formatter="createTimeReplace">
+                                                    :formatter="createTimeReplace"
+                                                    :width="flexWidth('createTime',tasks,'创建时间')">
                                             </el-table-column>
                                             <el-table-column
                                                     prop="updateTime"
                                                     label="更新时间"
                                                     align="center"
-                                                    :formatter="updateTimeReplace">
+                                                    :formatter="updateTimeReplace"
+                                                    :width="flexWidth('updateTime',tasks,'更新时间')">
                                             </el-table-column>
                                             <el-table-column
                                                     prop="remark"
                                                     label="备注 - 最新日志"
-                                                    align="center"
                                                     :width="flexWidth('remark',tasks,'备注 - 最新日志')">
                                             </el-table-column>
 
@@ -208,13 +209,13 @@
                                             <template>
                                                 <div style="margin-bottom:25px;">
 
-                                                    <el-button type="primary" @click="autoRun" plain>AutoABC</el-button>
+                                                    <el-button type="primary" @click="autoRun" plain>立即转账</el-button>
 
-                                                    <el-button type="success" @click="autoXXX('MX')" plain>AutoMX</el-button>
+                                                    <el-button type="success" @click="autoXXX('MX')" plain>M找A</el-button>
 
-                                                    <el-button type="success" @click="autoXXX('AX')" plain>AutoAX</el-button>
+                                                    <el-button type="success" @click="autoXXX('AX')" plain>A找B</el-button>
 
-                                                    <el-button type="success" @click="autoXXX('BX')" plain>AutoBX</el-button>
+                                                    <el-button type="success" @click="autoXXX('BX')" plain>B找C</el-button>
 
                                                     <el-button type="warning" @click="delAllTask" plain>清空任务</el-button>
                                                 </div>
@@ -294,16 +295,16 @@
                                 </table>
                             </div>
                         </div>
-                        <el-pagination
-                                background
-                                :page-sizes="[10, 20, 50, 100]"
-                                :page-size="pageSize"
-                                :current-page="pageNum"
-                                @size-change="handleSizeChange"
-                                @current-change="handleCurrentChange"
-                                layout="total, sizes, prev, pager, next"
-                                :total="total">
-                        </el-pagination>
+<!--                        <el-pagination-->
+<!--                                background-->
+<!--                                :page-sizes="[10, 20, 50, 100]"-->
+<!--                                :page-size="pageSize"-->
+<!--                                :current-page="pageNum"-->
+<!--                                @size-change="handleSizeChange"-->
+<!--                                @current-change="handleCurrentChange"-->
+<!--                                layout="total, sizes, prev, pager, next"-->
+<!--                                :total="total">-->
+<!--                        </el-pagination>-->
                     </section>
                 </div>
             </div>
@@ -416,7 +417,7 @@
 
         methods: {
             onSubmit() {
-                axios.get(baseUrl + '/task/listPage',
+                axios.get(baseUrl + '/task/list',
                     {
                         headers: {
                             'Access-Control-Allow-Origin': '*',  //解决cors头问题
@@ -425,16 +426,16 @@
                         },
                         withCredentials: true,
                         params: {
-                            pageNum: this.pageNum,
-                            pageSize: this.pageSize
+                            // pageNum: this.pageNum,
+                            // pageSize: this.pageSize
                         }
                     })
                     .then((response) => {
                         // console.log("responose是：" + response.data);
-                        this.tasks = response.data.data.records
-                        if (response.data != null) {
-                            this.total = response.data.data.total
-                        }
+                        this.tasks = response.data.data
+                        // if (response.data != null) {
+                        //     this.total = response.data.data.total
+                        // }
                     })
             },
             resetCondition() {
@@ -444,15 +445,15 @@
                 this.city= '',
                 this.zipCode = '';
             },
-            handleSizeChange(val) {
-                this.pageSize = val;
-                this.pageNum = 1;
-                this.onSubmit();
-            },
-            handleCurrentChange(val) {
-                this.pageNum = val;
-                this.onSubmit();
-            },
+            // handleSizeChange(val) {
+            //     this.pageSize = val;
+            //     this.pageNum = 1;
+            //     this.onSubmit();
+            // },
+            // handleCurrentChange(val) {
+            //     this.pageNum = val;
+            //     this.onSubmit();
+            // },
             timeFormatter(row, column) {
                 return this.timestampToTime(row.confirmedTimestamp);
             },

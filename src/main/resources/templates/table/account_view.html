@@ -143,7 +143,7 @@
                                                 </template>
                                             </el-table-column> -->
 
-                                            <el-table-column prop="firstTime" align="center" label="首次时间" :formatter="firstTimeReplace">
+                                            <el-table-column prop="firstTime" align="center" label="首次时间" :formatter="firstTimeReplace" :width="flexWidth('firstTime',accounts,'首次时间')">
                                             </el-table-column>
 
                                             <el-table-column prop="succTimes" align="center" label="转出次数" width="80">
@@ -152,7 +152,7 @@
                                             <el-table-column prop="succMoney" align="center" label="转出总额" width="80">
                                             </el-table-column>
 
-                                            <el-table-column prop="recentLog" align="center" label="最新日志" :width="flexWidth('recentLog',accounts,'最新日志')">
+                                            <el-table-column prop="recentLog" label="最新日志" :width="flexWidth('recentLog',accounts,'最新日志')">
                                             </el-table-column>
 
                                             <!-- <el-table-column prop="switchip" label="IP">
@@ -166,9 +166,9 @@
                                             <el-table-column prop="status" label="状态" align="center" width="50">
                                             </el-table-column>
                                             </el-table-column>
-                                            <el-table-column prop="updateTime" label="更新时间" align="center" :formatter="updateTimeReplace">
+                                            <el-table-column prop="updateTime" label="更新时间" align="center" :formatter="updateTimeReplace" :width="flexWidth('updateTime',accounts,'更新时间')">
                                             </el-table-column>
-                                            <el-table-column prop="remark" label="备注" align="center">
+                                            <el-table-column prop="remark" label="备注" :width="flexWidth('remark',accounts,'备注')">
                                             </el-table-column>
                                             <el-table-column label="操作" align="center"  width="300">
                                                 <template slot-scope="scope">
@@ -204,6 +204,8 @@
                                                         <el-radio v-model="newAccount.title" label="C">C号</el-radio>
                                                         <el-radio v-model="newAccount.title" label="D">D号</el-radio>
                                                         <el-radio v-model="newAccount.title" label="E">E号</el-radio>
+                                                        <el-radio v-model="newAccount.title" label="M">M号</el-radio>
+                                                        <el-radio v-model="newAccount.title" label="X">X号</el-radio>
                                                     </template>
                                                 </el-form-item>
 

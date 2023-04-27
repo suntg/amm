@@ -7,11 +7,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.amm.common.BizException;
+import com.example.amm.constant.BusinessType;
 import com.example.amm.constant.RedisKeyConstant;
 import com.example.amm.domain.entity.AccountDO;
+import com.example.amm.domain.entity.LogDO;
 import com.example.amm.domain.query.PageQuery;
 import com.example.amm.domain.vo.AccountVO;
 import com.example.amm.service.AccountService;
+import com.example.amm.service.LogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +27,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Tag(name = "Account")
 @Slf4j
@@ -99,16 +103,25 @@ public class AccountController {
         accountService.uploadLog(id, log);
     }
 
+    @Resource
+    private LogService logService;
+
     @Operation(summary = "获取account log viewlog($id)")
     @GetMapping("/accountLog/{id}")
     public List<String> getAccountLogListById(@PathVariable String id) {
-        return redisTemplate.opsForList().range(RedisKeyConstant.ACCOUNT_LOG_KEY + id, 0, -1);
+        // redisTemplate.opsForList().range(RedisKeyConstant.ACCOUNT_LOG_KEY + id, 0, -1);
+        return logService.list(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusinessId, id).eq(LogDO::getBusiness, BusinessType.ACCOUNT.toString()))
+                .stream().map(LogDO::getMessage).collect(Collectors.toList());
     }
 
     @Operation(summary = "获取group log grouplog($id)")
     @GetMapping("/groupLog/{id}")
     public List<String> getGroupLogListById(@PathVariable String id) {
-        return redisTemplate.opsForList().range(RedisKeyConstant.GROUP_LOG_KEY + id, 0, -1);
+        // redisTemplate.opsForList().range(RedisKeyConstant.GROUP_LOG_KEY + id, 0, -1);
+
+        return logService.list(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusinessId, id).eq(LogDO::getBusiness, BusinessType.GROUP.toString()))
+                .stream().map(LogDO::getMessage).collect(Collectors.toList());
+
     }
 
     @Operation(summary = "获取next account")

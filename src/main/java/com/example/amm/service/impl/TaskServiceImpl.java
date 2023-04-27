@@ -9,15 +9,19 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.amm.constant.BusinessType;
 import com.example.amm.constant.RedisKeyConstant;
 import com.example.amm.domain.entity.AccountDO;
+import com.example.amm.domain.entity.LogDO;
 import com.example.amm.domain.entity.TaskDO;
 import com.example.amm.domain.query.PageQuery;
 import com.example.amm.mapper.TaskMapper;
 import com.example.amm.service.AccountService;
+import com.example.amm.service.LogService;
 import com.example.amm.service.TaskService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -28,6 +32,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
 
     @Resource
     private TaskMapper taskMapper;
+    @Resource
+    private LogService logService;
     @Resource
     private AccountService accountService;
     @Resource
@@ -66,6 +72,7 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void uploadLog(Long id, String log) {
         String value = "[" +
                 LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN) +
@@ -73,9 +80,17 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
                 " => " +
                 log;
 
+        LogDO logDO = new LogDO();
+        logDO.setBusinessId(String.valueOf(id));
+        logDO.setMessage(value);
+        logDO.setBusiness(BusinessType.TASK.toString());
+        logDO.setLogTime(LocalDateTimeUtil.now());
+        logService.save(logDO);
 
-        redisTemplate.opsForList().leftPush(RedisKeyConstant.TASK_LOG_KEY + id, value);
-        redisTemplate.expire(RedisKeyConstant.TASK_LOG_KEY + id, 24, TimeUnit.HOURS);
+
+        // TODO
+        // redisTemplate.opsForList().leftPush(RedisKeyConstant.TASK_LOG_KEY + id, value);
+        // redisTemplate.expire(RedisKeyConstant.TASK_LOG_KEY + id, 24, TimeUnit.HOURS);
 
         LambdaUpdateWrapper<TaskDO> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
         lambdaUpdateWrapper.eq(TaskDO::getId, id)
@@ -161,10 +176,10 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
         for (TaskDO task : taskList) {
             taskMapper.deleteById(task.getId()); // SQL删除
             // autopp_tasklog_
-            redisTemplate.delete(RedisKeyConstant.AUTO_TASK_LOG_KEY + task.getId());
-            // Redis移除队列
-            // remRedisQueue(task.getId(), user);
 
+            logService.remove(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusiness, BusinessType.AUTO_TASK.toString()).eq(LogDO::getBusinessId, task.getId()));
+            // redisTemplate.delete(RedisKeyConstant.AUTO_TASK_LOG_KEY + task.getId());
+            // Redis移除队列
             // autopp_25_taskqueue
             String key = "autopp_" + user + "_taskqueue";
             redisTemplate.opsForList().remove(key, 0, task.getId());

@@ -12,8 +12,4 @@ public class RedisKeyConstant {
     public static String AUTO_TASK_LOG_KEY = "amm:autoTask:log:";
 
 
-
-
-
-    public static String AUTO_TASK_USER_LOG_KEY = "amm:autoTask:log:";
 }

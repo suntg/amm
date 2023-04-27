@@ -304,7 +304,7 @@ public class AutoController {
             if ("MX".equals(doParamUpper)) {
                 taskDO.setType(from + "->" + x);
                 taskDO.setGroup(1);
-            } else if (CharSequenceUtil.equalsAny("AX", "BX")) {
+            } else if (CharSequenceUtil.equalsAny(doParamUpper, "AX", "BX")) {
                 taskDO.setType(accountF.getId() + "->" + x);
                 taskDO.setGroup(from.intValue());
             }

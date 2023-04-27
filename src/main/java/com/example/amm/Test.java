@@ -3,6 +3,7 @@ package com.example.amm;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.example.amm.constant.BusinessType;
 
 import java.time.Duration;
@@ -22,5 +23,7 @@ public class Test {
         System.out.println(between.getSeconds());
 
         System.out.println(BusinessType.AUTO_TASK);
+
+        System.out.println(CharSequenceUtil.equalsAny("MX","AX","MX"));
     }
 }

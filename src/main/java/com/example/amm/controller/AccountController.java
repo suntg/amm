@@ -47,7 +47,7 @@ public class AccountController {
     @GetMapping("/list")
     public List<AccountDO> list() {
         return accountService.list(new QueryWrapper<AccountDO>().lambda()
-                .orderByAsc(AccountDO::getGroup));
+                .orderByAsc(AccountDO::getGroup).orderByAsc(AccountDO::getTitle));
     }
 
     @Operation(summary = "listNeMX")
@@ -56,7 +56,7 @@ public class AccountController {
         return accountService.list(new QueryWrapper<AccountDO>().lambda()
                 .ne(AccountDO::getTitle, "M")
                 .ne(AccountDO::getTitle, "X")
-                .orderByAsc(AccountDO::getGroup));
+                .orderByAsc(AccountDO::getGroup).orderByAsc(AccountDO::getTitle));
     }
 
 

@@ -94,10 +94,11 @@ public class TaskController {
 
     @Operation(summary = "获取 log  viewlog($id)")
     @GetMapping("/log/{id}")
-    public List<String> getGroupLogListById(@PathVariable String id) {
+    public List<String> getLogListById(@PathVariable String id) {
         // redisTemplate.opsForList().range(RedisKeyConstant.TASK_LOG_KEY + id, 0, -1);
 
-        return logService.list(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusinessId, id).eq(LogDO::getBusiness, BusinessType.TASK.toString()))
+        return logService.list(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusinessId, id)
+                        .eq(LogDO::getBusiness, BusinessType.TASK.toString()).orderByDesc(LogDO::getLogTime).orderByDesc(LogDO::getId))
                 .stream().map(LogDO::getMessage).collect(Collectors.toList());
 
     }

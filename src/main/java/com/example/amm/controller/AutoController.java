@@ -344,7 +344,8 @@ public class AutoController {
         // int user = 25;
         // String key = "autopp_" + user + "_autologs";
         // redisTemplate.opsForList().range(key, 0, -1);
-        return logService.list(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusinessId, User.USER_ID_25).eq(LogDO::getBusiness, BusinessType.AUTO_USER.toString()))
+        return logService.list(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusinessId, User.USER_ID_25)
+                        .eq(LogDO::getBusiness, BusinessType.AUTO_USER.toString()).orderByDesc(LogDO::getLogTime).orderByDesc(LogDO::getId))
                 .stream().map(LogDO::getMessage).collect(Collectors.toList());
     }
 

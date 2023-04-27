@@ -110,7 +110,8 @@ public class AccountController {
     @GetMapping("/accountLog/{id}")
     public List<String> getAccountLogListById(@PathVariable String id) {
         // redisTemplate.opsForList().range(RedisKeyConstant.ACCOUNT_LOG_KEY + id, 0, -1);
-        return logService.list(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusinessId, id).eq(LogDO::getBusiness, BusinessType.ACCOUNT.toString()))
+        return logService.list(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusinessId, id)
+                        .eq(LogDO::getBusiness, BusinessType.ACCOUNT.toString()).orderByDesc(LogDO::getLogTime).orderByDesc(LogDO::getId))
                 .stream().map(LogDO::getMessage).collect(Collectors.toList());
     }
 
@@ -119,7 +120,8 @@ public class AccountController {
     public List<String> getGroupLogListById(@PathVariable String id) {
         // redisTemplate.opsForList().range(RedisKeyConstant.GROUP_LOG_KEY + id, 0, -1);
 
-        return logService.list(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusinessId, id).eq(LogDO::getBusiness, BusinessType.GROUP.toString()))
+        return logService.list(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusinessId, id)
+                        .eq(LogDO::getBusiness, BusinessType.GROUP.toString()).orderByDesc(LogDO::getLogTime).orderByDesc(LogDO::getId))
                 .stream().map(LogDO::getMessage).collect(Collectors.toList());
 
     }

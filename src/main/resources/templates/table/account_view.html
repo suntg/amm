@@ -628,7 +628,7 @@
                                 });
                             }
                         });
-                        this.onSubmit();
+                        this.listNeMX();
                     })
                     .catch(function (error) {
                         loading.close();
@@ -703,7 +703,7 @@
                                         message: response.data.message,
                                         type: 'success'
                                     });
-                                    that.onSubmit();
+                                    that.listNeMX();
                                 } else {
                                     that.$message({
                                         showClose: true,
@@ -931,7 +931,7 @@
                                         message: response.data.message,
                                         type: 'success'
                                     });
-                                    that.onSubmit();
+                                    that.listNeMX();
                                 } else {
                                     that.$message({
                                         showClose: true,
@@ -966,7 +966,7 @@
                                 message: response.data.message,
                                 type: 'success'
                             });
-                            that.onSubmit();
+                            that.listNeMX();
                         } else {
                             that.$message({
                                 showClose: true,
@@ -1001,7 +1001,7 @@
                                 message: response.data.message,
                                 type: 'success'
                             });
-                            that.onSubmit();
+                            that.listNeMX();
                         } else {
                             that.$message({
                                 showClose: true,
@@ -1121,7 +1121,7 @@
 
         },
         mounted() {
-            this.onSubmit();
+            this.listNeMX();
         }
     })
 </script>

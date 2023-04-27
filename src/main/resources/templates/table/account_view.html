@@ -91,6 +91,7 @@
                                             :on-preview="handlePreview"
                                             :on-remove="handleRemove"
                                             :on-success="handleSuccess"
+                                            :on-error="handleError"
                                             :before-remove="beforeRemove"
                                             :file-list="fileList"
                                             :auto-upload="false">
@@ -587,7 +588,20 @@
                         message: response.message,
                         type: 'success'
                     });
-                    this.onSubmit();
+                    this.listNeMX();
+                    // this.onSubmit();
+
+                }
+            },
+            handleError(response, file, fileList) {
+                    this.$message({
+                        showClose: true,
+                        offset: 250,
+                        message: response.message,
+                        type: 'success'
+                    });
+                    // this.onSubmit();
+                    this.listNeMX();
                 }
             },
             handlePreview(file) {

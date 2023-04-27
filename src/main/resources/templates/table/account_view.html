@@ -111,8 +111,7 @@
                                 >
                                     <tbody>
                                     <template>
-                                        <el-scrollbar style="height: 900px;"  :thumb-size="70">
-                                        <el-table :data="accounts" border style="width: 100%" ref="table" row-key="id" @cell-dblclick="handleEdit">
+                                        <el-table :data="accounts" border style="width: 100%" ref="table" row-key="id" @cell-dblclick="handleEdit" height="900">
                                             <!--                                            <el-table-column type="selection" width="55" :reserve-selection="true">-->
                                             <!--                                            </el-table-column>-->
 
@@ -127,10 +126,10 @@
                                             </el-table-column>
                                             <el-table-column prop="title" label="身份" align="center" width="50">
                                             </el-table-column>
-                                            <el-table-column prop="email" align="center" label="Email">
+                                            <el-table-column prop="email" align="center" label="Email" :width="flexWidth('email',accounts,'最新日志Email')">
 
                                             </el-table-column>
-                                            <el-table-column prop="payme" align="center" label="PayMe链接">
+                                            <el-table-column prop="payme" align="center" label="PayMe链接" :width="flexWidth('payme',accounts,'PayMe链接')">
 
                                             </el-table-column>
                                             <el-table-column prop="balance" align="center" label="余额" width="70">
@@ -153,7 +152,7 @@
                                             <el-table-column prop="succMoney" align="center" label="转出总额" width="80">
                                             </el-table-column>
 
-                                            <el-table-column prop="recentLog" align="center" label="最新日志">
+                                            <el-table-column prop="recentLog" align="center" label="最新日志" :width="flexWidth('recentLog',accounts,'最新日志')">
                                             </el-table-column>
 
                                             <!-- <el-table-column prop="switchip" label="IP">
@@ -162,7 +161,7 @@
                                             </el-table-column> -->
                                             <!-- <el-table-column prop="affiliation" label="所属" align="center">
                                             </el-table-column>-->
-                                            <el-table-column prop="batch" label="批次" align="center" >
+                                            <el-table-column prop="batch" label="批次" align="center" :width="flexWidth('batch',accounts,'批次')">
                                             </el-table-column>
                                             <el-table-column prop="status" label="状态" align="center" width="50">
                                             </el-table-column>
@@ -171,7 +170,7 @@
                                             </el-table-column>
                                             <el-table-column prop="remark" label="备注" align="center">
                                             </el-table-column>
-                                            <el-table-column label="操作" align="center">
+                                            <el-table-column label="操作" align="center"  width="300">
                                                 <template slot-scope="scope">
                                                     <el-button type="success" size="mini" @click="showAccountLog(scope)">
                                                         账号Log
@@ -185,7 +184,6 @@
                                                 </template>
                                             </el-table-column>
                                         </el-table>
-                                        </el-scrollbar>
 
                                         <el-dialog title="账号添加" :visible.sync="dialogVisible" width="30%">
                                             <el-form ref="newAccount" :model="newAccount" label-width="120px" :rules="rules">
@@ -1075,6 +1073,52 @@
                     return row.firstTime.replace(/T/g, ' ').replace(/.[\d]{3}Z/, ' ').slice(0,16);
                 }
             },
+
+            /**
+             * flexWidth
+             * @param prop 每列的prop 可传''
+             * @param tableData 表格数据
+             * @param title 标题长内容短的，传标题  可不传
+             * @param num 列中有标签等加的富余量
+             * @returns 列的宽度
+             * 注：prop,title有一个必传
+             */
+            flexWidth(prop, tableData, title, num = 0) {
+                if (tableData.length === 0 ) {//表格没数据不做处理
+                    return;
+                }
+                let flexWidth = 0;//初始化表格列宽
+                let columnContent = '';//占位最宽的内容
+                let canvas = document.createElement("canvas");
+                let context = canvas.getContext("2d");
+                context.font = "14px Microsoft YaHei";
+                if ((prop === '') && title) {//标题长内容少的，取标题的值,
+                    columnContent = title
+                } else {// 获取该列中占位最宽的内容
+                    let index = 0;
+                    for (let i = 0; i < tableData.length; i++) {
+                        const now_temp = tableData[i][prop] + '';
+                        const max_temp = tableData[index][prop] + '';
+                        const now_temp_w = context.measureText(now_temp).width
+                        const max_temp_w = context.measureText(max_temp).width
+                        if (now_temp_w > max_temp_w) {
+                            index = i;
+                        }
+                    }
+                    columnContent = tableData[index][prop]
+                    //比较占位最宽的值跟标题、标题为空的留出四个位置
+                    const column_w = context.measureText(columnContent).width
+                    const title_w = context.measureText(title).width
+                    if (column_w < title_w) {
+                        columnContent = title || '留四个字'
+                    }
+                }
+                // 计算最宽内容的列宽
+                let width = context.measureText(columnContent);
+                flexWidth = width.width + 40 + num
+                return flexWidth + 'px';
+            }
+
         },
         mounted() {
             this.onSubmit();

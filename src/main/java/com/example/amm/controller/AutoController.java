@@ -65,7 +65,7 @@ public class AutoController {
         autoInfoDTO.setUserId(user);
         autoService.setAutoLog(autoInfoDTO, msg);
         // 获取指定条件组的所有账号信息
-        List<AccountDO> accountDOList = accountService.list(new QueryWrapper<AccountDO>().lambda().gt(AccountDO::getBalance, 1)
+        List<AccountDO> accountDOList = accountService.list(new QueryWrapper<AccountDO>().lambda().ge(AccountDO::getBalance, 1)
                 .gt(AccountDO::getGroup, 2));
 
         List<Integer> groupList = new ArrayList<>(); // 定义所有编组
@@ -182,7 +182,7 @@ public class AutoController {
         if ("MX".equals(doParamUpper)) {
             // 寻找 > 1的  M号
             List<AccountDO> accountDOList = accountService.list(
-                    new QueryWrapper<AccountDO>().lambda().gt(AccountDO::getBalance, 1)
+                    new QueryWrapper<AccountDO>().lambda().ge(AccountDO::getBalance, 1)
                             .eq(AccountDO::getGroup, 1).eq(AccountDO::getTitle, "M").select(AccountDO::getId));
 
             // 建立From号 队列
@@ -197,7 +197,7 @@ public class AutoController {
         } else if ("AX".equals(doParamUpper)) {
             // 寻找 > 1的  A号
             List<AccountDO> accountDOList = accountService.list(
-                    new QueryWrapper<AccountDO>().lambda().gt(AccountDO::getBalance, 1)
+                    new QueryWrapper<AccountDO>().lambda().ge(AccountDO::getBalance, 1)
                             .eq(AccountDO::getTitle, "A").select(AccountDO::getGroup));
 
             // 建立From号 队列
@@ -208,9 +208,9 @@ public class AutoController {
                 }
             }
         } else if ("BX".equals(doParamUpper)) {
-            // 寻找 > 1的  A号
+            // 寻找 >= 1的  A号
             List<AccountDO> accountDOList = accountService.list(
-                    new QueryWrapper<AccountDO>().lambda().gt(AccountDO::getBalance, 1)
+                    new QueryWrapper<AccountDO>().lambda().ge(AccountDO::getBalance, 1)
                             .eq(AccountDO::getTitle, "B").select(AccountDO::getGroup));
 
             // 建立From号 队列
@@ -257,17 +257,14 @@ public class AutoController {
                     if (accountX != null) {  // 如果存在 则 跳过
                         continue; // 跳过
                     }
+                    if (!diffTime(accountF.getUpdateTime(), 24 * 3600)) {
+                        msg = "[" + from + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail()
+                                + " 不满足24小时条件！上次: " + accountF.getUpdateTime();
+                        autoService.setAutoLog(autoInfoDTO, msg);
+                        continue;
+                    }
 
                 }
-
-                if (!diffTime(accountF.getUpdateTime(), 24 * 3600)) {
-                    msg = "[" + from + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail()
-                            + " 不满足24小时条件！上次: " + accountF.getUpdateTime();
-                    autoService.setAutoLog(autoInfoDTO, msg);
-                    continue;
-                }
-
-
             }
 
             Long x = getX();

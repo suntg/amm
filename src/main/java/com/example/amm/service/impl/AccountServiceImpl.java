@@ -54,7 +54,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     @Override
     public boolean updateAccountById(Long id, AccountDO account) {
         account.setId(id);
-        if (account.getChangeTimeFlag() == 0) {
+        if (account.getChangeTimeFlag() == 1) {
             account.setUpdateTime(LocalDateTimeUtil.now());
         }
         return accountMapper.updateById(account) > 0;

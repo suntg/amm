@@ -14,6 +14,7 @@ import com.example.amm.service.LogService;
 import com.example.amm.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +32,8 @@ public class AutoServiceImpl implements AutoService {
     @Resource
     private LogService logService;
 
-    @Transactional(rollbackFor = Exception.class)
+    // @Transactional(rollbackFor = Exception.class)
+    @Async
     public void setAutoLog(AutoInfoDTO info, String logs) {
         StringBuilder value = new StringBuilder();
         value.append("[");

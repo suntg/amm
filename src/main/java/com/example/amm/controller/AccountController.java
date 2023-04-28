@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.amm.common.BizException;
 import com.example.amm.constant.BusinessType;
-import com.example.amm.constant.RedisKeyConstant;
 import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.entity.LogDO;
 import com.example.amm.domain.query.PageQuery;
@@ -60,6 +59,7 @@ public class AccountController {
         return accountService.list(new QueryWrapper<AccountDO>().lambda()
                 .ne(AccountDO::getTitle, "M")
                 .ne(AccountDO::getTitle, "X")
+                .gt(AccountDO::getGroupStatus, 0)
                 .orderByAsc(AccountDO::getGroup).orderByAsc(AccountDO::getTitle));
     }
 

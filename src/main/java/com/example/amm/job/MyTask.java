@@ -2,10 +2,8 @@ package com.example.amm.job;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.util.NumberUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.amm.CircularLinkedList;
-import com.example.amm.constant.User;
 import com.example.amm.domain.dto.AutoInfoDTO;
 import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.entity.TaskDO;
@@ -23,7 +21,6 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 import static com.example.amm.util.DateTimeUtil.diffTime;
 
@@ -58,9 +55,9 @@ public class MyTask {
         }
 
         // 如果任务已启用，则执行任务逻辑
-        // ...
-        // System.out.println("执行任务逻辑");
-        autoRun();
+        if (taskService.count(new QueryWrapper<TaskDO>().lambda().eq(TaskDO::getStatus, 9)) < 1) {
+            autoRun();
+        }
     }
 
     public Date getNextExecutionTime() {
@@ -69,7 +66,7 @@ public class MyTask {
 
 
     public void autoRun() {
-        Integer user = Integer.valueOf(User.USER_ID_25);
+        Integer user = 25;
 
         taskService.deleteAllTasks();
         String msg = "============================ Auto任务开始 ============================";
@@ -98,6 +95,10 @@ public class MyTask {
         for (Integer group : groupList) {
             autoInfoDTO.setGroup(group);
             // 发送号->有钱号
+            if (accountService.count(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)) < 3) {
+                continue;
+            }
+
             AccountDO accountF = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)
                     .orderByDesc(AccountDO::getBalance)
                     .last(" LIMIT 1 "));
@@ -124,7 +125,8 @@ public class MyTask {
 
             List<AccountDO> accountGroupList = accountService.list(new QueryWrapper<AccountDO>().lambda()
                     .eq(AccountDO::getGroup, group).ne(AccountDO::getTitle, "M")
-                    .ne(AccountDO::getTitle, "X").orderByAsc(AccountDO::getTitle));
+                    .ne(AccountDO::getTitle, "X").orderByAsc(AccountDO::getTitle).select(AccountDO::getTitle));
+
             CircularLinkedList<String> list = new CircularLinkedList<>();
             for (AccountDO accountDO : accountGroupList) {
                 list.insertWithOrder(accountDO.getTitle());
@@ -144,10 +146,8 @@ public class MyTask {
                 }
             }
 
-            AccountDO accountT = accountService.getOne(
-                    new QueryWrapper<AccountDO>().lambda()
-                            .eq(AccountDO::getGroup, group)
-                            .eq(AccountDO::getTitle, nextTitle));
+            AccountDO accountT = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)
+                    .eq(AccountDO::getTitle, nextTitle));
             //
             /*AccountDO accountT = accountService.getOne(
                     new QueryWrapper<AccountDO>().lambda()
@@ -156,22 +156,20 @@ public class MyTask {
                             .orderByAsc(AccountDO::getUpdateTime)
                             .last("limit 1"));*/
 
-
             if (accountT == null) {
                 continue;
             }
 
             // 判断转账金额
+            // Random random = new Random();
+            // int randomNumber = random.nextInt(2) + 1;
 
-            Random random = new Random();
-            int randomNumber = random.nextInt(2) + 1;
+            // int money = Math.round(NumberUtil.sub(accountF.getBalance(), String.valueOf(randomNumber)).floatValue());
+            // if (money > 12) {  // 限定最大
+            //     money = 12;
+            // }
 
-            int money = Math.round(NumberUtil.sub(accountF.getBalance(), String.valueOf(randomNumber)).floatValue());
-            if (money > 12) {  // 限定最大
-                money = 12;
-            }
-
-            if (money < 1) {
+            if (Double.parseDouble(accountF.getBalance()) < 1) {
                 msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " 金额不足！金额: " + accountF.getBalance();
                 autoService.setAutoLog(autoInfoDTO, msg);
                 continue;
@@ -188,7 +186,7 @@ public class MyTask {
             TaskDO taskDO = new TaskDO();
             taskDO.setType(taskType);
             taskDO.setGroup(group);
-            taskDO.setMoney(String.valueOf(money));
+            taskDO.setMoney(accountF.getBalance());
             taskDO.setRemark("[" + group + "] 组 -> 自动任务添加 " + LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
             taskService.save(taskDO);
 

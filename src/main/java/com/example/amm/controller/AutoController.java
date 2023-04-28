@@ -4,7 +4,6 @@ package com.example.amm.controller;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.amm.CircularLinkedList;
@@ -33,7 +32,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 @Tag(name = "Auto")
@@ -83,7 +81,7 @@ public class AutoController {
         for (Integer group : groupList) {
             autoInfoDTO.setGroup(group);
             // 发送号->有钱号
-            if (accountService.count(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)) < 2) {
+            if (accountService.count(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)) < 3) {
                 continue;
             }
 
@@ -113,16 +111,12 @@ public class AutoController {
 
             List<AccountDO> accountGroupList = accountService.list(new QueryWrapper<AccountDO>().lambda()
                     .eq(AccountDO::getGroup, group).ne(AccountDO::getTitle, "M")
-                    .ne(AccountDO::getTitle, "X").orderByAsc(AccountDO::getTitle));
-
+                    .ne(AccountDO::getTitle, "X").orderByAsc(AccountDO::getTitle).select(AccountDO::getTitle));
 
             CircularLinkedList<String> list = new CircularLinkedList<>();
             for (AccountDO accountDO : accountGroupList) {
                 list.insertWithOrder(accountDO.getTitle());
             }
-            System.out.println("//////////////////////////////");
-            list.display();
-            System.out.println("//////////////////////////////");
             List<String> s = new ArrayList<>();
             for (int i = 0; i < list.getSize(); i++) {
                 if (i == list.getSize() - 1) {
@@ -138,10 +132,8 @@ public class AutoController {
                 }
             }
 
-            AccountDO accountT = accountService.getOne(
-                    new QueryWrapper<AccountDO>().lambda()
-                            .eq(AccountDO::getGroup, group)
-                            .eq(AccountDO::getTitle, nextTitle));
+            AccountDO accountT = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)
+                    .eq(AccountDO::getTitle, nextTitle));
             //
             /*AccountDO accountT = accountService.getOne(
                     new QueryWrapper<AccountDO>().lambda()
@@ -155,15 +147,15 @@ public class AutoController {
             }
 
             // 判断转账金额
-            Random random = new Random();
-            int randomNumber = random.nextInt(2) + 1;
+            // Random random = new Random();
+            // int randomNumber = random.nextInt(2) + 1;
 
-            int money = Math.round(NumberUtil.sub(accountF.getBalance(), String.valueOf(randomNumber)).floatValue());
-            if (money > 12) {  // 限定最大
-                money = 12;
-            }
+            // int money = Math.round(NumberUtil.sub(accountF.getBalance(), String.valueOf(randomNumber)).floatValue());
+            // if (money > 12) {  // 限定最大
+            //     money = 12;
+            // }
 
-            if (money < 1) {
+            if (Double.parseDouble(accountF.getBalance()) < 1) {
                 msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " 金额不足！金额: " + accountF.getBalance();
                 autoService.setAutoLog(autoInfoDTO, msg);
                 continue;
@@ -180,7 +172,7 @@ public class AutoController {
             TaskDO taskDO = new TaskDO();
             taskDO.setType(taskType);
             taskDO.setGroup(group);
-            taskDO.setMoney(String.valueOf(money));
+            taskDO.setMoney(accountF.getBalance());
             taskDO.setRemark("[" + group + "] 组 -> 自动任务添加 " + LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
             taskService.save(taskDO);
 

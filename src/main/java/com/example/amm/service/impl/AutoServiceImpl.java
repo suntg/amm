@@ -35,7 +35,7 @@ public class AutoServiceImpl implements AutoService {
     private LogService logService;
 
     @Transactional(rollbackFor = Exception.class)
-    @Async
+    @Async("logTaskExecutor")
     public void setAutoLog(AutoInfoDTO info, String logs) {
         StringBuilder value = new StringBuilder();
         value.append("[");

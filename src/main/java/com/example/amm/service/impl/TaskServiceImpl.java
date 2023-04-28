@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.amm.constant.BusinessType;
-import com.example.amm.constant.RedisKeyConstant;
 import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.entity.LogDO;
 import com.example.amm.domain.entity.TaskDO;
@@ -25,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements TaskService {
@@ -169,21 +167,23 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteAllTasks() {
         int user = 25;
+        logService.remove(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusiness, BusinessType.AUTO_TASK.toString()));
+
         List<TaskDO> taskList = taskMapper.selectList(Wrappers.<TaskDO>lambdaQuery().select(TaskDO::getId));
         // 循环删除
         for (TaskDO task : taskList) {
-            taskMapper.deleteById(task.getId()); // SQL删除
+            // taskMapper.deleteById(task.getId()); // SQL删除
             // autopp_tasklog_
-
-            logService.remove(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusiness, BusinessType.AUTO_TASK.toString()).eq(LogDO::getBusinessId, task.getId()));
             // redisTemplate.delete(RedisKeyConstant.AUTO_TASK_LOG_KEY + task.getId());
             // Redis移除队列
             // autopp_25_taskqueue
             String key = "autopp_" + user + "_taskqueue";
             redisTemplate.opsForList().remove(key, 0, task.getId());
         }
+        taskMapper.delete(new QueryWrapper<>());
         // Redis直接删除队列Key
         // autopp_25_taskqueue
         String key = "autopp_" + user + "_taskqueue";

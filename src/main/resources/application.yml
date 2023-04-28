@@ -26,4 +26,4 @@ mybatis-plus:
     map-underscore-to-camel-case: true
 
 task:
-  cron: 0/5 * * * * ?
+  cron: 0 0 * * * ?

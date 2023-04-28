@@ -133,7 +133,7 @@ public class TaskController {
         // 清空自动日志的redis
         // autopp_25_autologs
 
-        logService.remove(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusiness, BusinessType.AUTO_USER.toString()).eq(LogDO::getBusinessId, User.USER_ID_25));
+        logService.remove(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusiness, BusinessType.AUTO_USER.toString())/*.eq(LogDO::getBusinessId, User.USER_ID_25)*/);
         // redisTemplate.delete("autopp_25_autologs");
     }
 

@@ -24,3 +24,6 @@ mybatis-plus:
   configuration:
     default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
     map-underscore-to-camel-case: true
+
+task:
+  cron: 0/5 * * * * ?

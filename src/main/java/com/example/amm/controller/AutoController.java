@@ -83,6 +83,10 @@ public class AutoController {
         for (Integer group : groupList) {
             autoInfoDTO.setGroup(group);
             // 发送号->有钱号
+            if (accountService.count(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)) < 2) {
+                continue;
+            }
+
             AccountDO accountF = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)
                     .orderByDesc(AccountDO::getBalance)
                     .last(" LIMIT 1 "));
@@ -110,10 +114,15 @@ public class AutoController {
             List<AccountDO> accountGroupList = accountService.list(new QueryWrapper<AccountDO>().lambda()
                     .eq(AccountDO::getGroup, group).ne(AccountDO::getTitle, "M")
                     .ne(AccountDO::getTitle, "X").orderByAsc(AccountDO::getTitle));
+
+
             CircularLinkedList<String> list = new CircularLinkedList<>();
             for (AccountDO accountDO : accountGroupList) {
                 list.insertWithOrder(accountDO.getTitle());
             }
+            System.out.println("//////////////////////////////");
+            list.display();
+            System.out.println("//////////////////////////////");
             List<String> s = new ArrayList<>();
             for (int i = 0; i < list.getSize(); i++) {
                 if (i == list.getSize() - 1) {

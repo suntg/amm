@@ -1104,7 +1104,11 @@
                                 });
                             }
                             this.getButtonText();
-                            this.getDeadline();
+                            setTimeout(() => {
+                                // 等待2秒后执行倒计时函数
+                                this.getDeadline();
+                            }, 2000);
+
                         })
                 } else {
                     axios.get(baseUrl + '/scheduler/enable/',
@@ -1127,11 +1131,11 @@
                                 });
                             }
                             this.getButtonText();
-
                             setTimeout(() => {
                                 // 等待2秒后执行倒计时函数
                                 this.getDeadline();
                             }, 2000);
+
 
                         })
                 }
@@ -1140,20 +1144,20 @@
 
             getDeadline() {
                 axios.get(baseUrl + '/scheduler/next-execution-time').then(res => {
-                    console.log("返回时间是： " + res.data.dat);
                     this.deadline = new Date(res.data.data)  // 得到Date并赋值给deadline
                     let endDate = new Date(this.deadline)  // deadline为结束时间Date对象
-                    console.log("endDate是： " + endDate);
                     let now = new Date()
                     let diff = endDate - now
-                    console.log("时差是： " + diff);
 
                     //如果时差为0，说明定时任务并未开启，取消下面倒计时操作
-                    if (diff <= 0 || this.schedulerStatus === false) {
+                    if (diff <= 0 || this.schedulerStatus == false) {
                         this.countdownText = '/'
+                        clearInterval(this.timer)
                         return;
+                    } else {
+                        this.startTimer();  // 启动定时器
                     }
-                    this.startTimer();  // 启动定时器
+
                 })
             },
             startTimer() {
@@ -1177,7 +1181,11 @@
         mounted() {
             this.onSubmit();
             this.getButtonText();
-            this.getDeadline();
+            setTimeout(() => {
+                // 等待2秒后执行倒计时函数
+                this.getDeadline();
+            }, 2000);
+
         }
     })
 </script>

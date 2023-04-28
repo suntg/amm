@@ -55,7 +55,7 @@ public class MyTask {
         }
 
         // 如果任务已启用，则执行任务逻辑
-        if (taskService.count(new QueryWrapper<TaskDO>().lambda().eq(TaskDO::getStatus, 9)) < 1) {
+        if (taskService.count(new QueryWrapper<TaskDO>().lambda().in(TaskDO::getStatus, 4, 6)) < 1) {
             autoRun();
         }
     }

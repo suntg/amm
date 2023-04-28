@@ -14,10 +14,13 @@ import com.example.amm.service.LogService;
 import com.example.amm.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -32,6 +35,7 @@ public class AutoServiceImpl implements AutoService {
     private LogService logService;
 
     @Transactional(rollbackFor = Exception.class)
+    @Async
     public void setAutoLog(AutoInfoDTO info, String logs) {
         StringBuilder value = new StringBuilder();
         value.append("[");
@@ -41,12 +45,17 @@ public class AutoServiceImpl implements AutoService {
         value.append(logs);
 
 
+        List<LogDO> logDOList = new ArrayList<>();
+
+
         LogDO logDO = new LogDO();
         logDO.setBusinessId(User.USER_ID_25);
         logDO.setMessage(String.valueOf(value));
         logDO.setBusiness(BusinessType.AUTO_USER.toString());
         logDO.setLogTime(LocalDateTimeUtil.now());
-        logService.save(logDO);
+
+        logDOList.add(logDO);
+        // logService.save(logDO);
 
 
         // String key = "autopp_" + info.getUserId() + "_autologs";
@@ -57,10 +66,15 @@ public class AutoServiceImpl implements AutoService {
 
         // 写入账号日志
         if (info.getId() > 0) {
-            logDO.setId(null);
-            logDO.setBusinessId(String.valueOf(info.getId()));
-            logDO.setBusiness(BusinessType.AUTO_ACCOUNT.toString());
-            logService.save(logDO);
+            // logDO.setId(null);
+            LogDO log = new LogDO();
+            log.setMessage(String.valueOf(value));
+            log.setLogTime(LocalDateTimeUtil.now());
+            log.setBusinessId(String.valueOf(info.getId()));
+            log.setBusiness(BusinessType.AUTO_ACCOUNT.toString());
+
+            logDOList.add(log);
+            // logService.save(logDO);
             // key = "autopp_accountlog_" + info.getId();
             // redisTemplate.opsForList().leftPush(key, String.valueOf(value));
             // redisTemplate.expire(key, 30, TimeUnit.DAYS);
@@ -68,10 +82,15 @@ public class AutoServiceImpl implements AutoService {
 
         // 写入Group日志
         if (info.getGroup() > 0) {
-            logDO.setId(null);
-            logDO.setBusinessId(String.valueOf(info.getGroup()));
-            logDO.setBusiness(BusinessType.AUTO_GROUP.toString());
-            logService.save(logDO);
+            // logDO.setId(null);
+            LogDO log = new LogDO();
+            log.setMessage(String.valueOf(value));
+            log.setLogTime(LocalDateTimeUtil.now());
+            log.setBusinessId(String.valueOf(info.getGroup()));
+            log.setBusiness(BusinessType.AUTO_GROUP.toString());
+
+            logDOList.add(log);
+            // logService.save(logDO);
 
             // key = "autopp_grouplog_" + info.getGroup();
             // redisTemplate.opsForList().leftPush(key, String.valueOf(value));
@@ -82,10 +101,14 @@ public class AutoServiceImpl implements AutoService {
         // 写入Task日志
         if (info.getTaskId() > 0) {  // 任务添加成功的情况下
             // 写入Task日志 -> redis
-            logDO.setId(null);
-            logDO.setBusinessId(String.valueOf(info.getTaskId()));
-            logDO.setBusiness(BusinessType.AUTO_TASK.toString());
-            logService.save(logDO);
+            // logDO.setId(null);
+            LogDO log = new LogDO();
+            log.setMessage(String.valueOf(value));
+            log.setLogTime(LocalDateTimeUtil.now());
+            log.setBusinessId(String.valueOf(info.getTaskId()));
+            log.setBusiness(BusinessType.AUTO_TASK.toString());
+            logDOList.add(log);
+            // logService.save(logDO);
 
             // key = "autopp_tasklog_" + info.getTaskId();
             // redisTemplate.opsForList().leftPush(key, String.valueOf(value));
@@ -97,6 +120,8 @@ public class AutoServiceImpl implements AutoService {
 
             taskService.update(null, wrapper);
         }
+
+        logService.saveBatch(logDOList);
     }
 
 }

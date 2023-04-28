@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
 
 @RestController
-@RequestMapping("/task")
+@RequestMapping("/scheduler")
 public class SchedulerController {
 
     private RedisTemplate<String, Object> redisTemplate;

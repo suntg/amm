@@ -166,6 +166,8 @@ public class AccountController {
             List<AccountDO> accountDOList = reader.read(new InputStreamReader(file.getInputStream()), AccountDO.class);
             for (AccountDO accountDO : accountDOList) {
                 accountDO.setDeleted(0);
+                accountDO.setStatus(1);
+                accountDO.setUpdateTime(LocalDateTimeUtil.now());
             }
             accountService.saveBatch(accountDOList);
         } catch (IOException e) {

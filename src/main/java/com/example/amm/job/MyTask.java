@@ -3,8 +3,8 @@ package com.example.amm.job;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.amm.CircularLinkedList;
 import com.example.amm.constant.User;
 import com.example.amm.domain.dto.AutoInfoDTO;
 import com.example.amm.domain.entity.AccountDO;
@@ -23,6 +23,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import static com.example.amm.util.DateTimeUtil.diffTime;
 
@@ -58,8 +59,8 @@ public class MyTask {
 
         // 如果任务已启用，则执行任务逻辑
         // ...
-        System.out.println("执行任务逻辑");
-
+        // System.out.println("执行任务逻辑");
+        autoRun();
     }
 
     public Date getNextExecutionTime() {
@@ -120,20 +121,52 @@ public class MyTask {
 
             // 接收号->最早更新号
             // TODO
-            //
+
+            List<AccountDO> accountGroupList = accountService.list(new QueryWrapper<AccountDO>().lambda()
+                    .eq(AccountDO::getGroup, group).ne(AccountDO::getTitle, "M")
+                    .ne(AccountDO::getTitle, "X").orderByAsc(AccountDO::getTitle));
+            CircularLinkedList<String> list = new CircularLinkedList<>();
+            for (AccountDO accountDO : accountGroupList) {
+                list.insertWithOrder(accountDO.getTitle());
+            }
+            List<String> s = new ArrayList<>();
+            for (int i = 0; i < list.getSize(); i++) {
+                if (i == list.getSize() - 1) {
+                    s.add(list.getNode(i) + "_" + list.getNode(0));
+                } else {
+                    s.add(list.getNode(i) + "_" + list.getNode(i + 1));
+                }
+            }
+            String nextTitle = null;
+            for (String s1 : s) {
+                if (s1.startsWith(accountF.getTitle())) {
+                    nextTitle = s1.split("_")[1];
+                }
+            }
+
             AccountDO accountT = accountService.getOne(
+                    new QueryWrapper<AccountDO>().lambda()
+                            .eq(AccountDO::getGroup, group)
+                            .eq(AccountDO::getTitle, nextTitle));
+            //
+            /*AccountDO accountT = accountService.getOne(
                     new QueryWrapper<AccountDO>().lambda()
                             .eq(AccountDO::getGroup, group)
                             .ne(AccountDO::getTitle, accountF.getTitle())
                             .orderByAsc(AccountDO::getUpdateTime)
-                            .last("limit 1"));
+                            .last("limit 1"));*/
+
 
             if (accountT == null) {
                 continue;
             }
 
             // 判断转账金额
-            int money = Math.round(NumberUtil.sub(accountF.getBalance(), String.valueOf(RandomUtil.randomInt(1, 3))).floatValue());
+
+            Random random = new Random();
+            int randomNumber = random.nextInt(2) + 1;
+
+            int money = Math.round(NumberUtil.sub(accountF.getBalance(), String.valueOf(randomNumber)).floatValue());
             if (money > 12) {  // 限定最大
                 money = 12;
             }

@@ -2,13 +2,12 @@ package com.example.amm.controller;
 
 
 import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.date.TimeInterval;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.example.amm.CircularLinkedList;
+import com.example.amm.DataProcessor;
 import com.example.amm.common.BizException;
 import com.example.amm.constant.BusinessType;
 import com.example.amm.constant.User;
@@ -80,113 +79,119 @@ public class AutoController {
 
         int v = 0;
 
-        for (Integer group : groupList) {
-            autoInfoDTO.setGroup(group);
-            // 发送号->有钱号
-            if (accountService.count(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)) < 3) {
-                continue;
-            }
+        // for (Integer group : groupList) {
+        //     autoInfoDTO.setGroup(group);
+        //     // 发送号->有钱号
+        //     if (accountService.count(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)) < 3) {
+        //         continue;
+        //     }
+        //
+        //     AccountDO accountF = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)
+        //             .orderByDesc(AccountDO::getBalance)
+        //             .last(" LIMIT 1 "));
+        //     if (accountF == null) {
+        //         continue;
+        //     }
+        //
+        //     int ht = 24;
+        //
+        //     autoInfoDTO.setId(accountF.getId());
+        //     // 进行时间差值判断
+        //     if (!diffTime(accountF.getUpdateTime(), ht * 60 * 60)) {
+        //
+        //         msg = "[" + autoInfoDTO.getGroup() + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail()
+        //                 + " 不满足" + ht + "小时条件！上次: " + accountF.getUpdateTime();
+        //         autoService.setAutoLog(autoInfoDTO, msg);
+        //         continue;
+        //     }
+        //
+        //     // 符合条件的继续执行
+        //
+        //     // 接收号->最早更新号
+        //     // TODO
+        //
+        //     List<AccountDO> accountGroupList = accountService.list(new QueryWrapper<AccountDO>().lambda()
+        //             .eq(AccountDO::getGroup, group).ne(AccountDO::getTitle, "M")
+        //             .ne(AccountDO::getTitle, "X").orderByAsc(AccountDO::getTitle).select(AccountDO::getTitle));
+        //
+        //     CircularLinkedList<String> list = new CircularLinkedList<>();
+        //     for (AccountDO accountDO : accountGroupList) {
+        //         list.insertWithOrder(accountDO.getTitle());
+        //     }
+        //     List<String> s = new ArrayList<>();
+        //     for (int i = 0; i < list.getSize(); i++) {
+        //         if (i == list.getSize() - 1) {
+        //             s.add(list.getNode(i) + "_" + list.getNode(0));
+        //         } else {
+        //             s.add(list.getNode(i) + "_" + list.getNode(i + 1));
+        //         }
+        //     }
+        //     String nextTitle = null;
+        //     for (String s1 : s) {
+        //         if (s1.startsWith(accountF.getTitle())) {
+        //             nextTitle = s1.split("_")[1];
+        //         }
+        //     }
+        //
+        //     AccountDO accountT = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)
+        //             .eq(AccountDO::getTitle, nextTitle));
+        //     //
+        //     /*AccountDO accountT = accountService.getOne(
+        //             new QueryWrapper<AccountDO>().lambda()
+        //                     .eq(AccountDO::getGroup, group)
+        //                     .ne(AccountDO::getTitle, accountF.getTitle())
+        //                     .orderByAsc(AccountDO::getUpdateTime)
+        //                     .last("limit 1"));*/
+        //
+        //     if (accountT == null) {
+        //         continue;
+        //     }
+        //
+        //     // 判断转账金额
+        //     // Random random = new Random();
+        //     // int randomNumber = random.nextInt(2) + 1;
+        //
+        //     // int money = Math.round(NumberUtil.sub(accountF.getBalance(), String.valueOf(randomNumber)).floatValue());
+        //     // if (money > 12) {  // 限定最大
+        //     //     money = 12;
+        //     // }
+        //
+        //     if (Double.parseDouble(accountF.getBalance()) < 1) {
+        //         msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " 金额不足！金额: " + accountF.getBalance();
+        //         autoService.setAutoLog(autoInfoDTO, msg);
+        //         continue;
+        //     }
+        //
+        //     String taskType = accountF.getTitle() + accountT.getTitle();
+        //
+        //     if (taskType.length() != 2) {
+        //         msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " Type类型不符！Type: " + taskType;
+        //         autoService.setAutoLog(autoInfoDTO, msg);
+        //         continue;
+        //     }
+        //
+        //     TaskDO taskDO = new TaskDO();
+        //     taskDO.setType(taskType);
+        //     taskDO.setGroup(group);
+        //     taskDO.setMoney(accountF.getBalance());
+        //     taskDO.setRemark("[" + group + "] 组 -> 自动任务添加 " + LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
+        //     taskService.save(taskDO);
+        //
+        //
+        //     msg = "[" + group + "] 组 -> 任务 => [" + taskType + "] =>  金额：[" + taskDO.getMoney() + "] -> Auto添加完成！";
+        //     autoInfoDTO.setTaskId(taskDO.getId());
+        //     autoService.setAutoLog(autoInfoDTO, msg);
+        //
+        //     v = v + 1;
+        // }
 
-            AccountDO accountF = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)
-                    .orderByDesc(AccountDO::getBalance)
-                    .last(" LIMIT 1 "));
-            if (accountF == null) {
-                continue;
-            }
-
-            int ht = 24;
-
-            autoInfoDTO.setId(accountF.getId());
-            // 进行时间差值判断
-            if (!diffTime(accountF.getUpdateTime(), ht * 60 * 60)) {
-
-                msg = "[" + autoInfoDTO.getGroup() + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail()
-                        + " 不满足" + ht + "小时条件！上次: " + accountF.getUpdateTime();
-                autoService.setAutoLog(autoInfoDTO, msg);
-                continue;
-            }
-
-            // 符合条件的继续执行
-
-            // 接收号->最早更新号
-            // TODO
-
-            List<AccountDO> accountGroupList = accountService.list(new QueryWrapper<AccountDO>().lambda()
-                    .eq(AccountDO::getGroup, group).ne(AccountDO::getTitle, "M")
-                    .ne(AccountDO::getTitle, "X").orderByAsc(AccountDO::getTitle).select(AccountDO::getTitle));
-
-            CircularLinkedList<String> list = new CircularLinkedList<>();
-            for (AccountDO accountDO : accountGroupList) {
-                list.insertWithOrder(accountDO.getTitle());
-            }
-            List<String> s = new ArrayList<>();
-            for (int i = 0; i < list.getSize(); i++) {
-                if (i == list.getSize() - 1) {
-                    s.add(list.getNode(i) + "_" + list.getNode(0));
-                } else {
-                    s.add(list.getNode(i) + "_" + list.getNode(i + 1));
-                }
-            }
-            String nextTitle = null;
-            for (String s1 : s) {
-                if (s1.startsWith(accountF.getTitle())) {
-                    nextTitle = s1.split("_")[1];
-                }
-            }
-
-            AccountDO accountT = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)
-                    .eq(AccountDO::getTitle, nextTitle));
-            //
-            /*AccountDO accountT = accountService.getOne(
-                    new QueryWrapper<AccountDO>().lambda()
-                            .eq(AccountDO::getGroup, group)
-                            .ne(AccountDO::getTitle, accountF.getTitle())
-                            .orderByAsc(AccountDO::getUpdateTime)
-                            .last("limit 1"));*/
-
-            if (accountT == null) {
-                continue;
-            }
-
-            // 判断转账金额
-            // Random random = new Random();
-            // int randomNumber = random.nextInt(2) + 1;
-
-            // int money = Math.round(NumberUtil.sub(accountF.getBalance(), String.valueOf(randomNumber)).floatValue());
-            // if (money > 12) {  // 限定最大
-            //     money = 12;
-            // }
-
-            if (Double.parseDouble(accountF.getBalance()) < 1) {
-                msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " 金额不足！金额: " + accountF.getBalance();
-                autoService.setAutoLog(autoInfoDTO, msg);
-                continue;
-            }
-
-            String taskType = accountF.getTitle() + accountT.getTitle();
-
-            if (taskType.length() != 2) {
-                msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " Type类型不符！Type: " + taskType;
-                autoService.setAutoLog(autoInfoDTO, msg);
-                continue;
-            }
-
-            TaskDO taskDO = new TaskDO();
-            taskDO.setType(taskType);
-            taskDO.setGroup(group);
-            taskDO.setMoney(accountF.getBalance());
-            taskDO.setRemark("[" + group + "] 组 -> 自动任务添加 " + LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
-            taskService.save(taskDO);
-
-
-            msg = "[" + group + "] 组 -> 任务 => [" + taskType + "] =>  金额：[" + taskDO.getMoney() + "] -> Auto添加完成！";
-            autoInfoDTO.setTaskId(taskDO.getId());
-            autoService.setAutoLog(autoInfoDTO, msg);
-
-            v = v + 1;
+        try {
+            DataProcessor processor = new DataProcessor(groupList, 50, autoInfoDTO, autoService, taskService, accountService); // 每批次查询 100 条数据
+            v = processor.process();
+        } catch (InterruptedException e) {
+            log.error("批次生成线程异常:{}", ExceptionUtil.stacktraceToString(e));
+            throw new BizException("批次生成线程异常");
         }
-
-
         autoInfoDTO.setId(0L);
         autoInfoDTO.setGroup(0);
         autoInfoDTO.setTaskId(0L);

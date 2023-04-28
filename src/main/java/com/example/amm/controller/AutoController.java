@@ -81,7 +81,7 @@ public class AutoController {
 
         for (Integer group : groupList) {
             autoInfoDTO.setGroup(group);
-
+            // 发送号->有钱号
             AccountDO accountF = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)
                     .orderByDesc(AccountDO::getBalance)
                     .last(" LIMIT 1 "));
@@ -92,6 +92,7 @@ public class AutoController {
             int ht = 24;
 
             autoInfoDTO.setId(accountF.getId());
+            // 进行时间差值判断
             if (!diffTime(accountF.getUpdateTime(), ht * 60 * 60)) {
 
                 msg = "[" + autoInfoDTO.getGroup() + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail()
@@ -100,10 +101,11 @@ public class AutoController {
                 continue;
             }
 
-            // 符合条件的继续执行/////////////////////
+            // 符合条件的继续执行
 
             // 接收号->最早更新号
-
+            // TODO
+            //
             AccountDO accountT = accountService.getOne(
                     new QueryWrapper<AccountDO>().lambda()
                             .eq(AccountDO::getGroup, group)
@@ -112,27 +114,24 @@ public class AutoController {
                             .last("limit 1"));
 
             if (accountT == null) {
-                continue; // Skip to next group
+                continue;
             }
 
-            // Calculate task amount based on balance of first account
+            // 判断转账金额
             int money = Math.round(NumberUtil.sub(accountF.getBalance(), String.valueOf(RandomUtil.randomInt(1, 3))).floatValue());
             if (money > 12) {  // 限定最大
                 money = 12;
             }
 
-            if (money < 1) { // Amount is less than 1
-                // Log message and skip to next group
+            if (money < 1) {
                 msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " 金额不足！金额: " + accountF.getBalance();
                 autoService.setAutoLog(autoInfoDTO, msg);
                 continue;
             }
 
-            // Set task type
             String taskType = accountF.getTitle() + accountT.getTitle();
 
-            if (taskType.length() != 2) { // Type length is not 2
-                // Log message and skip to next group
+            if (taskType.length() != 2) {
                 msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " Type类型不符！Type: " + taskType;
                 autoService.setAutoLog(autoInfoDTO, msg);
                 continue;

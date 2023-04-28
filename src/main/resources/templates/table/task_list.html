@@ -38,6 +38,23 @@
         .listView .el-table .el-table__header-wrapper thead tr th {
             white-space: nowrap!important;
         }
+        .box-card {
+            width: 50px;
+            flex: 1;
+            margin-left: 10px;
+        }
+
+        .parent {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 40%;
+        }
+
+        .button {
+            flex: 1;
+            width: 50px;
+        }
 
     </style>
     <div th:include="common :: commonheader"></div>
@@ -82,15 +99,19 @@
 
                         <div class="panel-body">
                             <div class="adv-table editable-table el-table__wrapper">
-                                <div style="margin-bottom:25px;">
+                                <div style="margin-bottom:25px;" class="parent">
 
-                                    <el-button type="primary" @click="showAddTask">添加任务</el-button>
+                                    <el-button type="primary" @click="showAddTask" class="button">添加任务</el-button>
 
-                                    <el-button type="success" @click="showAuto" plain>Auto相关</el-button>
+                                    <el-button type="success" @click="showAuto" plain class="button">Auto相关</el-button>
 
-                                    <el-button type="info" @click="executeAllTask" plain>一键执行</el-button>
+                                    <el-button type="info" @click="executeAllTask" plain class="button">一键执行</el-button>
 
-                                    <el-button type="warning" @click="delSucTask" plain>清除完成</el-button>
+                                    <el-button type="warning" @click="delSucTask" plain class="button">清除完成</el-button>
+
+                                    <el-card class="box-card">
+                                        <span style="font-weight: bold;text-align: center;">{{ countdownText }}</span>
+                                    </el-card>
                                 </div>
 
                                 <table class="table table-striped table-hover table-bordered"
@@ -412,7 +433,9 @@
                 },
                 originalTask:{},
                 schedulerStatus: '',
-
+                countdownText: '',
+                timer: '',
+                deadline: '',
 
 
         }
@@ -1051,7 +1074,6 @@
             getButtonText() {
                 // 请求后端接口
                 axios.get(baseUrl + '/scheduler/status/').then(response => {
-                    console.log("按钮文字 " + response.data.data);
                     if (response.data.data == true) {
                         this.schedulerStatus = true;
                     } else {
@@ -1105,12 +1127,48 @@
                             }
                         })
                 }
-
             },
+
+            getDeadline() {
+                axios.get(baseUrl + '/scheduler/next-execution-time').then(res => {
+                    console.log("返回时间是： " + res.data.dat);
+                    this.deadline = new Date(res.data.data)  // 得到Date并赋值给deadline
+                    let endDate = new Date(this.deadline)  // deadline为结束时间Date对象
+                    console.log("endDate是： " + endDate);
+                    let now = new Date()
+                    let diff = endDate - now
+                    console.log("时差是： " + diff);
+
+                    //如果时差为0，说明定时任务并未开启，取消下面倒计时操作
+                    if (diff <= 0) {
+                        this.countdownText = '/'
+                        return;
+                    }
+                    this.startTimer();  // 启动定时器
+                })
+            },
+            startTimer() {
+                this.timer = setInterval(() => {
+                    let endDate = new Date(this.deadline)  // deadline为结束时间Date对象
+                    let now = new Date()
+                    let diff = endDate - now
+                    // let day = parseInt(diff / 1000 / 60 / 60 / 24)
+                    // let hour = parseInt(diff / 1000 / 60 / 60 % 24)
+                    let minute = parseInt(diff / 1000 / 60 % 60)
+                    let second = parseInt(diff / 1000 % 60)
+                    // this.countdownText = `${day}天${hour}时${minute}分${second}秒`
+                    this.countdownText = `${minute}分${second}秒`
+                    if (diff <= 0) {   // 倒计时结束
+                        clearInterval(this.timer)  // 清除定时器
+                        this.getDeadline()  // 重新获取deadline并启动新一轮倒计时
+                    }
+                }, 1000)
+            }
         },
         mounted() {
             this.onSubmit();
             this.getButtonText();
+            this.getDeadline();
         }
     })
 </script>

@@ -1141,7 +1141,7 @@
                     console.log("时差是： " + diff);
 
                     //如果时差为0，说明定时任务并未开启，取消下面倒计时操作
-                    if (diff <= 0) {
+                    if (diff <= 0 || this.schedulerStatus === false) {
                         this.countdownText = '/'
                         return;
                     }

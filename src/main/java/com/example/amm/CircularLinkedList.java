@@ -2,18 +2,6 @@ package com.example.amm;
 
 public class CircularLinkedList<T extends Comparable<T>> {
 
-    // 定义链表节点类
-    private class Node<T> {
-        T data;
-        Node<T> next;
-
-        public Node(T data) {
-            this.data = data;
-            this.next = null;
-        }
-
-    }
-
     // 头结点
     private Node<T> head;
     // 链表长度
@@ -109,7 +97,6 @@ public class CircularLinkedList<T extends Comparable<T>> {
         System.out.println();
     }
 
-
     // 插入新节点并按照自定义排序规则排序
     public void insertWithOrder(T data) {
         Node<T> newNode = new Node<>(data);
@@ -143,5 +130,16 @@ public class CircularLinkedList<T extends Comparable<T>> {
         size++;
     }
 
+    // 定义链表节点类
+    private class Node<T> {
+        T data;
+        Node<T> next;
+
+        public Node(T data) {
+            this.data = data;
+            this.next = null;
+        }
+
+    }
 
 }

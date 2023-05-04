@@ -1,11 +1,18 @@
 package com.example.amm.controller;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.StrUtil;
+import javax.annotation.Resource;
+
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.amm.DataProcessor;
 import com.example.amm.common.BizException;
@@ -20,20 +27,15 @@ import com.example.amm.service.AccountService;
 import com.example.amm.service.AutoService;
 import com.example.amm.service.LogService;
 import com.example.amm.service.TaskService;
+
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.StrUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Tag(name = "Auto")
 @Slf4j
@@ -49,6 +51,10 @@ public class AutoController {
 
     @Resource
     private AccountService accountService;
+    @Resource
+    private RedisTemplate<String, String> redisTemplate;
+    @Resource
+    private LogService logService;
 
     @Operation(summary = "自动养号逻辑 autorun()")
     @GetMapping("/autoRun")
@@ -65,128 +71,135 @@ public class AutoController {
         autoInfoDTO.setUserId(user);
         autoService.setAutoLog(autoInfoDTO, msg);
         // 获取指定条件组的所有账号信息
-        List<AccountDO> accountDOList = accountService.list(new QueryWrapper<AccountDO>().lambda().ge(AccountDO::getBalance, 1)
-                .gt(AccountDO::getGroup, 2));
+        List<AccountDO> accountDOList = accountService
+            .list(new QueryWrapper<AccountDO>().lambda().ge(AccountDO::getBalance, 1).gt(AccountDO::getGroup, 2));
 
         List<Integer> groupList = new ArrayList<>(); // 定义所有编组
 
         for (AccountDO v : accountDOList) {
             // 判断元素是否存在于列表中，如果不存在则加入
             if (!groupList.contains(v.getGroup())) {
-                groupList.add(v.getGroup());  // 编组 作为元素加入列表
+                groupList.add(v.getGroup()); // 编组 作为元素加入列表
             }
         }
 
         int v = 0;
 
         // for (Integer group : groupList) {
-        //     autoInfoDTO.setGroup(group);
-        //     // 发送号->有钱号
-        //     if (accountService.count(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)) < 3) {
-        //         continue;
-        //     }
+        // autoInfoDTO.setGroup(group);
+        // // 发送号->有钱号
+        // if (accountService.count(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)) < 3) {
+        // continue;
+        // }
         //
-        //     AccountDO accountF = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)
-        //             .orderByDesc(AccountDO::getBalance)
-        //             .last(" LIMIT 1 "));
-        //     if (accountF == null) {
-        //         continue;
-        //     }
+        // AccountDO accountF = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup,
+        // group)
+        // .orderByDesc(AccountDO::getBalance)
+        // .last(" LIMIT 1 "));
+        // if (accountF == null) {
+        // continue;
+        // }
         //
-        //     int ht = 24;
+        // int ht = 24;
         //
-        //     autoInfoDTO.setId(accountF.getId());
-        //     // 进行时间差值判断
-        //     if (!diffTime(accountF.getUpdateTime(), ht * 60 * 60)) {
+        // autoInfoDTO.setId(accountF.getId());
+        // // 进行时间差值判断
+        // if (!diffTime(accountF.getUpdateTime(), ht * 60 * 60)) {
         //
-        //         msg = "[" + autoInfoDTO.getGroup() + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail()
-        //                 + " 不满足" + ht + "小时条件！上次: " + accountF.getUpdateTime();
-        //         autoService.setAutoLog(autoInfoDTO, msg);
-        //         continue;
-        //     }
+        // msg = "[" + autoInfoDTO.getGroup() + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail()
+        // + " 不满足" + ht + "小时条件！上次: " + accountF.getUpdateTime();
+        // autoService.setAutoLog(autoInfoDTO, msg);
+        // continue;
+        // }
         //
-        //     // 符合条件的继续执行
+        // // 符合条件的继续执行
         //
-        //     // 接收号->最早更新号
-        //     // TODO
+        // // 接收号->最早更新号
+        // // TODO
         //
-        //     List<AccountDO> accountGroupList = accountService.list(new QueryWrapper<AccountDO>().lambda()
-        //             .eq(AccountDO::getGroup, group).ne(AccountDO::getTitle, "M")
-        //             .ne(AccountDO::getTitle, "X").orderByAsc(AccountDO::getTitle).select(AccountDO::getTitle));
+        // List<AccountDO> accountGroupList = accountService.list(new QueryWrapper<AccountDO>().lambda()
+        // .eq(AccountDO::getGroup, group).ne(AccountDO::getTitle, "M")
+        // .ne(AccountDO::getTitle, "X").orderByAsc(AccountDO::getTitle).select(AccountDO::getTitle));
         //
-        //     CircularLinkedList<String> list = new CircularLinkedList<>();
-        //     for (AccountDO accountDO : accountGroupList) {
-        //         list.insertWithOrder(accountDO.getTitle());
-        //     }
-        //     List<String> s = new ArrayList<>();
-        //     for (int i = 0; i < list.getSize(); i++) {
-        //         if (i == list.getSize() - 1) {
-        //             s.add(list.getNode(i) + "_" + list.getNode(0));
-        //         } else {
-        //             s.add(list.getNode(i) + "_" + list.getNode(i + 1));
-        //         }
-        //     }
-        //     String nextTitle = null;
-        //     for (String s1 : s) {
-        //         if (s1.startsWith(accountF.getTitle())) {
-        //             nextTitle = s1.split("_")[1];
-        //         }
-        //     }
+        // CircularLinkedList<String> list = new CircularLinkedList<>();
+        // for (AccountDO accountDO : accountGroupList) {
+        // list.insertWithOrder(accountDO.getTitle());
+        // }
+        // List<String> s = new ArrayList<>();
+        // for (int i = 0; i < list.getSize(); i++) {
+        // if (i == list.getSize() - 1) {
+        // s.add(list.getNode(i) + "_" + list.getNode(0));
+        // } else {
+        // s.add(list.getNode(i) + "_" + list.getNode(i + 1));
+        // }
+        // }
+        // String nextTitle = null;
+        // for (String s1 : s) {
+        // if (s1.startsWith(accountF.getTitle())) {
+        // nextTitle = s1.split("_")[1];
+        // }
+        // }
         //
-        //     AccountDO accountT = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)
-        //             .eq(AccountDO::getTitle, nextTitle));
-        //     //
-        //     /*AccountDO accountT = accountService.getOne(
-        //             new QueryWrapper<AccountDO>().lambda()
-        //                     .eq(AccountDO::getGroup, group)
-        //                     .ne(AccountDO::getTitle, accountF.getTitle())
-        //                     .orderByAsc(AccountDO::getUpdateTime)
-        //                     .last("limit 1"));*/
+        // AccountDO accountT = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup,
+        // group)
+        // .eq(AccountDO::getTitle, nextTitle));
+        // //
+        // /*AccountDO accountT = accountService.getOne(
+        // new QueryWrapper<AccountDO>().lambda()
+        // .eq(AccountDO::getGroup, group)
+        // .ne(AccountDO::getTitle, accountF.getTitle())
+        // .orderByAsc(AccountDO::getUpdateTime)
+        // .last("limit 1"));*/
         //
-        //     if (accountT == null) {
-        //         continue;
-        //     }
+        // if (accountT == null) {
+        // continue;
+        // }
         //
-        //     // 判断转账金额
-        //     // Random random = new Random();
-        //     // int randomNumber = random.nextInt(2) + 1;
+        // // 判断转账金额
+        // // Random random = new Random();
+        // // int randomNumber = random.nextInt(2) + 1;
         //
-        //     // int money = Math.round(NumberUtil.sub(accountF.getBalance(), String.valueOf(randomNumber)).floatValue());
-        //     // if (money > 12) {  // 限定最大
-        //     //     money = 12;
-        //     // }
+        // // int money = Math.round(NumberUtil.sub(accountF.getBalance(), String.valueOf(randomNumber)).floatValue());
+        // // if (money > 12) { // 限定最大
+        // // money = 12;
+        // // }
         //
-        //     if (Double.parseDouble(accountF.getBalance()) < 1) {
-        //         msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " 金额不足！金额: " + accountF.getBalance();
-        //         autoService.setAutoLog(autoInfoDTO, msg);
-        //         continue;
-        //     }
+        // if (Double.parseDouble(accountF.getBalance()) < 1) {
+        // msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " 金额不足！金额: " +
+        // accountF.getBalance();
+        // autoService.setAutoLog(autoInfoDTO, msg);
+        // continue;
+        // }
         //
-        //     String taskType = accountF.getTitle() + accountT.getTitle();
+        // String taskType = accountF.getTitle() + accountT.getTitle();
         //
-        //     if (taskType.length() != 2) {
-        //         msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " Type类型不符！Type: " + taskType;
-        //         autoService.setAutoLog(autoInfoDTO, msg);
-        //         continue;
-        //     }
+        // if (taskType.length() != 2) {
+        // msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " Type类型不符！Type: " +
+        // taskType;
+        // autoService.setAutoLog(autoInfoDTO, msg);
+        // continue;
+        // }
         //
-        //     TaskDO taskDO = new TaskDO();
-        //     taskDO.setType(taskType);
-        //     taskDO.setGroup(group);
-        //     taskDO.setMoney(accountF.getBalance());
-        //     taskDO.setRemark("[" + group + "] 组 -> 自动任务添加 " + LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
-        //     taskService.save(taskDO);
+        // TaskDO taskDO = new TaskDO();
+        // taskDO.setType(taskType);
+        // taskDO.setGroup(group);
+        // taskDO.setMoney(accountF.getBalance());
+        // taskDO.setRemark("[" + group + "] 组 -> 自动任务添加 " + LocalDateTimeUtil.format(LocalDateTimeUtil.now(),
+        // DatePattern.NORM_DATETIME_PATTERN));
+        // taskService.save(taskDO);
         //
         //
-        //     msg = "[" + group + "] 组 -> 任务 => [" + taskType + "] =>  金额：[" + taskDO.getMoney() + "] -> Auto添加完成！";
-        //     autoInfoDTO.setTaskId(taskDO.getId());
-        //     autoService.setAutoLog(autoInfoDTO, msg);
+        // msg = "[" + group + "] 组 -> 任务 => [" + taskType + "] => 金额：[" + taskDO.getMoney() + "] -> Auto添加完成！";
+        // autoInfoDTO.setTaskId(taskDO.getId());
+        // autoService.setAutoLog(autoInfoDTO, msg);
         //
-        //     v = v + 1;
+        // v = v + 1;
         // }
 
         try {
-            DataProcessor processor = new DataProcessor(groupList, 50, autoInfoDTO, autoService, taskService, accountService); // 每批次查询 100 条数据
+            DataProcessor processor =
+                new DataProcessor(groupList, 50, autoInfoDTO, autoService, taskService, accountService); // 每批次查询 100
+                                                                                                         // 条数据
             v = processor.process();
         } catch (InterruptedException e) {
             log.error("批次生成线程异常:{}", ExceptionUtil.stacktraceToString(e));
@@ -198,7 +211,6 @@ public class AutoController {
         msg = "============== User => [" + user + "] 自动任务完成！ 新增任务：[ " + v + " ] ==============";
         autoService.setAutoLog(autoInfoDTO, msg);
     }
-
 
     @Operation(summary = "自动养号逻辑 autoxxx($do)")
     @GetMapping("/autoXXX")
@@ -218,10 +230,10 @@ public class AutoController {
 
         List<Long> allFrom = new ArrayList<>();
         if ("MX".equals(doParamUpper)) {
-            // 寻找 > 1的  M号
-            List<AccountDO> accountDOList = accountService.list(
-                    new QueryWrapper<AccountDO>().lambda().ge(AccountDO::getBalance, 1)
-                            .eq(AccountDO::getGroup, 1).eq(AccountDO::getTitle, "M").select(AccountDO::getId));
+            // 寻找 > 1的 M号
+            List<AccountDO> accountDOList =
+                accountService.list(new QueryWrapper<AccountDO>().lambda().ge(AccountDO::getBalance, 1)
+                    .eq(AccountDO::getGroup, 1).eq(AccountDO::getTitle, "M").select(AccountDO::getId));
 
             // 建立From号 队列
             for (AccountDO account : accountDOList) {
@@ -231,12 +243,10 @@ public class AutoController {
                 }
             }
 
-
         } else if ("AX".equals(doParamUpper)) {
-            // 寻找 > 1的  A号
-            List<AccountDO> accountDOList = accountService.list(
-                    new QueryWrapper<AccountDO>().lambda().ge(AccountDO::getBalance, 1)
-                            .eq(AccountDO::getTitle, "A").select(AccountDO::getGroup));
+            // 寻找 > 1的 A号
+            List<AccountDO> accountDOList = accountService.list(new QueryWrapper<AccountDO>().lambda()
+                .ge(AccountDO::getBalance, 1).eq(AccountDO::getTitle, "A").select(AccountDO::getGroup));
 
             // 建立From号 队列
             for (AccountDO account : accountDOList) {
@@ -246,10 +256,9 @@ public class AutoController {
                 }
             }
         } else if ("BX".equals(doParamUpper)) {
-            // 寻找 >= 1的  A号
-            List<AccountDO> accountDOList = accountService.list(
-                    new QueryWrapper<AccountDO>().lambda().ge(AccountDO::getBalance, 1)
-                            .eq(AccountDO::getTitle, "B").select(AccountDO::getGroup));
+            // 寻找 >= 1的 A号
+            List<AccountDO> accountDOList = accountService.list(new QueryWrapper<AccountDO>().lambda()
+                .ge(AccountDO::getBalance, 1).eq(AccountDO::getTitle, "B").select(AccountDO::getGroup));
 
             // 建立From号 队列
             for (AccountDO account : accountDOList) {
@@ -267,7 +276,7 @@ public class AutoController {
                 if ("AX".equals(doParamUpper)) {
                     // 发送号
                     AccountDO accountTmp = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
-                            .eq(AccountDO::getGroup, from).eq(AccountDO::getTitle, "A"));
+                        .eq(AccountDO::getGroup, from).eq(AccountDO::getTitle, "A"));
                     if (accountTmp == null) {
                         continue; // 跳过
                     }
@@ -275,15 +284,15 @@ public class AutoController {
 
                     // 确保该组不存在 B
                     AccountDO accountX = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
-                            .eq(AccountDO::getGroup, from).eq(AccountDO::getTitle, "B").select(AccountDO::getId));
-                    if (accountX != null) {  // 如果存在 则 跳过
+                        .eq(AccountDO::getGroup, from).eq(AccountDO::getTitle, "B").select(AccountDO::getId));
+                    if (accountX != null) { // 如果存在 则 跳过
                         continue; // 跳过
                     }
                 }
                 if ("BX".equals(doParamUpper)) {
                     // 发送号
                     AccountDO accountTmp = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
-                            .eq(AccountDO::getGroup, from).eq(AccountDO::getTitle, "B"));
+                        .eq(AccountDO::getGroup, from).eq(AccountDO::getTitle, "B"));
                     if (accountTmp == null) {
                         continue; // 跳过
                     }
@@ -291,13 +300,13 @@ public class AutoController {
 
                     // 确保该组不存在 C
                     AccountDO accountX = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
-                            .eq(AccountDO::getGroup, from).eq(AccountDO::getTitle, "C").select(AccountDO::getId));
-                    if (accountX != null) {  // 如果存在 则 跳过
+                        .eq(AccountDO::getGroup, from).eq(AccountDO::getTitle, "C").select(AccountDO::getId));
+                    if (accountX != null) { // 如果存在 则 跳过
                         continue; // 跳过
                     }
                     if (!diffTime(accountF.getUpdateTime(), 24 * 3600)) {
                         msg = "[" + from + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail()
-                                + " 不满足24小时条件！上次: " + accountF.getUpdateTime();
+                            + " 不满足24小时条件！上次: " + accountF.getUpdateTime();
                         autoService.setAutoLog(autoInfoDTO, msg);
                         continue;
                     }
@@ -308,14 +317,9 @@ public class AutoController {
             Long x = getX();
             if (x == 0) {
                 // 写入日志
-                String value = "[" +
-                        LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN) +
-                        "]" +
-                        " => " +
-                        "[没有X号了] -> Auto" +
-                        doParamUpper +
-                        "任务！";
-
+                String value =
+                    "[" + LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN) + "]"
+                        + " => " + "[没有X号了] -> Auto" + doParamUpper + "任务！";
 
                 LogDO logDO = new LogDO();
                 logDO.setBusinessId(User.USER_ID_25);
@@ -329,7 +333,6 @@ public class AutoController {
                 // redisTemplate.expire(key, 30, TimeUnit.DAYS);
                 return;
             }
-
 
             // 符合条件的继续执行/////////////////////
             // 任务信息
@@ -345,13 +348,15 @@ public class AutoController {
             }
             taskDO.setMoney(String.valueOf(1));
 
-            taskDO.setRemark("[1] 组 -> 分配自动" + doParamUpper + "任务 " + LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
+            taskDO.setRemark("[1] 组 -> 分配自动" + doParamUpper + "任务 "
+                + LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
             taskService.save(taskDO);
 
             autoInfoDTO.setTaskId(taskDO.getId());
 
             // 写入日志
-            msg = "[" + taskDO.getGroup() + "] 组 -> 任务 => [" + taskDO.getType() + "] =>  金额：[" + taskDO.getMoney() + "] -> Auto" + doParamUpper + "添加完成！";
+            msg = "[" + taskDO.getGroup() + "] 组 -> 任务 => [" + taskDO.getType() + "] =>  金额：[" + taskDO.getMoney()
+                + "] -> Auto" + doParamUpper + "添加完成！";
             autoService.setAutoLog(autoInfoDTO, msg);
 
             // 增量计数
@@ -366,13 +371,6 @@ public class AutoController {
         autoService.setAutoLog(autoInfoDTO, msg);
     }
 
-
-    @Resource
-    private RedisTemplate<String, String> redisTemplate;
-
-    @Resource
-    private LogService logService;
-
     @Operation(summary = "查看自动日志 logs()")
     @GetMapping("/logs")
     public List<String> logs() {
@@ -380,10 +378,9 @@ public class AutoController {
         // String key = "autopp_" + user + "_autologs";
         // redisTemplate.opsForList().range(key, 0, -1);
         return logService.list(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusinessId, User.USER_ID_25)
-                        .eq(LogDO::getBusiness, BusinessType.AUTO_USER.toString()).orderByDesc(LogDO::getLogTime).orderByDesc(LogDO::getId))
-                .stream().map(LogDO::getMessage).collect(Collectors.toList());
+            .eq(LogDO::getBusiness, BusinessType.AUTO_USER.toString()).orderByDesc(LogDO::getLogTime)
+            .orderByDesc(LogDO::getId)).stream().map(LogDO::getMessage).collect(Collectors.toList());
     }
-
 
     private boolean diffTime(LocalDateTime time, int diff) {
         Duration between = LocalDateTimeUtil.between(time, LocalDateTimeUtil.now());
@@ -392,10 +389,8 @@ public class AutoController {
 
     private Long getX() {
         QueryWrapper<AccountDO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda().lt(AccountDO::getGroup, 3)
-                .eq(AccountDO::getTitle, "X")
-                .eq(AccountDO::getStatus, 0)
-                .last("ORDER BY RAND() ASC LIMIT 1");
+        queryWrapper.lambda().lt(AccountDO::getGroup, 3).eq(AccountDO::getTitle, "X").eq(AccountDO::getStatus, 0)
+            .last("ORDER BY RAND() ASC LIMIT 1");
         AccountDO account = accountService.getOne(queryWrapper);
         if (account == null) {
             return 0L;
@@ -415,9 +410,8 @@ public class AutoController {
             throw new BizException("错误：队列空！");
         }
 
-
-        TaskDO taskDO = taskService.getOne(new QueryWrapper<TaskDO>().lambda().eq(TaskDO::getStatus, 0)
-                .eq(TaskDO::getId, task));
+        TaskDO taskDO =
+            taskService.getOne(new QueryWrapper<TaskDO>().lambda().eq(TaskDO::getStatus, 0).eq(TaskDO::getId, task));
 
         if (taskDO == null) {
             throw new BizException("错误：没有需要执行的任务[1]！");
@@ -432,24 +426,21 @@ public class AutoController {
         AccountDO fromAccount = null;
         AccountDO toAccount = null;
 
-
         if (type.length() == 2) {
             String from = type.substring(0, 1); // 取值 第一
             String to = type.substring(1); // 取值 最后
 
             fromAccount = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
-                    .eq(AccountDO::getGroup, taskDO.getGroup())
-                    .eq(AccountDO::getTitle, from)
-                    .select(AccountDO.class, info -> !info.getColumn().equals("lastlog") &&
-                            !info.getColumn().equals("remarks") && !info.getColumn().equals("create_time") &&
-                            !info.getColumn().equals("update_time") && !info.getColumn().equals("delete_time")));
+                .eq(AccountDO::getGroup, taskDO.getGroup()).eq(AccountDO::getTitle, from).select(AccountDO.class,
+                    info -> !info.getColumn().equals("lastlog") && !info.getColumn().equals("remarks")
+                        && !info.getColumn().equals("create_time") && !info.getColumn().equals("update_time")
+                        && !info.getColumn().equals("delete_time")));
 
             toAccount = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
-                    .eq(AccountDO::getGroup, taskDO.getGroup())
-                    .eq(AccountDO::getTitle, to)
-                    .select(AccountDO.class, info -> !info.getColumn().equals("lastlog") &&
-                            !info.getColumn().equals("remarks") && !info.getColumn().equals("create_time") &&
-                            !info.getColumn().equals("update_time") && !info.getColumn().equals("delete_time")));
+                .eq(AccountDO::getGroup, taskDO.getGroup()).eq(AccountDO::getTitle, to).select(AccountDO.class,
+                    info -> !info.getColumn().equals("lastlog") && !info.getColumn().equals("remarks")
+                        && !info.getColumn().equals("create_time") && !info.getColumn().equals("update_time")
+                        && !info.getColumn().equals("delete_time")));
 
         } else {
             String[] arr = type.split("->");
@@ -490,6 +481,5 @@ public class AutoController {
 
         return accountVO;
     }
-
 
 }

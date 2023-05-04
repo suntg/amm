@@ -1,27 +1,29 @@
 package com.example.amm.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.amm.common.BizException;
-import com.example.amm.common.ReturnCode;
-import com.example.amm.constant.BusinessType;
-import com.example.amm.constant.User;
-import com.example.amm.domain.entity.LogDO;
-import com.example.amm.domain.entity.TaskDO;
-import com.example.amm.domain.query.PageQuery;
-import com.example.amm.service.LogService;
-import com.example.amm.service.TaskService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.amm.common.BizException;
+import com.example.amm.common.ReturnCode;
+import com.example.amm.constant.BusinessType;
+import com.example.amm.domain.entity.LogDO;
+import com.example.amm.domain.entity.TaskDO;
+import com.example.amm.domain.query.PageQuery;
+import com.example.amm.service.LogService;
+import com.example.amm.service.TaskService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 
 @Tag(name = "Task")
 @Slf4j
@@ -33,6 +35,8 @@ public class TaskController {
     private TaskService taskService;
     @Resource
     private RedisTemplate<String, String> redisTemplate;
+    @Resource
+    private LogService logService;
 
     @Operation(summary = "分页查询 index()")
     @GetMapping("/listPage")
@@ -45,7 +49,6 @@ public class TaskController {
     public List<TaskDO> list() {
         return taskService.list(new QueryWrapper<TaskDO>().lambda().orderByDesc(TaskDO::getCreateTime));
     }
-
 
     @Operation(summary = "creat()")
     @PostMapping("/save")
@@ -64,7 +67,8 @@ public class TaskController {
     @Transactional(rollbackFor = Exception.class)
     public boolean removeTaskById(@PathVariable Long id) {
 
-        logService.remove(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusiness, BusinessType.TASK.toString()).eq(LogDO::getBusinessId, id));
+        logService.remove(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusiness, BusinessType.TASK.toString())
+            .eq(LogDO::getBusinessId, id));
 
         // redisTemplate.delete(RedisKeyConstant.TASK_LOG_KEY + id);
         return taskService.removeTaskById(id);
@@ -96,20 +100,16 @@ public class TaskController {
         taskService.uploadLog(id, log);
     }
 
-    @Resource
-    private LogService logService;
-
     @Operation(summary = "获取 log  viewlog($id)")
     @GetMapping("/log/{id}")
     public List<String> getLogListById(@PathVariable String id) {
         // redisTemplate.opsForList().range(RedisKeyConstant.TASK_LOG_KEY + id, 0, -1);
 
         return logService.list(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusinessId, id)
-                        .eq(LogDO::getBusiness, BusinessType.TASK.toString()).orderByDesc(LogDO::getLogTime).orderByDesc(LogDO::getId))
-                .stream().map(LogDO::getMessage).collect(Collectors.toList());
+            .eq(LogDO::getBusiness, BusinessType.TASK.toString()).orderByDesc(LogDO::getLogTime)
+            .orderByDesc(LogDO::getId)).stream().map(LogDO::getMessage).collect(Collectors.toList());
 
     }
-
 
     @Operation(summary = "setstatus($id,$status)")
     @PostMapping("/setStatus/{id}/{status}")
@@ -117,13 +117,11 @@ public class TaskController {
         return taskService.setTaskStatus(id, status);
     }
 
-
     @Operation(summary = "一键清空已完成任务 delsuctask()")
     @GetMapping("/delSucTask")
     public void delSucTask() {
         taskService.deleteSucTasks();
     }
-
 
     @Operation(summary = "一键清空所有任务 delalltask()")
     @GetMapping("/delAllTask")
@@ -133,10 +131,10 @@ public class TaskController {
         // 清空自动日志的redis
         // autopp_25_autologs
 
-        logService.remove(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusiness, BusinessType.AUTO_USER.toString())/*.eq(LogDO::getBusinessId, User.USER_ID_25)*/);
+        logService.remove(new QueryWrapper<LogDO>().lambda().eq(LogDO::getBusiness,
+            BusinessType.AUTO_USER.toString())/*.eq(LogDO::getBusinessId, User.USER_ID_25)*/);
         // redisTemplate.delete("autopp_25_autologs");
     }
-
 
     @Operation(summary = " gotorun($id)")
     @GetMapping("/executeTask/{id}")
@@ -149,7 +147,6 @@ public class TaskController {
     public void stopTask(@PathVariable Long id) {
         taskService.stopTask(id);
     }
-
 
     @Operation(summary = "allrun()")
     @GetMapping("/executeAllTask")
@@ -167,6 +164,4 @@ public class TaskController {
         return redisTemplate.opsForList().rightPop(key);
     }
 
-
 }
-

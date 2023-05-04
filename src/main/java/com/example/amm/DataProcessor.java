@@ -1,7 +1,12 @@
 package com.example.amm;
 
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.LocalDateTimeUtil;
+import static com.example.amm.util.DateTimeUtil.diffTime;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.amm.domain.dto.AutoInfoDTO;
 import com.example.amm.domain.entity.AccountDO;
@@ -10,29 +15,25 @@ import com.example.amm.service.AccountService;
 import com.example.amm.service.AutoService;
 import com.example.amm.service.TaskService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.example.amm.util.DateTimeUtil.diffTime;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.LocalDateTimeUtil;
 
 public class DataProcessor {
-    private List<Integer> ids; // 存放所有需要查询的 id
-    private int batchSize; // 每批次查询的数量
-    private CountDownLatch latch; // 用于控制并发的计数器
-    private AtomicInteger counter; // 记录存在的数据数量
+    private final List<Integer> ids; // 存放所有需要查询的 id
+    private final int batchSize; // 每批次查询的数量
+    private final CountDownLatch latch; // 用于控制并发的计数器
+    private final AtomicInteger counter; // 记录存在的数据数量
 
-    private AutoService autoService;
+    private final AutoService autoService;
 
-    private TaskService taskService;
+    private final TaskService taskService;
 
-    private AccountService accountService;
+    private final AccountService accountService;
 
-    private AutoInfoDTO autoInfoDTO;
+    private final AutoInfoDTO autoInfoDTO;
 
-    public DataProcessor(List<Integer> ids, int batchSize, AutoInfoDTO autoInfoDTO,
-                         AutoService autoService, TaskService taskService, AccountService accountService) {
+    public DataProcessor(List<Integer> ids, int batchSize, AutoInfoDTO autoInfoDTO, AutoService autoService,
+        TaskService taskService, AccountService accountService) {
         this.ids = ids;
         this.batchSize = batchSize;
         this.latch = new CountDownLatch(getBatchCount());
@@ -55,11 +56,13 @@ public class DataProcessor {
 
                     autoInfoDTO.setGroup(group);
                     // 发送号->有钱号
-                    if (accountService.count(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)) < 3) {
+                    if (accountService
+                        .count(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group)) < 3) {
                         continue;
                     }
 
-                    AccountDO accountF = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group).orderByDesc(AccountDO::getBalance).last(" LIMIT 1 "));
+                    AccountDO accountF = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
+                        .eq(AccountDO::getGroup, group).orderByDesc(AccountDO::getBalance).last(" LIMIT 1 "));
                     if (accountF == null) {
                         continue;
                     }
@@ -70,7 +73,8 @@ public class DataProcessor {
                     // 进行时间差值判断
                     if (!diffTime(accountF.getUpdateTime(), ht * 60 * 60)) {
 
-                        String msg = "[" + autoInfoDTO.getGroup() + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " 不满足" + ht + "小时条件！上次: " + accountF.getUpdateTime();
+                        String msg = "[" + autoInfoDTO.getGroup() + "] 组 -> 账号 [" + accountF.getTitle() + "] "
+                            + accountF.getEmail() + " 不满足" + ht + "小时条件！上次: " + accountF.getUpdateTime();
                         autoService.setAutoLog(autoInfoDTO, msg);
                         continue;
                     }
@@ -80,7 +84,9 @@ public class DataProcessor {
                     // 接收号->最早更新号
                     // TODO
 
-                    List<AccountDO> accountGroupList = accountService.list(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group).ne(AccountDO::getTitle, "M").ne(AccountDO::getTitle, "X").orderByAsc(AccountDO::getTitle).select(AccountDO::getTitle));
+                    List<AccountDO> accountGroupList = accountService.list(new QueryWrapper<AccountDO>().lambda()
+                        .eq(AccountDO::getGroup, group).ne(AccountDO::getTitle, "M").ne(AccountDO::getTitle, "X")
+                        .orderByAsc(AccountDO::getTitle).select(AccountDO::getTitle));
 
                     CircularLinkedList<String> list = new CircularLinkedList<>();
                     for (AccountDO accountDO : accountGroupList) {
@@ -101,7 +107,8 @@ public class DataProcessor {
                         }
                     }
 
-                    AccountDO accountT = accountService.getOne(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, group).eq(AccountDO::getTitle, nextTitle));
+                    AccountDO accountT = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
+                        .eq(AccountDO::getGroup, group).eq(AccountDO::getTitle, nextTitle));
                     //
                     /*AccountDO accountT = accountService.getOne(
                         new QueryWrapper<AccountDO>().lambda()
@@ -118,13 +125,15 @@ public class DataProcessor {
                     // Random random = new Random();
                     // int randomNumber = random.nextInt(2) + 1;
 
-                    // int money = Math.round(NumberUtil.sub(accountF.getBalance(), String.valueOf(randomNumber)).floatValue());
-                    // if (money > 12) {  // 限定最大
-                    //     money = 12;
+                    // int money = Math.round(NumberUtil.sub(accountF.getBalance(),
+                    // String.valueOf(randomNumber)).floatValue());
+                    // if (money > 12) { // 限定最大
+                    // money = 12;
                     // }
 
                     if (Double.parseDouble(accountF.getBalance()) < 1) {
-                        String msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " 金额不足！金额: " + accountF.getBalance();
+                        String msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail()
+                            + " 金额不足！金额: " + accountF.getBalance();
                         autoService.setAutoLog(autoInfoDTO, msg);
                         continue;
                     }
@@ -132,7 +141,8 @@ public class DataProcessor {
                     String taskType = accountF.getTitle() + accountT.getTitle();
 
                     if (taskType.length() != 2) {
-                        String msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail() + " Type类型不符！Type: " + taskType;
+                        String msg = "[" + group + "] 组 -> 账号 [" + accountF.getTitle() + "] " + accountF.getEmail()
+                            + " Type类型不符！Type: " + taskType;
                         autoService.setAutoLog(autoInfoDTO, msg);
                         continue;
                     }
@@ -141,11 +151,12 @@ public class DataProcessor {
                     taskDO.setType(taskType);
                     taskDO.setGroup(group);
                     taskDO.setMoney(accountF.getBalance());
-                    taskDO.setRemark("[" + group + "] 组 -> 自动任务添加 " + LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
+                    taskDO.setRemark("[" + group + "] 组 -> 自动任务添加 "
+                        + LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN));
                     taskService.save(taskDO);
 
-
-                    String msg = "[" + group + "] 组 -> 任务 => [" + taskType + "] =>  金额：[" + taskDO.getMoney() + "] -> Auto添加完成！";
+                    String msg =
+                        "[" + group + "] 组 -> 任务 => [" + taskType + "] =>  金额：[" + taskDO.getMoney() + "] -> Auto添加完成！";
                     autoInfoDTO.setTaskId(taskDO.getId());
                     autoService.setAutoLog(autoInfoDTO, msg);
 
@@ -166,7 +177,7 @@ public class DataProcessor {
     }
 
     private int getBatchCount() {
-        return (int) Math.ceil((double) ids.size() / batchSize);
+        return (int)Math.ceil((double)ids.size() / batchSize);
     }
 
     private boolean queryDataExists(String id) {

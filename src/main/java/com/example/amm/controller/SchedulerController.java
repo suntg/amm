@@ -1,15 +1,17 @@
 package com.example.amm.controller;
 
-import com.example.amm.job.MyTask;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
+import com.example.amm.job.MyTask;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 
 @Tag(name = "Scheduler")
 @Slf4j
@@ -17,8 +19,8 @@ import java.util.Date;
 @RequestMapping("/scheduler")
 public class SchedulerController {
 
-    private RedisTemplate<String, Object> redisTemplate;
-    private MyTask myTask;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final MyTask myTask;
 
     @Autowired
     public SchedulerController(RedisTemplate<String, Object> redisTemplate, MyTask myTask) {
@@ -29,7 +31,7 @@ public class SchedulerController {
     @GetMapping("/status")
     public Boolean getTaskStatus() {
         // 从Redis中获取任务状态
-        return (Boolean) redisTemplate.opsForValue().get("task_enabled");
+        return (Boolean)redisTemplate.opsForValue().get("task_enabled");
     }
 
     @GetMapping("/next-execution-time")

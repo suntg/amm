@@ -1,17 +1,12 @@
 package com.example.amm.converter;
 
-import com.example.amm.domain.entity.AccountDO;
-import com.example.amm.domain.entity.BankDO;
-import com.example.amm.domain.request.AccountBankCsvRequest;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
 public interface AccountBankCsvConverter {
 
     AccountBankCsvConverter INSTANCE = Mappers.getMapper(AccountBankCsvConverter.class);
-
 
     // @Mapping(source = "accountDeleteStatus", target = "accountDeleteStatus")
     // @Mapping(source = "accountGroupId", target = "groupId")
@@ -108,6 +103,5 @@ public interface AccountBankCsvConverter {
     // @Mapping(source = "bankFileHistoryPath", target = "fileHistoryPath")
     // @Mapping(source = "bankRemark", target = "remark")
     // BankDO csv2BankDO(AccountBankCsvRequest accountBankCsvRequest);
-
 
 }

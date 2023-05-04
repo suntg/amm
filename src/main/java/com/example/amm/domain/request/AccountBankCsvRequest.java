@@ -25,7 +25,6 @@ public class AccountBankCsvRequest {
     @Alias("account_unblocke_count")
     private Integer accountUnblockeCount;
 
-
     /**
      * 账号申请时间
      */
@@ -295,7 +294,6 @@ public class AccountBankCsvRequest {
      */
     @Alias("account_remark")
     private String accountRemark;
-
 
     /**
      * 默认值为:0(正常) ,1:软删除

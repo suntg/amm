@@ -1,9 +1,10 @@
 package com.example.amm.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
-import lombok.Data;
-
 import java.time.LocalDateTime;
+
+import com.baomidou.mybatisplus.annotation.*;
+
+import lombok.Data;
 
 @Data
 @TableName("t_log")

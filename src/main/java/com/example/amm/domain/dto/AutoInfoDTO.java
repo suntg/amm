@@ -1,6 +1,5 @@
 package com.example.amm.domain.dto;
 
-
 import lombok.Data;
 
 @Data

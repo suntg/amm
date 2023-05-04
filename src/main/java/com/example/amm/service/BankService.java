@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.amm.domain.entity.BankDO;
 import com.example.amm.domain.query.PageQuery;
 
+@Deprecated
 public interface BankService extends IService<BankDO> {
 
     Page<BankDO> listPage(PageQuery pageQuery);

@@ -1,9 +1,9 @@
 package com.example.amm.service;
 
+import java.util.List;
+
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.amm.domain.entity.LogDO;
-
-import java.util.List;
 
 public interface LogService extends IService<LogDO> {
 

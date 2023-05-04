@@ -1,9 +1,13 @@
 package com.example.amm.service.impl;
 
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.RandomUtil;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -16,13 +20,12 @@ import com.example.amm.domain.vo.AccountVO;
 import com.example.amm.mapper.AccountMapper;
 import com.example.amm.service.AccountService;
 import com.example.amm.service.LogService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import java.util.List;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.RandomUtil;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -33,10 +36,13 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
 
     @Resource
     private RedisTemplate<String, String> redisTemplate;
+    @Resource
+    private LogService logService;
 
     @Override
     public Page<AccountDO> listPage(PageQuery pageQuery) {
-        return this.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()), new QueryWrapper<AccountDO>().lambda()
+        return this.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()),
+            new QueryWrapper<AccountDO>().lambda()
                 // .gt(AccountDO::getGroupStatus, 0)
                 .orderByDesc(AccountDO::getGroup));
     }
@@ -69,8 +75,8 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
             result.setSuccTimes(++times);
 
             LambdaUpdateWrapper<AccountDO> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-            lambdaUpdateWrapper.eq(AccountDO::getId, id).set(AccountDO::getSuccMoney, money).set(AccountDO::getSuccTimes, times)
-                    .set(AccountDO::getUpdateTime, LocalDateTimeUtil.now());
+            lambdaUpdateWrapper.eq(AccountDO::getId, id).set(AccountDO::getSuccMoney, money)
+                .set(AccountDO::getSuccTimes, times).set(AccountDO::getUpdateTime, LocalDateTimeUtil.now());
             if (result.getFirstTime() == null) {
                 lambdaUpdateWrapper.set(AccountDO::getFirstTime, LocalDateTimeUtil.now());
             }
@@ -99,19 +105,12 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
         return accountMapper.updateByPrimaryKey(account);
     }
 
-
-    @Resource
-    private LogService logService;
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void uploadLog(Long id, String logs) {
 
-        String value = "[" +
-                LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN) +
-                "]" +
-                " => " +
-                logs;
+        String value = "[" + LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN) + "]"
+            + " => " + logs;
 
         LogDO logDO = new LogDO();
         logDO.setBusinessId(String.valueOf(id));
@@ -124,9 +123,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
         // redisTemplate.opsForList().leftPush(RedisKeyConstant.ACCOUNT_LOG_KEY + id, value);
         // redisTemplate.expire(RedisKeyConstant.ACCOUNT_LOG_KEY + id, 30, TimeUnit.DAYS);
 
-
         AccountDO accountDO = accountMapper.selectById(id);
-
 
         logDO.setId(null);
         logDO.setBusinessId(String.valueOf(accountDO.getGroup()));
@@ -134,9 +131,9 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
         logService.save(logDO);
 
         // TODO
-        // redisTemplate.opsForList().leftPush(RedisKeyConstant.GROUP_LOG_KEY + accountDO.getGroup(), String.valueOf(value));
+        // redisTemplate.opsForList().leftPush(RedisKeyConstant.GROUP_LOG_KEY + accountDO.getGroup(),
+        // String.valueOf(value));
         // redisTemplate.expire(RedisKeyConstant.GROUP_LOG_KEY + accountDO.getGroup(), 90, TimeUnit.DAYS);
-
 
         accountDO.setRecentLog(logs);
         accountMapper.updateById(accountDO);
@@ -145,8 +142,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     @Override
     public int nextGroup(int group) {
         AccountDO accountDO = accountMapper.selectOne(new QueryWrapper<AccountDO>().lambda()
-                .gt(AccountDO::getGroup, group)
-                .orderByAsc(AccountDO::getGroup).last(" LIMIT 1 "));
+            .gt(AccountDO::getGroup, group).orderByAsc(AccountDO::getGroup).last(" LIMIT 1 "));
         if (accountDO == null) {
             return group;
         }
@@ -156,15 +152,14 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     @Override
     public Long nextAccount(Long id) {
         AccountDO accountDO = accountMapper.selectById(id);
-        AccountDO next = accountMapper.selectOne(new QueryWrapper<AccountDO>().lambda()
-                .ne(AccountDO::getGroup, accountDO.getGroup())
-                .ge(AccountDO::getId, id)
-                .orderByAsc(AccountDO::getId).last(" LIMIT 1 "));
+        AccountDO next =
+            accountMapper.selectOne(new QueryWrapper<AccountDO>().lambda().ne(AccountDO::getGroup, accountDO.getGroup())
+                .ge(AccountDO::getId, id).orderByAsc(AccountDO::getId).last(" LIMIT 1 "));
         if (next == null) {
             int nextGroup = nextGroup(accountDO.getGroup());
 
             next = accountMapper.selectOne(new QueryWrapper<AccountDO>().lambda().ne(AccountDO::getGroup, nextGroup)
-                    .orderByAsc(AccountDO::getId).last(" LIMIT 1 "));
+                .orderByAsc(AccountDO::getId).last(" LIMIT 1 "));
         }
         if (next == null) {
             return null;
@@ -174,11 +169,8 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
 
     @Override
     public int getNewGroup() {
-        AccountDO account = accountMapper.selectOne(
-                new QueryWrapper<AccountDO>().lambda().gt(AccountDO::getGroup, 1)
-                        .select(AccountDO::getGroup)
-                        .orderByDesc(AccountDO::getGroup)
-                        .last("limit 1"));
+        AccountDO account = accountMapper.selectOne(new QueryWrapper<AccountDO>().lambda().gt(AccountDO::getGroup, 1)
+            .select(AccountDO::getGroup).orderByDesc(AccountDO::getGroup).last("limit 1"));
         if (account == null) {
             return 2;
         } else {
@@ -195,15 +187,16 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     @Override
     public AccountVO getAccount(Long id) {
         AccountDO accountDO = accountMapper.selectById(id);
-        List<AccountDO> accountDOList = accountMapper.selectList(new QueryWrapper<AccountDO>().lambda()
-                .eq(AccountDO::getGroup, accountDO.getGroup()));
+        List<AccountDO> accountDOList = accountMapper
+            .selectList(new QueryWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, accountDO.getGroup()));
 
         AccountVO accountVO = new AccountVO();
 
         accountVO.setCurrentAccount(accountDO);
         accountVO.setAccountDOList(accountDOList);
-        int money = Math.round(NumberUtil.sub(accountDO.getBalance(), String.valueOf(RandomUtil.randomInt(1, 3))).floatValue());
-        if (money > 15) {  // 限定最大
+        int money =
+            Math.round(NumberUtil.sub(accountDO.getBalance(), String.valueOf(RandomUtil.randomInt(1, 3))).floatValue());
+        if (money > 15) { // 限定最大
             money = 15;
         }
         accountVO.setMoney(money);

@@ -1,5 +1,9 @@
 package com.example.amm.service.impl;
 
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -7,10 +11,8 @@ import com.example.amm.domain.entity.BankDO;
 import com.example.amm.domain.query.PageQuery;
 import com.example.amm.mapper.BankMapper;
 import com.example.amm.service.BankService;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-
+@Deprecated
 @Service
 public class BankServiceImpl extends ServiceImpl<BankMapper, BankDO> implements BankService {
 
@@ -19,8 +21,8 @@ public class BankServiceImpl extends ServiceImpl<BankMapper, BankDO> implements 
 
     @Override
     public Page<BankDO> listPage(PageQuery pageQuery) {
-        return this.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()), new QueryWrapper<BankDO>()
-                .lambda().orderByDesc(BankDO::getCreateTime));
+        return this.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()),
+            new QueryWrapper<BankDO>().lambda().orderByDesc(BankDO::getCreateTime));
     }
 
     @Override

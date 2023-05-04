@@ -1,9 +1,11 @@
 package com.example.amm.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.example.amm.domain.entity.BankDO;
 import org.apache.ibatis.annotations.Mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.amm.domain.entity.BankDO;
+
+@Deprecated
 @Mapper
 public interface BankMapper extends BaseMapper<BankDO> {
     int deleteByPrimaryKey(Long id);

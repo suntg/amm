@@ -1,13 +1,15 @@
 package com.example.amm.service.impl;
 
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.amm.domain.entity.BankTypeDO;
 import com.example.amm.mapper.BankTypeMapper;
 import com.example.amm.service.BankTypeService;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-
+@Deprecated
 @Service
 public class BankTypeServiceImpl extends ServiceImpl<BankTypeMapper, BankTypeDO> implements BankTypeService {
 

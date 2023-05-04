@@ -7,7 +7,6 @@ import com.example.amm.domain.query.PageQuery;
 
 public interface TaskService extends IService<TaskDO> {
 
-
     boolean saveTask(TaskDO taskDO);
 
     boolean updateTaskById(Long id, TaskDO taskDO);
@@ -18,11 +17,9 @@ public interface TaskService extends IService<TaskDO> {
 
     Page<TaskDO> listPage(PageQuery pageQuery);
 
-
     void createQuickTask(TaskDO task);
 
     void uploadLog(Long id, String log);
-
 
     int setTaskStatus(Long id, int status);
 
@@ -32,11 +29,9 @@ public interface TaskService extends IService<TaskDO> {
 
     void deleteAllTasks();
 
-
     void updateStatus(Long id, int status);
 
+    void executeTask(Long id);
 
-    void executeTask( Long id);
-
-    void stopTask( Long id);
+    void stopTask(Long id);
 }

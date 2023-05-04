@@ -1,8 +1,15 @@
 package com.example.amm.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.LocalDateTimeUtil;
+import javax.annotation.Resource;
+
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.amm.constant.BusinessType;
 import com.example.amm.constant.User;
@@ -12,15 +19,10 @@ import com.example.amm.domain.entity.TaskDO;
 import com.example.amm.service.AutoService;
 import com.example.amm.service.LogService;
 import com.example.amm.service.TaskService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.LocalDateTimeUtil;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -44,9 +46,7 @@ public class AutoServiceImpl implements AutoService {
         value.append(" => ");
         value.append(logs);
 
-
         List<LogDO> logDOList = new ArrayList<>();
-
 
         LogDO logDO = new LogDO();
         logDO.setBusinessId(User.USER_ID_25);
@@ -57,12 +57,10 @@ public class AutoServiceImpl implements AutoService {
         logDOList.add(logDO);
         // logService.save(logDO);
 
-
         // String key = "autopp_" + info.getUserId() + "_autologs";
         //
         // redisTemplate.opsForList().leftPush(key, String.valueOf(value));
         // redisTemplate.expire(key, 30, TimeUnit.DAYS);
-
 
         // 写入账号日志
         if (info.getId() > 0) {
@@ -97,9 +95,8 @@ public class AutoServiceImpl implements AutoService {
             // redisTemplate.expire(key, 90, TimeUnit.DAYS);
         }
 
-
         // 写入Task日志
-        if (info.getTaskId() > 0) {  // 任务添加成功的情况下
+        if (info.getTaskId() > 0) { // 任务添加成功的情况下
             // 写入Task日志 -> redis
             // logDO.setId(null);
             LogDO log = new LogDO();

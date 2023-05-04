@@ -1,8 +1,13 @@
 package com.example.amm.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.LocalDateTimeUtil;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -18,12 +23,10 @@ import com.example.amm.mapper.TaskMapper;
 import com.example.amm.service.AccountService;
 import com.example.amm.service.LogService;
 import com.example.amm.service.TaskService;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import java.util.List;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.LocalDateTimeUtil;
 
 @Service
 public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements TaskService {
@@ -60,8 +63,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
 
     @Override
     public Page<TaskDO> listPage(PageQuery pageQuery) {
-        return this.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()), new QueryWrapper<TaskDO>().lambda()
-                .orderByDesc(TaskDO::getCreateTime));
+        return this.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()),
+            new QueryWrapper<TaskDO>().lambda().orderByDesc(TaskDO::getCreateTime));
     }
 
     @Override
@@ -72,11 +75,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void uploadLog(Long id, String log) {
-        String value = "[" +
-                LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN) +
-                "]" +
-                " => " +
-                log;
+        String value = "[" + LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.NORM_DATETIME_PATTERN) + "]"
+            + " => " + log;
 
         LogDO logDO = new LogDO();
         logDO.setBusinessId(String.valueOf(id));
@@ -85,14 +85,12 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
         logDO.setLogTime(LocalDateTimeUtil.now());
         logService.save(logDO);
 
-
         // TODO
         // redisTemplate.opsForList().leftPush(RedisKeyConstant.TASK_LOG_KEY + id, value);
         // redisTemplate.expire(RedisKeyConstant.TASK_LOG_KEY + id, 24, TimeUnit.HOURS);
 
         LambdaUpdateWrapper<TaskDO> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-        lambdaUpdateWrapper.eq(TaskDO::getId, id)
-                .set(TaskDO::getRemark, log);
+        lambdaUpdateWrapper.eq(TaskDO::getId, id).set(TaskDO::getRemark, log);
         taskMapper.update(null, lambdaUpdateWrapper);
     }
 
@@ -111,9 +109,9 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
             char to = type.charAt(1);
 
             fromAccount = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
-                    .eq(AccountDO::getEmail, task.getGroup()).eq(AccountDO::getTitle, from));
+                .eq(AccountDO::getEmail, task.getGroup()).eq(AccountDO::getTitle, from));
             toAccount = accountService.getOne(new QueryWrapper<AccountDO>().lambda()
-                    .eq(AccountDO::getEmail, task.getGroup()).eq(AccountDO::getTitle, to));
+                .eq(AccountDO::getEmail, task.getGroup()).eq(AccountDO::getTitle, to));
 
         } else {
             String[] arr = type.split("->");
@@ -140,12 +138,12 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
                     newGroup = 1;
                 }
                 accountService.update(new AccountDO().setGroup(newGroup).setTitle(newTitle),
-                        new UpdateWrapper<AccountDO>().lambda().eq(AccountDO::getId, toAccount.getId()));
+                    new UpdateWrapper<AccountDO>().lambda().eq(AccountDO::getId, toAccount.getId()));
 
                 // 先检查first_time == 0
-                if (toAccount.getFirstTime() == null) {  // 更新时间
-                    accountService.update(new UpdateWrapper<AccountDO>().lambda().eq(AccountDO::getId, toAccount.getId())
-                            .set(AccountDO::getFirstTime, LocalDateTimeUtil.now()));
+                if (toAccount.getFirstTime() == null) { // 更新时间
+                    accountService.update(new UpdateWrapper<AccountDO>().lambda()
+                        .eq(AccountDO::getId, toAccount.getId()).set(AccountDO::getFirstTime, LocalDateTimeUtil.now()));
                 }
             }
 
@@ -159,7 +157,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
         TaskDO taskDO = taskMapper.selectById(id);
         return taskDO.getStatus();
     }
-
 
     @Override
     public void deleteSucTasks() {
@@ -190,11 +187,11 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, TaskDO> implements 
         redisTemplate.delete(key);
     }
 
-
     @Override
     public void executeTask(Long id) {
         List<String> taskQueue = redisTemplate.opsForList().range("auto_25_taskqueue", 0, -1);
-        if (CollUtil.isEmpty(taskQueue) || (CollUtil.isNotEmpty(taskQueue) && !taskQueue.contains(String.valueOf(id)))) {
+        if (CollUtil.isEmpty(taskQueue)
+            || (CollUtil.isNotEmpty(taskQueue) && !taskQueue.contains(String.valueOf(id)))) {
             redisTemplate.opsForList().leftPush("auto_25_taskqueue", String.valueOf(id));
         }
         updateStatus(id, 0);

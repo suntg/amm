@@ -16,11 +16,9 @@ public interface AccountService extends IService<AccountDO> {
 
     boolean saveAccount(AccountDO account);
 
-
     boolean updateAccountById(Long id, AccountDO account);
 
     boolean updateMoneyAndTimesById(Long id, AccountDO account);
-
 
     int insertSelective(AccountDO account);
 
@@ -34,9 +32,7 @@ public interface AccountService extends IService<AccountDO> {
 
     Long nextAccount(Long id);
 
-
     AccountVO getAccount(Long id);
-
 
     int getNewGroup();
 

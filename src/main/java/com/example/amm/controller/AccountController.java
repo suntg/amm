@@ -73,16 +73,7 @@ public class AccountController {
         LambdaQueryWrapper<AccountDO> wrapper = new LambdaQueryWrapper<>();
         wrapper.select(AccountDO::getGroup).groupBy(AccountDO::getGroup).orderByAsc(AccountDO::getGroup);
 
-        Page<AccountDO> accountDOPage =
-            accountService.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()), wrapper);
-
-        List<AccountDO> accountDOList = accountService.list(new QueryWrapper<AccountDO>().lambda()
-            .in(AccountDO::getGroup,
-                accountDOPage.getRecords().stream().map(AccountDO::getGroup).collect(Collectors.toList()))
-            .orderByAsc(AccountDO::getGroup).orderByAsc(AccountDO::getTitle));
-
-        accountDOPage.setRecords(accountDOList);
-        return accountDOPage;
+        return getAccountDOPage(pageQuery, wrapper);
     }
 
     @Operation(summary = "listNeMXByPage")
@@ -92,6 +83,10 @@ public class AccountController {
         wrapper.select(AccountDO::getGroup).ne(AccountDO::getTitle, "M").ne(AccountDO::getTitle, "X")
             .gt(AccountDO::getGroupStatus, 0).groupBy(AccountDO::getGroup).orderByAsc(AccountDO::getGroup);
 
+        return getAccountDOPage(pageQuery, wrapper);
+    }
+
+    private Page<AccountDO> getAccountDOPage(PageQuery pageQuery, LambdaQueryWrapper<AccountDO> wrapper) {
         Page<AccountDO> accountDOPage =
             accountService.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()), wrapper);
 

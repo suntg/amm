@@ -137,7 +137,7 @@
                                     </el-input>
 
                                     <span>身份：</span>
-                                    <el-select v-model="title" placeholder="请选择">
+                                    <el-select v-model="title" placeholder="请选择" clearable>
                                         <el-option
                                                 v-for="title in titles"
                                                 :key="title"
@@ -418,7 +418,7 @@
                         </div>
                         <el-pagination
                                 background
-                                :page-sizes="[10, 20, 50, 100]"
+                                :page-sizes="[15, 20, 50, 100]"
                                 :page-size="pageSize"
                                 :current-page="pageNum"
                                 @size-change="handleSizeChange"

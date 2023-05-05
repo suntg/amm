@@ -160,9 +160,6 @@ public class DataProcessor {
                     autoInfoDTO.setTaskId(taskDO.getId());
                     autoService.setAutoLog(autoInfoDTO, msg);
 
-                    // if (exists) {
-                    // counter++;
-                    // }
                     counter.incrementAndGet();
                 }
                 latch.countDown();

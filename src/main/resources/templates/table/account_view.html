@@ -106,6 +106,8 @@
 
                                 <el-button type="warning" @click="listNeMX" plain>过滤MX</el-button>
 
+                                <el-button type="info" @click="showBalanceChange" plain>批量更新余额</el-button>
+
                                 <hr>
                                 <table class="table table-striped table-hover table-bordered"
                                        id="editable-sample"
@@ -119,8 +121,8 @@
                                                 row-key="id"
                                                 @cell-dblclick="handleEdit"
                                                 height="900">
-                                            <!--                                            <el-table-column type="selection" width="55" :reserve-selection="true">-->
-                                            <!--                                            </el-table-column>-->
+                                            <el-table-column type="selection" width="55" :reserve-selection="true">
+                                            </el-table-column>
 
                                             <el-table-column prop="id" label="ID" align="center" width="65">
                                             </el-table-column>
@@ -351,6 +353,22 @@
 
                                         </el-dialog>
 
+                                        <el-dialog title="批量更新余额" :visible.sync="batchBalanceChangeVisible" width="30%">
+
+                                            <template>
+                                                <el-form ref="batchAccount" :model="batchAccount" label-width="120px">
+
+                                                    <el-form-item label="账号余额" prop="balance">
+                                                        <el-input-number v-model="batchAccount.balance" :min="-1" ></el-input-number>
+                                                    </el-form-item>
+
+                                                </el-form>
+
+                                            </template>
+                                            <el-button type="success" @click="batchUpdateBalance()">更 新</el-button>
+                                            <el-button @click="batchBalanceChangeVisible = false">返 回</el-button>
+                                        </el-dialog>
+
                                     </template>
 
                                     </tbody>
@@ -402,6 +420,8 @@
 
 <script src="js/vue.js"></script>
 
+<script src="js/qs.min.js"></script>
+
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <!-- 引入样式 -->
 <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
@@ -441,6 +461,7 @@
                 quickVisible: false,
                 accountLogVisible: false,
                 accountEditVisible: false,
+                batchBalanceChangeVisible: false,
                 groupId: "",
                 accountId: "",
                 newAccount: {
@@ -452,6 +473,9 @@
                     switchIp: '',
                     packageNum: '',
                     remark: '',
+                },
+                batchAccount: {
+                    balance: '',
                 },
                 rules: {
                     email: [
@@ -1142,6 +1166,51 @@
                 let width = context.measureText(columnContent);
                 flexWidth = width.width + 40 + num
                 return flexWidth + 'px';
+            },
+
+            showBalanceChange() {
+
+                this.batchBalanceChangeVisible = true;
+
+            },
+
+            batchUpdateBalance() {
+                let ids = [];
+                for (let i = 0; i < this.$refs.table.selection.length; i++) {
+                    ids.push(this.$refs.table.selection[i].id);
+                }
+
+                axios.put(baseUrl + '/account/batchUpdateBalanceByIds',{}, {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {
+                            ids: ids,
+                            balance: this.batchAccount.balance
+                        },
+                        paramsSerializer: {
+                            serialize:function(params) {
+                                return Qs.stringify(params, { arrayFormat: 'repeat' })
+                            }
+                        }
+                     },
+                   ).then((response) => {
+
+                    this.$message({
+                        message: response.data.message,
+                        type: 'success'
+                    });
+
+                    if (response.data.status == 100) {
+                        this.batchBalanceChangeVisible = false;
+                        this.listNeMX();
+                    }
+
+                })
+
             }
 
         },

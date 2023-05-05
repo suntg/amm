@@ -107,6 +107,47 @@
                                 <el-button type="warning" @click="listNeMX" plain>过滤MX</el-button>
 
                                 <el-button type="info" @click="showBalanceChange" plain>批量更新余额</el-button>
+                                <div style="margin-bottom:25px;margin-top:25px;">
+                                    <span>分组：</span>
+                                    <el-input
+                                            placeholder="请输入内容"
+                                            v-model.trim="group"
+                                            clearable
+                                            @keyup.enter.native="search"
+                                            style="width:10%;margin-right:20px;"
+                                    >
+                                    </el-input>
+                                    <span>Email：</span>
+                                    <el-input
+                                            placeholder="请输入内容"
+                                            v-model.trim="email"
+                                            clearable
+                                            @keyup.enter.native="search"
+                                            style="width:10%;margin-right:20px;"
+                                    >
+                                    </el-input>
+                                    <span>天数：</span>
+                                    <el-input
+                                            placeholder="请输入内容"
+                                            v-model.trim="intervalDay"
+                                            clearable
+                                            @keyup.enter.native="search"
+                                            style="width:10%;margin-right:20px;"
+                                    >
+                                    </el-input>
+
+                                    <span>身份：</span>
+                                    <el-select v-model="title" placeholder="请选择">
+                                        <el-option
+                                                v-for="title in titles"
+                                                :key="title"
+                                                :label="title"
+                                                :value="title">
+                                        </el-option>
+                                    </el-select>
+
+                                    <el-button type="primary" @click="onSubmit">查询</el-button>
+                                </div>
 
                                 <hr>
                                 <table class="table table-striped table-hover table-bordered"
@@ -375,16 +416,16 @@
                                 </table>
                             </div>
                         </div>
-<!--                        <el-pagination-->
-<!--                                background-->
-<!--                                :page-sizes="[10, 20, 50, 100]"-->
-<!--                                :page-size="pageSize"-->
-<!--                                :current-page="pageNum"-->
-<!--                                @size-change="handleSizeChange"-->
-<!--                                @current-change="handleCurrentChange"-->
-<!--                                layout="total, sizes, prev, pager, next"-->
-<!--                                :total="total">-->
-<!--                        </el-pagination>-->
+                        <el-pagination
+                                background
+                                :page-sizes="[10, 20, 50, 100]"
+                                :page-size="pageSize"
+                                :current-page="pageNum"
+                                @size-change="handleSizeChange"
+                                @current-change="handleCurrentChange"
+                                layout="total, sizes, prev, pager, next"
+                                :total="total">
+                        </el-pagination>
                     </section>
                 </div>
             </div>
@@ -439,6 +480,11 @@
         el: '#app',
         data () {
             let data = {
+                group:'',
+                title:'',
+                intervalDay:'',
+                email:'',
+                titles:[],
                 accounts:[],
                 groupLogs:[],
                 accountLogs:[],
@@ -525,7 +571,7 @@
 
         methods: {
             onSubmit() {
-                axios.get(baseUrl + '/account/list',
+                axios.get(baseUrl + '/account/page',
                     {
                         headers: {
                             'Access-Control-Allow-Origin': '*',  //解决cors头问题
@@ -534,20 +580,24 @@
                         },
                         withCredentials: true,
                         params: {
-                            // pageNum: this.pageNum,
-                            // pageSize: this.pageSize
+                            pageNum: this.pageNum,
+                            pageSize: this.pageSize,
+                            group: this.group,
+                            title: this.title,
+                            intervalDay: this.intervalDay,
+                            email: this.email,
                         }
                     })
                     .then((response) => {
                         // console.log("responose是：" + response.data);
-                        this.accounts = response.data.data
-                        // if (response.data != null) {
-                        //     this.total = response.data.data.total
-                        // }
+                        this.accounts = response.data.data.records
+                        if (response.data != null) {
+                            this.total = response.data.data.total
+                        }
                     })
             },
             listNeMX() {
-                axios.get(baseUrl + '/account/listNeMX',
+                axios.get(baseUrl + '/account/listNeMXByPage',
                     {
                         headers: {
                             'Access-Control-Allow-Origin': '*',  //解决cors头问题
@@ -556,13 +606,13 @@
                         },
                         withCredentials: true,
                         params: {
-                            // pageNum: this.pageNum,
-                            // pageSize: this.pageSize
+                            pageNum: this.pageNum,
+                            pageSize: this.pageSize
                         }
                     })
                     .then((response) => {
                         // console.log("responose是：" + response.data);
-                        this.accounts = response.data.data
+                        this.accounts = response.data.data.records
                         if (response.data != null) {
                             this.total = response.data.data.total
                         }
@@ -1211,11 +1261,27 @@
 
                 })
 
-            }
+            },
+            findDistinctTitles() {
+                axios.get(baseUrl + '/account/findDistinctTitles',
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {}
+                    })
+                    .then((response) => {
+                        this.titles = response.data.data
+                    })
+            },
 
         },
         mounted() {
             this.listNeMX();
+            this.findDistinctTitles();
         }
     })
 </script>

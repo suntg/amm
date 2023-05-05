@@ -3,6 +3,7 @@ package com.example.amm.controller;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -12,13 +13,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.amm.common.BizException;
 import com.example.amm.constant.BusinessType;
 import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.entity.LogDO;
+import com.example.amm.domain.query.AccountPageQuery;
 import com.example.amm.domain.query.PageQuery;
 import com.example.amm.domain.vo.AccountVO;
 import com.example.amm.service.AccountService;
@@ -47,8 +51,8 @@ public class AccountController {
 
     @Operation(summary = "分页查询 index()")
     @GetMapping("listPage")
-    public Page<AccountDO> listPage(PageQuery pageQuery) {
-        return accountService.listPage(pageQuery);
+    public Page<AccountDO> listPage(PageQuery pageQuery, AccountPageQuery accountPageQuery) {
+        return accountService.listPage(pageQuery, accountPageQuery);
     }
 
     @Operation(summary = "list")
@@ -64,6 +68,43 @@ public class AccountController {
         return accountService
             .list(new QueryWrapper<AccountDO>().lambda().ne(AccountDO::getTitle, "M").ne(AccountDO::getTitle, "X")
                 .gt(AccountDO::getGroupStatus, 0).orderByAsc(AccountDO::getGroup).orderByAsc(AccountDO::getTitle));
+    }
+
+    @Operation(summary = "listByPage")
+    @GetMapping("/listByPage")
+    public Page<AccountDO> listByPage(PageQuery pageQuery) {
+        LambdaQueryWrapper<AccountDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.select(AccountDO::getGroup).groupBy(AccountDO::getGroup).orderByAsc(AccountDO::getGroup);
+
+        Page<AccountDO> accountDOPage =
+            accountService.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()), wrapper);
+
+        List<AccountDO> accountDOList = accountService.list(new QueryWrapper<AccountDO>().lambda()
+            .in(AccountDO::getGroup,
+                accountDOPage.getRecords().stream().map(AccountDO::getGroup).collect(Collectors.toList()))
+            .orderByAsc(AccountDO::getGroup).orderByAsc(AccountDO::getTitle));
+
+        accountDOPage.setRecords(accountDOList);
+        return accountDOPage;
+    }
+
+    @Operation(summary = "listNeMXByPage")
+    @GetMapping("/listNeMXByPage")
+    public Page<AccountDO> listNeMXByPage(PageQuery pageQuery) {
+        LambdaQueryWrapper<AccountDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.select(AccountDO::getGroup).ne(AccountDO::getTitle, "M").ne(AccountDO::getTitle, "X")
+            .gt(AccountDO::getGroupStatus, 0).groupBy(AccountDO::getGroup).orderByAsc(AccountDO::getGroup);
+
+        Page<AccountDO> accountDOPage =
+            accountService.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()), wrapper);
+
+        List<AccountDO> accountDOList = accountService.list(new QueryWrapper<AccountDO>().lambda()
+            .in(AccountDO::getGroup,
+                accountDOPage.getRecords().stream().map(AccountDO::getGroup).collect(Collectors.toList()))
+            .orderByAsc(AccountDO::getGroup).orderByAsc(AccountDO::getTitle));
+
+        accountDOPage.setRecords(accountDOList);
+        return accountDOPage;
     }
 
     @Operation(summary = "通过id查询 edit($id)")
@@ -191,6 +232,33 @@ public class AccountController {
     public void groupStop(@PathVariable("id") Long id) {
         accountService.update(new UpdateWrapper<AccountDO>().lambda().eq(AccountDO::getGroup, id)
             .set(AccountDO::getGroupStatus, 0).set(AccountDO::getUpdateTime, LocalDateTimeUtil.now()));
+    }
+
+    @Operation(summary = "查询所有title")
+    @GetMapping("/findDistinctTitles")
+    public List<String> findDistinctTitles() {
+        QueryWrapper<AccountDO> wrapper = new QueryWrapper<>();
+        wrapper.select("DISTINCT title").orderByAsc("title");
+        List<Map<String, Object>> maps = accountService.listMaps(wrapper);
+        return maps.stream().map(map -> (String)map.get("title")).collect(Collectors.toList());
+    }
+
+    @Operation(summary = "批量更新余额")
+    @PutMapping("/batchUpdateBalanceByIds")
+    public boolean batchUpdateBalanceByIds(@RequestParam("ids") List<Long> ids,
+        @RequestParam("balance") String balance) {
+        LambdaUpdateWrapper<AccountDO> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.in(AccountDO::getId, ids);
+        wrapper.set(AccountDO::getBalance, balance);
+        return accountService.update(wrapper);
+    }
+
+    @Operation(summary = "通过id集合查询path")
+    @GetMapping("/queryPathsByIds")
+    public List<AccountDO> queryPathsByIds(@RequestParam List<Long> ids) {
+        LambdaQueryWrapper<AccountDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.select(AccountDO::getPath, AccountDO::getId).in(AccountDO::getId, ids);
+        return accountService.list(wrapper);
     }
 
 }

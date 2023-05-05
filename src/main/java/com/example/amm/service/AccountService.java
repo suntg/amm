@@ -3,12 +3,13 @@ package com.example.amm.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.amm.domain.entity.AccountDO;
+import com.example.amm.domain.query.AccountPageQuery;
 import com.example.amm.domain.query.PageQuery;
 import com.example.amm.domain.vo.AccountVO;
 
 public interface AccountService extends IService<AccountDO> {
 
-    Page<AccountDO> listPage(PageQuery pageQuery);
+    Page<AccountDO> listPage(PageQuery pageQuery, AccountPageQuery accountPageQuery);
 
     AccountDO getById(Long id);
 

@@ -1,5 +1,7 @@
 package com.example.amm.service.impl;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -8,6 +10,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -15,6 +18,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.amm.constant.BusinessType;
 import com.example.amm.domain.entity.AccountDO;
 import com.example.amm.domain.entity.LogDO;
+import com.example.amm.domain.query.AccountPageQuery;
 import com.example.amm.domain.query.PageQuery;
 import com.example.amm.domain.vo.AccountVO;
 import com.example.amm.mapper.AccountMapper;
@@ -23,6 +27,7 @@ import com.example.amm.service.LogService;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -40,11 +45,39 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     private LogService logService;
 
     @Override
-    public Page<AccountDO> listPage(PageQuery pageQuery) {
+    public Page<AccountDO> listPage(PageQuery pageQuery, AccountPageQuery accountPageQuery) {
+        // 查询
+        LambdaQueryWrapper<AccountDO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(CharSequenceUtil.isNotBlank(accountPageQuery.getEmail()), AccountDO::getEmail,
+            accountPageQuery.getEmail());
+
+
+        if (accountPageQuery.getIntervalDay() != null && CharSequenceUtil.isNotBlank(accountPageQuery.getTitle())) {
+            LocalDateTime offset =
+                LocalDateTimeUtil.offset(LocalDateTimeUtil.now(), -accountPageQuery.getIntervalDay(), ChronoUnit.DAYS);
+            wrapper.le(AccountDO::getFirstTime, offset);
+            wrapper.eq(AccountDO::getTitle, "C");
+        }
+        if (accountPageQuery.getIntervalDay() != null && CharSequenceUtil.isBlank(accountPageQuery.getTitle())) {
+            LocalDateTime offset =
+                    LocalDateTimeUtil.offset(LocalDateTimeUtil.now(), -accountPageQuery.getIntervalDay(), ChronoUnit.DAYS);
+            wrapper.le(AccountDO::getFirstTime, offset);
+            wrapper.eq(AccountDO::getTitle, "C");
+        }
+
+
+        if (accountPageQuery.getIntervalDay() == null && CharSequenceUtil.isNotBlank(accountPageQuery.getTitle())) {
+            wrapper.eq(AccountDO::getTitle, accountPageQuery.getTitle());
+        }
+
+        wrapper.eq(CharSequenceUtil.isNotBlank(accountPageQuery.getTitle()), AccountDO::getTitle,
+            accountPageQuery.getTitle());
+
+        wrapper.ne(AccountDO::getTitle, "M").ne(AccountDO::getTitle, "X").gt(AccountDO::getGroupStatus, 0)
+            .orderByAsc(AccountDO::getGroup).orderByAsc(AccountDO::getTitle);
+
         return this.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()),
-            new QueryWrapper<AccountDO>().lambda()
-                // .gt(AccountDO::getGroupStatus, 0)
-                .orderByDesc(AccountDO::getGroup));
+            new QueryWrapper<AccountDO>().lambda().orderByDesc(AccountDO::getGroup));
     }
 
     @Override

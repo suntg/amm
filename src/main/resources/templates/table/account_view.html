@@ -146,7 +146,7 @@
                                         </el-option>
                                     </el-select>
 
-                                    <el-button type="primary" @click="onSubmit">查询</el-button>
+                                    <el-button type="primary" @click="pageQuery">查询</el-button>
                                 </div>
 
                                 <hr>
@@ -565,12 +565,37 @@
                         { required: true, message: '请填写 金额', trigger: 'blur' }
                     ]
                 },
+                condition: 1,
             }
             return data
         },
 
         methods: {
             onSubmit() {
+                this.condition = 2;
+                axios.get(baseUrl + '/account/listByPage',
+                    {
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                            'Access-Control-Allow-Credentials': 'true', //解决session问题
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' //将表单数据传递转化为form-data类型
+                        },
+                        withCredentials: true,
+                        params: {
+                            pageNum: this.pageNum,
+                            pageSize: this.pageSize,
+                        }
+                    })
+                    .then((response) => {
+                        // console.log("responose是：" + response.data);
+                        this.accounts = response.data.data.records
+                        if (response.data != null) {
+                            this.total = response.data.data.total
+                        }
+                    })
+            },
+            pageQuery() {
+                this.condition = 3;
                 axios.get(baseUrl + '/account/page',
                     {
                         headers: {
@@ -597,6 +622,7 @@
                     })
             },
             listNeMX() {
+                this.condition = 1;
                 axios.get(baseUrl + '/account/listNeMXByPage',
                     {
                         headers: {
@@ -628,11 +654,22 @@
             handleSizeChange(val) {
                 this.pageSize = val;
                 this.pageNum = 1;
-                this.onSubmit();
+                this.reFreshPage();
             },
             handleCurrentChange(val) {
                 this.pageNum = val;
-                this.onSubmit();
+                this.reFreshPage();
+            },
+            reFreshPage(){
+                if (this.condition == 1) {
+                    this.listNeMX();
+                }
+                if (this.condition == 2) {
+                    this.onSubmit();
+                }
+                if (this.condition == 3) {
+                    this.pageQuery();
+                }
             },
             timeFormatter(row, column) {
                 return this.timestampToTime(row.confirmedTimestamp);
@@ -672,7 +709,7 @@
                         message: response.message,
                         type: 'success'
                     });
-                    this.listNeMX();
+                    this.reFreshPage();
                     // this.onSubmit();
 
                 }
@@ -685,7 +722,7 @@
                         type: 'success'
                     });
                     // this.onSubmit();
-                    this.listNeMX();
+                    this.reFreshPage();
             },
             handlePreview(file) {
                 console.log(file);
@@ -727,7 +764,7 @@
                                 });
                             }
                         });
-                        this.listNeMX();
+                        this.reFreshPage();
                     })
                     .catch(function (error) {
                         loading.close();
@@ -802,7 +839,7 @@
                                         message: response.data.message,
                                         type: 'success'
                                     });
-                                    that.listNeMX();
+                                    that.reFreshPage();
                                 } else {
                                     that.$message({
                                         showClose: true,
@@ -1030,7 +1067,7 @@
                                         message: response.data.message,
                                         type: 'success'
                                     });
-                                    that.listNeMX();
+                                    that.reFreshPage();
                                 } else {
                                     that.$message({
                                         showClose: true,
@@ -1065,7 +1102,7 @@
                                 message: response.data.message,
                                 type: 'success'
                             });
-                            that.listNeMX();
+                            that.reFreshPage();
                         } else {
                             that.$message({
                                 showClose: true,
@@ -1100,7 +1137,7 @@
                                 message: response.data.message,
                                 type: 'success'
                             });
-                            that.listNeMX();
+                            that.reFreshPage();
                         } else {
                             that.$message({
                                 showClose: true,
@@ -1256,7 +1293,7 @@
 
                     if (response.data.status == 100) {
                         this.batchBalanceChangeVisible = false;
-                        this.listNeMX();
+                        this.reFreshPage();
                     }
 
                 })

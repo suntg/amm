@@ -2,7 +2,10 @@ package com.example.amm.service.impl;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -25,6 +28,7 @@ import com.example.amm.mapper.AccountMapper;
 import com.example.amm.service.AccountService;
 import com.example.amm.service.LogService;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -45,39 +49,57 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
     private LogService logService;
 
     @Override
-    public Page<AccountDO> listPage(PageQuery pageQuery, AccountPageQuery accountPageQuery) {
+    public Page<AccountDO> page(PageQuery pageQuery, AccountPageQuery accountPageQuery) {
         // 查询
         LambdaQueryWrapper<AccountDO> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(CharSequenceUtil.isNotBlank(accountPageQuery.getEmail()), AccountDO::getEmail,
+        wrapper.likeLeft(CharSequenceUtil.isNotBlank(accountPageQuery.getEmail()), AccountDO::getEmail,
             accountPageQuery.getEmail());
-
-
-        if (accountPageQuery.getIntervalDay() != null && CharSequenceUtil.isNotBlank(accountPageQuery.getTitle())) {
-            LocalDateTime offset =
-                LocalDateTimeUtil.offset(LocalDateTimeUtil.now(), -accountPageQuery.getIntervalDay(), ChronoUnit.DAYS);
-            wrapper.le(AccountDO::getFirstTime, offset);
-            wrapper.eq(AccountDO::getTitle, "C");
+        List<String> groups = new ArrayList<>();
+        if (CharSequenceUtil.isNotBlank(accountPageQuery.getGroup())) {
+            groups = Arrays.asList(accountPageQuery.getGroup().split(","));
         }
-        if (accountPageQuery.getIntervalDay() != null && CharSequenceUtil.isBlank(accountPageQuery.getTitle())) {
-            LocalDateTime offset =
-                    LocalDateTimeUtil.offset(LocalDateTimeUtil.now(), -accountPageQuery.getIntervalDay(), ChronoUnit.DAYS);
-            wrapper.le(AccountDO::getFirstTime, offset);
-            wrapper.eq(AccountDO::getTitle, "C");
-        }
-
-
-        if (accountPageQuery.getIntervalDay() == null && CharSequenceUtil.isNotBlank(accountPageQuery.getTitle())) {
-            wrapper.eq(AccountDO::getTitle, accountPageQuery.getTitle());
-        }
-
-        wrapper.eq(CharSequenceUtil.isNotBlank(accountPageQuery.getTitle()), AccountDO::getTitle,
-            accountPageQuery.getTitle());
-
+        wrapper.in(CollUtil.isNotEmpty(groups), AccountDO::getGroup, groups);
+        wrapper.groupBy(AccountDO::getGroup);
         wrapper.ne(AccountDO::getTitle, "M").ne(AccountDO::getTitle, "X").gt(AccountDO::getGroupStatus, 0)
             .orderByAsc(AccountDO::getGroup).orderByAsc(AccountDO::getTitle);
 
-        return this.page(new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize()),
-            new QueryWrapper<AccountDO>().lambda().orderByDesc(AccountDO::getGroup));
+        if (accountPageQuery.getIntervalDay() != null) {
+
+            if (CharSequenceUtil.isNotBlank(accountPageQuery.getTitle())) {
+
+                LocalDateTime offset = LocalDateTimeUtil.offset(LocalDateTimeUtil.now(),
+                    -accountPageQuery.getIntervalDay(), ChronoUnit.DAYS);
+                wrapper.having("MAX(first_time <= '" + offset.toString() + "' AND title = 'C') > 0 AND"
+                    + " SUM(CASE WHEN title = '" + accountPageQuery.getTitle() + "' THEN 1 ELSE 0 END) > 0 ");
+            } else {
+                LocalDateTime offset = LocalDateTimeUtil.offset(LocalDateTimeUtil.now(),
+                    -accountPageQuery.getIntervalDay(), ChronoUnit.DAYS);
+                wrapper.having("MAX(first_time <= {0} AND title = 'C') > 0 ", offset.toString());
+            }
+        } else {
+            wrapper.eq(CharSequenceUtil.isNotBlank(accountPageQuery.getTitle()), AccountDO::getTitle,
+                accountPageQuery.getTitle());
+        }
+
+        // 查询group
+        wrapper.select(AccountDO::getGroup);
+        List<AccountDO> groupList = accountMapper.selectList(wrapper);
+
+        // group分组后，进行in查询
+        Page<AccountDO> page = new Page<>();
+        page.setSize(pageQuery.getPageSize());
+        if (CollUtil.isNotEmpty(groupList)) {
+            // 通过对group分组内存分组
+            List<AccountDO> groupPage = CollUtil.page(pageQuery.getPageNum() - 1, pageQuery.getPageSize(), groupList);
+            List<AccountDO> accountDOList = accountMapper.selectList(new QueryWrapper<AccountDO>().lambda()
+                .eq(CharSequenceUtil.isNotBlank(accountPageQuery.getTitle()), AccountDO::getTitle,
+                    accountPageQuery.getTitle())
+                .in(AccountDO::getGroup, groupPage.stream().map(AccountDO::getGroup).collect(Collectors.toList()))
+                .orderByAsc(AccountDO::getGroup).orderByAsc(AccountDO::getTitle));
+            page.setTotal(groupList.size());
+            page.setRecords(accountDOList);
+        }
+        return page;
     }
 
     @Override

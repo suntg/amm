@@ -9,7 +9,7 @@ import com.example.amm.domain.vo.AccountVO;
 
 public interface AccountService extends IService<AccountDO> {
 
-    Page<AccountDO> listPage(PageQuery pageQuery, AccountPageQuery accountPageQuery);
+    Page<AccountDO> page(PageQuery pageQuery, AccountPageQuery accountPageQuery);
 
     AccountDO getById(Long id);
 

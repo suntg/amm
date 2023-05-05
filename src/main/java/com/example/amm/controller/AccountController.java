@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,14 +44,12 @@ public class AccountController {
     private AccountService accountService;
 
     @Resource
-    private RedisTemplate<String, String> redisTemplate;
-    @Resource
     private LogService logService;
 
-    @Operation(summary = "分页查询 index()")
-    @GetMapping("listPage")
-    public Page<AccountDO> listPage(PageQuery pageQuery, AccountPageQuery accountPageQuery) {
-        return accountService.listPage(pageQuery, accountPageQuery);
+    @Operation(summary = "分页查询")
+    @GetMapping("page")
+    public Page<AccountDO> page(PageQuery pageQuery, AccountPageQuery accountPageQuery) {
+        return accountService.page(pageQuery, accountPageQuery);
     }
 
     @Operation(summary = "list")

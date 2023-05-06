@@ -27,16 +27,19 @@
             padding-right: 0px !important;
             overflow: hidden;
         }
-        .el-table__wrapper  {
+
+        .el-table__wrapper {
             max-width: 100%;
             overflow-x: auto;
         }
+
         .custom-tooltip {
-            white-space: nowrap;  /* 禁止换行 */
-            overflow: visible;   /* 允许内容超出容器 */
+            white-space: nowrap; /* 禁止换行 */
+            overflow: visible; /* 允许内容超出容器 */
         }
+
         .listView .el-table .el-table__header-wrapper thead tr th {
-            white-space: nowrap!important;
+            white-space: nowrap !important;
         }
 
     </style>
@@ -96,11 +99,13 @@
                                             :file-list="fileList"
                                             :auto-upload="false">
                                         <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-                                        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+                                        <el-button style="margin-left: 10px;" size="small" type="success"
+                                                   @click="submitUpload">上传到服务器
+                                        </el-button>
                                         <div slot="tip" class="el-upload__tip">只能上传CSV文件</div>
                                     </el-upload>
                                 </div>
-                                    <el-button type="primary" @click="showAddAccount">添加账号</el-button>
+                                <el-button type="primary" @click="showAddAccount">添加账号</el-button>
 
                                 <el-button type="success" @click="onSubmit" plain>显示全部</el-button>
 
@@ -149,7 +154,8 @@
                                         </el-option>
                                     </el-select>
 
-                                    <el-button type="primary" @click="pageQuery" style="margin-left:20px;">查询</el-button>
+                                    <el-button type="primary" @click="pageQuery" style="margin-left:20px;">查询
+                                    </el-button>
                                 </div>
 
                                 <hr>
@@ -164,7 +170,9 @@
                                                 ref="table"
                                                 row-key="id"
                                                 @cell-dblclick="handleEdit"
-                                                height="900">
+                                                height="900"
+                                                :cell-class-name="tableCellClassName">
+
                                             <el-table-column type="selection" width="55" :reserve-selection="true">
                                             </el-table-column>
 
@@ -172,23 +180,36 @@
                                             </el-table-column>
                                             <el-table-column prop="group" align="center" label="分组" width="80">
                                                 <template slot-scope="scope">
-                                                    <el-button :type="getButtonType(scope.row.group)" plain size="mini" @click="showGroupLog(scope)">
+                                                    <el-button :type="getButtonType(scope.row.group)" plain size="mini"
+                                                               @click="showGroupLog(scope)">
                                                         {{ scope.row.group }}
                                                     </el-button>
                                                 </template>
                                             </el-table-column>
                                             <el-table-column prop="title" label="身份" align="center" width="50">
                                             </el-table-column>
-                                            <el-table-column prop="email" align="center" label="Email" :width="flexWidth('email',accounts,'最新日志Email')">
+                                            <el-table-column prop="email" align="center" label="Email"
+                                                             :width="flexWidth('email',accounts,'最新日志Email')">
 
                                             </el-table-column>
-                                            <el-table-column prop="payme" align="center" label="PayMe链接" :width="flexWidth('payme',accounts,'PayMe链接')">
+                                            <el-table-column prop="payme" align="center" label="PayMe链接"
+                                                             :width="flexWidth('payme',accounts,'PayMe链接')">
 
                                             </el-table-column>
                                             <el-table-column prop="balance" align="center" label="余额" width="70">
                                                 <template slot-scope="scope">
-                                                    <div v-if="!scope.row.isEditing">{{ scope.row.balance }}</div>
-                                                    <el-input v-else v-model="scope.row.balance" @blur="handleSave(scope.row)" autofocus></el-input>
+
+                                                    <!--v-if去判断双击的是不是当前单元格-->
+                                                    <el-input
+                                                            @blur="handleSave(scope.row)"
+                                                            size="mini"
+                                                            :ref="scope.row.index + ',' + scope.column.index"
+                                                            v-model="scope.row.balance"
+                                                            v-if="scope.row.index + ',' + scope.column.index == currentCell">
+                                                    </el-input>
+                                                    <span v-else>{{scope.row.balance}}</span>
+
+
                                                 </template>
                                             </el-table-column>
 
@@ -200,7 +221,9 @@
                                                 </template>
                                             </el-table-column> -->
 
-                                            <el-table-column prop="firstTime" align="center" label="首次时间" :formatter="firstTimeReplace" :width="flexWidth('firstTime',accounts,'首次时间')">
+                                            <el-table-column prop="firstTime" align="center" label="首次时间"
+                                                             :formatter="firstTimeReplace"
+                                                             :width="flexWidth('firstTime',accounts,'首次时间')">
                                             </el-table-column>
 
                                             <el-table-column prop="succTimes" align="center" label="转出次数" width="80">
@@ -209,7 +232,8 @@
                                             <el-table-column prop="succMoney" align="center" label="转出总额" width="80">
                                             </el-table-column>
 
-                                            <el-table-column prop="recentLog" label="最新日志" :width="flexWidth('recentLog',accounts,'最新日志')">
+                                            <el-table-column prop="recentLog" label="最新日志"
+                                                             :width="flexWidth('recentLog',accounts,'最新日志')">
                                             </el-table-column>
 
                                             <!-- <el-table-column prop="switchip" label="IP">
@@ -218,24 +242,30 @@
                                             </el-table-column> -->
                                             <!-- <el-table-column prop="affiliation" label="所属" align="center">
                                             </el-table-column>-->
-                                            <el-table-column prop="batch" label="批次" align="center" :width="flexWidth('batch',accounts,'批次')">
+                                            <el-table-column prop="batch" label="批次" align="center"
+                                                             :width="flexWidth('batch',accounts,'批次')">
                                             </el-table-column>
                                             <el-table-column prop="status" label="状态" align="center" width="50">
                                             </el-table-column>
                                             </el-table-column>
-                                            <el-table-column prop="updateTime" label="更新时间" align="center" :formatter="updateTimeReplace" :width="flexWidth('updateTime',accounts,'更新时间')">
+                                            <el-table-column prop="updateTime" label="更新时间" align="center"
+                                                             :formatter="updateTimeReplace"
+                                                             :width="flexWidth('updateTime',accounts,'更新时间')">
                                             </el-table-column>
-                                            <el-table-column prop="remark" label="备注" :width="flexWidth('remark',accounts,'备注')">
+                                            <el-table-column prop="remark" label="备注"
+                                                             :width="flexWidth('remark',accounts,'备注')">
                                             </el-table-column>
-                                            <el-table-column label="操作" align="center"  width="300">
+                                            <el-table-column label="操作" align="center" width="300">
                                                 <template slot-scope="scope">
-                                                    <el-button type="success" size="mini" @click="showAccountLog(scope)">
+                                                    <el-button type="success" size="mini"
+                                                               @click="showAccountLog(scope)">
                                                         账号Log
                                                     </el-button>
                                                     <el-button type="primary" size="mini" @click="accountEdit(scope)">
                                                         编辑
                                                     </el-button>
-                                                    <el-button type="danger" size="mini" @click="deleteAccountByRow(scope)">
+                                                    <el-button type="danger" size="mini"
+                                                               @click="deleteAccountByRow(scope)">
                                                         删除
                                                     </el-button>
                                                 </template>
@@ -243,7 +273,8 @@
                                         </el-table>
 
                                         <el-dialog title="账号添加" :visible.sync="dialogVisible" width="30%">
-                                            <el-form ref="newAccount" :model="newAccount" label-width="120px" :rules="rules">
+                                            <el-form ref="newAccount" :model="newAccount" label-width="120px"
+                                                     :rules="rules">
                                                 <el-form-item label="账号" prop="email" required>
                                                     <el-input v-model="newAccount.email"></el-input>
                                                 </el-form-item>
@@ -251,7 +282,8 @@
                                                     <el-input v-model="newAccount.group"></el-input>
                                                 </el-form-item>
                                                 <el-form-item label="余额" prop="balance" required>
-                                                    <el-input-number v-model="newAccount.balance" :min="1" :max="9999999999999"></el-input-number>
+                                                    <el-input-number v-model="newAccount.balance" :min="1"
+                                                                     :max="9999999999999"></el-input-number>
                                                 </el-form-item>
                                                 <el-form-item label="身份" prop="title" required>
                                                     <template>
@@ -269,14 +301,14 @@
                                                 <el-form-item label="路径" prop="path" required>
                                                     <el-input v-model="newAccount.path"></el-input>
                                                 </el-form-item>
-<!--                                                <el-form-item label="切IP" prop="switchIp" required>-->
-<!--                                                    <el-input v-model="newAccount.switchIp" ></el-input>-->
-<!--                                                </el-form-item>-->
-<!--                                                <el-form-item label="包" prop="packageNum" required>-->
-<!--                                                    <el-input v-model="newAccount.packageNum" ></el-input>-->
-<!--                                                </el-form-item>-->
+                                                <!--                                                <el-form-item label="切IP" prop="switchIp" required>-->
+                                                <!--                                                    <el-input v-model="newAccount.switchIp" ></el-input>-->
+                                                <!--                                                </el-form-item>-->
+                                                <!--                                                <el-form-item label="包" prop="packageNum" required>-->
+                                                <!--                                                    <el-input v-model="newAccount.packageNum" ></el-input>-->
+                                                <!--                                                </el-form-item>-->
                                                 <el-form-item label="备注" prop="remark" required>
-                                                    <el-input v-model="newAccount.remark" ></el-input>
+                                                    <el-input v-model="newAccount.remark"></el-input>
                                                 </el-form-item>
                                             </el-form>
 
@@ -306,21 +338,23 @@
                                         </el-dialog>
 
                                         <el-dialog title="快捷任务" :visible.sync="quickVisible" width="30%">
-                                            <el-form ref="newQuick" :model="newQuick" label-width="120px" :rules="quickRules">
+                                            <el-form ref="newQuick" :model="newQuick" label-width="120px"
+                                                     :rules="quickRules">
                                                 <el-form-item label="Type" prop="type" required>
                                                     <el-input v-model="newQuick.type" disable="true"></el-input>
-<!--                                                    <el-button-->
-<!--                                                            :type="success"-->
-<!--                                                            size="medium" round-->
-<!--                                                            disable="true">-->
-<!--                                                        {{ newQuick.title }}-->
-<!--                                                    </el-button>-->
+                                                    <!--                                                    <el-button-->
+                                                    <!--                                                            :type="success"-->
+                                                    <!--                                                            size="medium" round-->
+                                                    <!--                                                            disable="true">-->
+                                                    <!--                                                        {{ newQuick.title }}-->
+                                                    <!--                                                    </el-button>-->
                                                 </el-form-item>
                                                 <el-form-item label="分组" prop="group" required>
-                                                    <el-input v-model="newQuick.group"  disable="true"></el-input>
+                                                    <el-input v-model="newQuick.group" disable="true"></el-input>
                                                 </el-form-item>
                                                 <el-form-item label="金额" prop="money" required>
-                                                    <el-input-number v-model="newQuick.money" :min="-1" :max="9999999999999"></el-input-number>
+                                                    <el-input-number v-model="newQuick.money" :min="-1"
+                                                                     :max="9999999999999"></el-input-number>
                                                 </el-form-item>
 
                                             </el-form>
@@ -390,7 +424,7 @@
                                             </el-form>
 
                                             <el-button type="success" @click="updateAccount()">更 新</el-button>
-<!--                                            <el-button @click="resetToOriginalAccount()">重 置</el-button>-->
+                                            <!--                                            <el-button @click="resetToOriginalAccount()">重 置</el-button>-->
                                             <el-button @click="accountEditVisible = false">取 消</el-button>
                                             <el-button type="danger" @click="deleteAccount()">删 除</el-button>
                                             <el-button type="info" @click="nextAccount()">下一条</el-button>
@@ -403,7 +437,8 @@
                                                 <el-form ref="batchAccount" :model="batchAccount" label-width="120px">
 
                                                     <el-form-item label="账号余额" prop="balance">
-                                                        <el-input-number v-model="batchAccount.balance" :min="-1" ></el-input-number>
+                                                        <el-input-number v-model="batchAccount.balance"
+                                                                         :min="-1"></el-input-number>
                                                     </el-form-item>
 
                                                 </el-form>
@@ -424,8 +459,11 @@
                                                 </el-input>
 
                                             </template>
-                                            <el-button @click="batchPatchVisible = false" style="margin-top:20px;">返 回</el-button>
-                                            <el-button @click="copyBatchPath" style="margin-top:20px;margin-left:20px" type="danger" plain>复 制</el-button>
+                                            <el-button @click="batchPatchVisible = false" style="margin-top:20px;">返 回
+                                            </el-button>
+                                            <el-button @click="copyBatchPath" style="margin-top:20px;margin-left:20px"
+                                                       type="danger" plain>复 制
+                                            </el-button>
                                         </el-dialog>
 
                                     </template>
@@ -497,19 +535,19 @@
     // let baseUrl = "http://192.168.100.119:8080";
     var app = new Vue({
         el: '#app',
-        data () {
+        data() {
             let data = {
-                group:'',
-                title:'',
-                intervalDay:'',
-                email:'',
-                titles:[],
-                accounts:[],
-                groupLogs:[],
-                accountLogs:[],
+                group: '',
+                title: '',
+                intervalDay: '',
+                email: '',
+                titles: [],
+                accounts: [],
+                groupLogs: [],
+                accountLogs: [],
                 fileList: [],
                 account: {},
-                originalAccount:{},
+                originalAccount: {},
                 summary: '',
                 total: 0,
                 pageNum: 1,
@@ -543,22 +581,22 @@
                 batchAccount: {
                     balance: '',
                 },
-                batchPath:'',
+                batchPath: '',
                 rules: {
                     email: [
-                        { required: true, message: '请输入账号', trigger: 'blur' },
+                        {required: true, message: '请输入账号', trigger: 'blur'},
                     ],
                     group: [
-                        { required: true, message: '请填写 分组', trigger: 'blur' }
+                        {required: true, message: '请填写 分组', trigger: 'blur'}
                     ],
                     title: [
-                        {required: true, message: '请填写 身份', trigger: 'blur' }
+                        {required: true, message: '请填写 身份', trigger: 'blur'}
                     ],
                     balance: [
-                        { required: true, message: '请填写 余额', trigger: 'blur' }
+                        {required: true, message: '请填写 余额', trigger: 'blur'}
                     ],
                     path: [
-                        { required: true, message: '请填写 路径', trigger: 'blur' }
+                        {required: true, message: '请填写 路径', trigger: 'blur'}
                     ],
                     // switchIp: [
                     //     { required: true, message: '请填写 切换IP', trigger: 'blur' }
@@ -567,7 +605,7 @@
                     //     { required: true, message: '请填写 包', trigger: 'blur' }
                     // ],
                     remark: [
-                        { required: true, message: '请填写 备注', trigger: 'blur' }
+                        {required: true, message: '请填写 备注', trigger: 'blur'}
                     ]
                 },
                 newQuick: {
@@ -577,16 +615,18 @@
                 },
                 quickRules: {
                     type: [
-                        { required: true, message: '请确定 类型', trigger: 'blur' },
+                        {required: true, message: '请确定 类型', trigger: 'blur'},
                     ],
                     group: [
-                        { required: true, message: '请填写 分组', trigger: 'blur' }
+                        {required: true, message: '请填写 分组', trigger: 'blur'}
                     ],
                     money: [
-                        { required: true, message: '请填写 金额', trigger: 'blur' }
+                        {required: true, message: '请填写 金额', trigger: 'blur'}
                     ]
                 },
                 condition: 1,
+                // 用一个字符串来保存当前双击的是哪一个单元格
+                currentCell: null,
             }
             return data
         },
@@ -667,10 +707,10 @@
             },
             resetCondition() {
                 this.ip = '',
-                this.country = '',
-                this.state = '',
-                this.city= '',
-                this.zipCode = '';
+                    this.country = '',
+                    this.state = '',
+                    this.city = '',
+                    this.zipCode = '';
             },
             handleSizeChange(val) {
                 this.pageSize = val;
@@ -681,7 +721,7 @@
                 this.pageNum = val;
                 this.reFreshPage();
             },
-            reFreshPage(){
+            reFreshPage() {
                 if (this.condition == 1) {
                     this.listNeMX();
                 }
@@ -736,20 +776,20 @@
                 }
             },
             handleError(response, file, fileList) {
-                    this.$message({
-                        showClose: true,
-                        offset: 250,
-                        message: response.message,
-                        type: 'success'
-                    });
-                    // this.onSubmit();
-                    this.reFreshPage();
+                this.$message({
+                    showClose: true,
+                    offset: 250,
+                    message: response.message,
+                    type: 'success'
+                });
+                // this.onSubmit();
+                this.reFreshPage();
             },
             handlePreview(file) {
                 console.log(file);
             },
             beforeRemove(file, fileList) {
-                return this.$confirm(`确定移除 ${ file.name }？`);
+                return this.$confirm(`确定移除 ${file.name}？`);
             },
             getButtonType(group) {
                 return group % 2 == 1 ? 'success' : 'warning'
@@ -798,34 +838,54 @@
                         });
                     });
             },
-            handleEdit(row) {
+            // 给单元格绑定横向和竖向的index，这样就能确定是哪一个单元格
+            tableCellClassName({row, column, rowIndex, columnIndex}){
+                row.index=rowIndex;
+                column.index=columnIndex;
+            },
+
+            handleEdit(row, column) {
                 // 将当前行设置为编辑状态
-                Vue.set(row, 'isEditing', true);
+                // Vue.set(row, 'isEditing', true);
+                this.currentCell = row.index + ',' + column.index;
+                // 这里必须要setTimeout，因为在点击的时候，input才刚被v-if显示出来，不然拿不到dom
+                setTimeout(() => {
+                    // 双击后自动获得焦点
+                    this.$refs[row.index + ',' + column.index].focus();
+                })
             },
             handleSave(row) {
-                // 保存当前行的修改
-                // 可以将修改后的数据提交到后台进行保存
-                axios.put(baseUrl + '/account/update/' + row.id,
+                if (this.isNumber(row.balance)){
+                    // 保存当前行的修改
+                    // 可以将修改后的数据提交到后台进行保存
+                    axios.put(baseUrl + '/account/update/' + row.id,
 
-                    JSON.stringify(row)
-                    , {
-                        headers: {
-                            'Access-Control-Allow-Origin': '*',  //解决cors头问题
-                            'Access-Control-Allow-Credentials': 'true', //解决session问题
-                            'Content-Type': 'application/json; charset=UTF-8' //将表单数据传递转化为form-data类型
-                        },
-                        withCredentials: true
-                    }).then((response) => {
+                        JSON.stringify(row)
+                        , {
+                            headers: {
+                                'Access-Control-Allow-Origin': '*',  //解决cors头问题
+                                'Access-Control-Allow-Credentials': 'true', //解决session问题
+                                'Content-Type': 'application/json; charset=UTF-8' //将表单数据传递转化为form-data类型
+                            },
+                            withCredentials: true
+                        }).then((response) => {
 
-                    console.log(response)
+                        console.log(response)
+                        this.$message({
+                            message: response.data.message,
+                            type: 'success'
+                        });
+                        // 当input失去焦点的时候，隐藏input
+                        this.currentCell = null;
+                    })
+                } else {
                     this.$message({
-                        message: response.data.message,
-                        type: 'success'
+                        message: "请输入正确数字!",
+                        type: 'error'
                     });
-                })
+                    // this.reFreshPage();
+                }
 
-                // 将当前行的 isEditing 属性设置为 false，表示该行不再处于编辑状态
-                Vue.set(row, 'isEditing', false);
             },
 
             showAddAccount() {
@@ -896,8 +956,8 @@
 
             },
             getGroupLogListById() {
-                        //保存Vue指针
-                        var that = this;
+                //保存Vue指针
+                var that = this;
 
                 axios.get(baseUrl + '/account/groupLog/' + this.groupId,
                     {
@@ -912,7 +972,7 @@
                     .then((response) => {
                         // console.log("responose是：" + response.data);
                         this.groupLogs = response.data.data.map(log => ({  // 生成对象
-                            log    // 生成log属性
+                                log    // 生成log属性
                             })
                         );
                         // this.groupLogs = response.data.data.records
@@ -1075,39 +1135,39 @@
             },
             updateAccount() {
 
-                        //保存Vue指针
-                        var that = this;
+                //保存Vue指针
+                var that = this;
 
-                        axios.put(baseUrl + '/account/update/' + this.account.id, this.account)
-                            .then(function (response) {
-                                if (response.data.status == 100) {
-                                    console.log(response.data.status);
-                                    that.$message({
-                                        showClose: true,
-                                        offset: 250,
-                                        message: response.data.message,
-                                        type: 'success'
-                                    });
-                                    that.reFreshPage();
-                                } else {
-                                    that.$message({
-                                        showClose: true,
-                                        offset: 250,
-                                        message: response.data.message,
-                                        type: 'warning'
-                                    });
-                                }
-                            })
-                            .catch(function (error) {
-
-                                that.$message({
-                                    showClose: true,
-                                    offset: 250,
-                                    message: error.response.data.message,
-                                    type: 'error'
-                                });
+                axios.put(baseUrl + '/account/update/' + this.account.id, this.account)
+                    .then(function (response) {
+                        if (response.data.status == 100) {
+                            console.log(response.data.status);
+                            that.$message({
+                                showClose: true,
+                                offset: 250,
+                                message: response.data.message,
+                                type: 'success'
                             });
-                        this.accountEditVisible = false;
+                            that.reFreshPage();
+                        } else {
+                            that.$message({
+                                showClose: true,
+                                offset: 250,
+                                message: response.data.message,
+                                type: 'warning'
+                            });
+                        }
+                    })
+                    .catch(function (error) {
+
+                        that.$message({
+                            showClose: true,
+                            offset: 250,
+                            message: error.response.data.message,
+                            type: 'error'
+                        });
+                    });
+                this.accountEditVisible = false;
             },
             deleteAccount({row, column}) {
                 //保存Vue指针
@@ -1227,7 +1287,7 @@
             },
             firstTimeReplace(row, column) {
                 if (row.firstTime != null) {
-                    return row.firstTime.replace(/T/g, ' ').replace(/.[\d]{3}Z/, ' ').slice(0,16);
+                    return row.firstTime.replace(/T/g, ' ').replace(/.[\d]{3}Z/, ' ').slice(0, 16);
                 }
             },
 
@@ -1241,7 +1301,7 @@
              * 注：prop,title有一个必传
              */
             flexWidth(prop, tableData, title, num = 0) {
-                if (tableData.length === 0 ) {//表格没数据不做处理
+                if (tableData.length === 0) {//表格没数据不做处理
                     return;
                 }
                 let flexWidth = 0;//初始化表格列宽
@@ -1288,7 +1348,7 @@
                     ids.push(this.$refs.table.selection[i].id);
                 }
 
-                axios.put(baseUrl + '/account/batchUpdateBalanceByIds',{}, {
+                axios.put(baseUrl + '/account/batchUpdateBalanceByIds', {}, {
                         headers: {
                             'Access-Control-Allow-Origin': '*',  //解决cors头问题
                             'Access-Control-Allow-Credentials': 'true', //解决session问题
@@ -1300,12 +1360,12 @@
                             balance: this.batchAccount.balance
                         },
                         paramsSerializer: {
-                            serialize:function(params) {
-                                return Qs.stringify(params, { arrayFormat: 'repeat' })
+                            serialize: function (params) {
+                                return Qs.stringify(params, {arrayFormat: 'repeat'})
                             }
                         }
-                     },
-                   ).then((response) => {
+                    },
+                ).then((response) => {
 
                     this.$message({
                         message: response.data.message,
@@ -1345,13 +1405,13 @@
                     ids.push(this.$refs.table.selection[i].id);
                 }
 
-                axios.get(baseUrl + '/account/queryPathsByIds',                    {
+                axios.get(baseUrl + '/account/queryPathsByIds', {
                         params: {
                             ids: ids
                         },
                         paramsSerializer: {
-                            serialize:function(params) {
-                                return Qs.stringify(params, { arrayFormat: 'repeat' })
+                            serialize: function (params) {
+                                return Qs.stringify(params, {arrayFormat: 'repeat'})
                             }
                         }
                     },
@@ -1359,7 +1419,7 @@
 
                     if (response.data.data.length > 0) {
                         let temp = "";
-                        for(let account of response.data.data) {
+                        for (let account of response.data.data) {
                             if (account.path != null) {
                                 temp += account.path + "\n";
                             }
@@ -1382,23 +1442,25 @@
                 // document.execCommand('copy') // 执行copy方法
                 // this.$message({ message: '复制成功', type: 'success' })
 
-                    let that = this;
-                    this.$copyText(this.batchPath).then(
-                        function (e) {
-                            that.$notify({
-                                title: "复制成功",
-                                type: "success",
-                            });
-                        },
-                        function (e) {
-                            that.$notify({
-                                title: "复制失败",
-                                type: "error",
-                            });
-                        }
-                    );
+                let that = this;
+                this.$copyText(this.batchPath).then(
+                    function (e) {
+                        that.$notify({
+                            title: "复制成功",
+                            type: "success",
+                        });
+                    },
+                    function (e) {
+                        that.$notify({
+                            title: "复制失败",
+                            type: "error",
+                        });
+                    }
+                );
+            },
+            isNumber(str) {
+                return /^[+-]?\d*(\.\d+)?$/.test(str)
             }
-
         },
         mounted() {
             this.listNeMX();

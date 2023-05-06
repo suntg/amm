@@ -60,13 +60,22 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
         }
         wrapper.in(CollUtil.isNotEmpty(groups), AccountDO::getGroup, groups);
         wrapper.groupBy(AccountDO::getGroup);
-        wrapper.ne(AccountDO::getTitle, "M").ne(AccountDO::getTitle, "X").gt(AccountDO::getGroupStatus, 0)
-            .orderByAsc(AccountDO::getGroup).orderByAsc(AccountDO::getTitle);
+
+        if (!"M".equals(accountPageQuery.getTitle()) && !"X".equals(accountPageQuery.getTitle())) {
+            // 既不等于 M 也不等于 X
+            wrapper.ne(AccountDO::getTitle, "M").ne(AccountDO::getTitle, "X");
+        }
+        if ("M".equals(accountPageQuery.getTitle())) {
+            wrapper.eq(AccountDO::getTitle, "M");
+        }
+        if ("X".equals(accountPageQuery.getTitle())) {
+            wrapper.eq(AccountDO::getTitle, "X");
+        }
+
+        wrapper.gt(AccountDO::getGroupStatus, 0).orderByAsc(AccountDO::getGroup).orderByAsc(AccountDO::getTitle);
 
         if (accountPageQuery.getIntervalDay() != null) {
-
             if (CharSequenceUtil.isNotBlank(accountPageQuery.getTitle())) {
-
                 LocalDateTime offset = LocalDateTimeUtil.offset(LocalDateTimeUtil.now(),
                     -accountPageQuery.getIntervalDay(), ChronoUnit.DAYS);
                 wrapper.having("MAX(first_time <= '" + offset.toString() + "' AND title = 'C') > 0 AND"

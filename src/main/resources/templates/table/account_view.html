@@ -425,6 +425,7 @@
 
                                             </template>
                                             <el-button @click="batchPatchVisible = false" style="margin-top:20px;">返 回</el-button>
+                                            <el-button @click="copyBatchPath" style="margin-top:20px;margin-left:20px" type="danger" plain>复 制</el-button>
                                         </el-dialog>
 
                                     </template>
@@ -479,6 +480,7 @@
 <script src="js/vue.js"></script>
 
 <script src="js/qs.min.js"></script>
+<script src="js/vue-clipboard.min.js "></script>
 
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <!-- 引入样式 -->
@@ -1367,6 +1369,34 @@
 
                 })
 
+            },
+            copyBatchPath() {
+                // const save = function(e) {
+                //     e.clipboardData.setData('text/plain', this.batchPath)
+                //     e.preventDefault() // 阻止默认行为
+                // }
+                // const once = {
+                //     once: true
+                // }
+                // document.addEventListener('copy', save, once) // 添加一个copy事件,当触发时执行一次,执行完删除
+                // document.execCommand('copy') // 执行copy方法
+                // this.$message({ message: '复制成功', type: 'success' })
+
+                    let that = this;
+                    this.$copyText(this.batchPath).then(
+                        function (e) {
+                            that.$notify({
+                                title: "复制成功",
+                                type: "success",
+                            });
+                        },
+                        function (e) {
+                            that.$notify({
+                                title: "复制失败",
+                                type: "error",
+                            });
+                        }
+                    );
             }
 
         },

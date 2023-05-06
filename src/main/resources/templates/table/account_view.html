@@ -107,6 +107,9 @@
                                 <el-button type="warning" @click="listNeMX" plain>过滤MX</el-button>
 
                                 <el-button type="info" @click="showBalanceChange" plain>批量更新余额</el-button>
+
+                                <el-button type="primary" @click="showBatchPath" plain>批量查询路径</el-button>
+
                                 <div style="margin-bottom:25px;margin-top:25px;">
                                     <span>分组：</span>
                                     <el-input
@@ -146,7 +149,7 @@
                                         </el-option>
                                     </el-select>
 
-                                    <el-button type="primary" @click="pageQuery">查询</el-button>
+                                    <el-button type="primary" @click="pageQuery" style="margin-left:20px;">查询</el-button>
                                 </div>
 
                                 <hr>
@@ -410,6 +413,20 @@
                                             <el-button @click="batchBalanceChangeVisible = false">返 回</el-button>
                                         </el-dialog>
 
+                                        <el-dialog title="批量查询路径" :visible.sync="batchPatchVisible" width="70%">
+
+                                            <template>
+
+                                                <el-input
+                                                        type="textarea"
+                                                        :autosize="{ maxRows: 40}"
+                                                        v-model="batchPath">
+                                                </el-input>
+
+                                            </template>
+                                            <el-button @click="batchPatchVisible = false" style="margin-top:20px;">返 回</el-button>
+                                        </el-dialog>
+
                                     </template>
 
                                     </tbody>
@@ -508,6 +525,7 @@
                 accountLogVisible: false,
                 accountEditVisible: false,
                 batchBalanceChangeVisible: false,
+                batchPatchVisible: false,
                 groupId: "",
                 accountId: "",
                 newAccount: {
@@ -523,6 +541,7 @@
                 batchAccount: {
                     balance: '',
                 },
+                batchPath:'',
                 rules: {
                     email: [
                         { required: true, message: '请输入账号', trigger: 'blur' },
@@ -1314,6 +1333,41 @@
                         this.titles = response.data.data
                     })
             },
+
+            showBatchPath() {
+
+                this.batchPatchVisible = true;
+
+                let ids = [];
+                for (let i = 0; i < this.$refs.table.selection.length; i++) {
+                    ids.push(this.$refs.table.selection[i].id);
+                }
+
+                axios.get(baseUrl + '/account/queryPathsByIds',                    {
+                        params: {
+                            ids: ids
+                        },
+                        paramsSerializer: {
+                            serialize:function(params) {
+                                return Qs.stringify(params, { arrayFormat: 'repeat' })
+                            }
+                        }
+                    },
+                ).then((response) => {
+
+                    if (response.data.data.length > 0) {
+                        let temp = "";
+                        for(let account of response.data.data) {
+                            if (account.path != null) {
+                                temp += account.path + "\n";
+                            }
+                        }
+                        this.batchPath = temp;
+                    }
+
+                })
+
+            }
 
         },
         mounted() {

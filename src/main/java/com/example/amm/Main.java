@@ -1,12 +1,10 @@
 package com.example.amm;
 
 import java.io.IOException;
-import java.util.List;
 
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisURI;
-import io.lettuce.core.api.StatefulRedisConnection;
-import io.lettuce.core.codec.ByteArrayCodec;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.LocalDateTimeUtil;
 
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -93,21 +91,24 @@ public class Main {
         // System.out.println("------------------------------------------------");
         // }
 
-        RedisURI redisUri =
-            RedisURI.builder().withHost("w2.ad123.win").withPort(50879).withPassword("123456").withDatabase(6).build();
-        RedisClient client = RedisClient.create(redisUri);
-        StatefulRedisConnection<byte[], byte[]> connection = client.connect(ByteArrayCodec.INSTANCE);
+        // RedisURI redisUri =
+        // RedisURI.builder().withHost("w2.ad123.win").withPort(50879).withPassword("123456").withDatabase(6).build();
+        // RedisClient client = RedisClient.create(redisUri);
+        // StatefulRedisConnection<byte[], byte[]> connection = client.connect(ByteArrayCodec.INSTANCE);
+        //
+        // String key = "pp25_accountlog_1000";
+        // List<byte[]> list = connection.sync().lrange(key.getBytes(), 0, -1);
+        //
+        // for (byte[] bytes : list) {
+        // System.out.println(new String(bytes));
+        // }
+        //
+        // // use the connection here
+        // connection.close();
+        // client.shutdown();
 
-        String key = "pp25_accountlog_1000";
-        List<byte[]> list = connection.sync().lrange(key.getBytes(), 0, -1);
-
-        for (byte[] bytes : list) {
-            System.out.println(new String(bytes));
-        }
-
-        // use the connection here
-        connection.close();
-        client.shutdown();
+        System.out.println(LocalDateTimeUtil.isSameDay(LocalDateTimeUtil.now(),
+            LocalDateTimeUtil.of(new DateTime("2023-05-01 15:17:43", DatePattern.NORM_DATETIME_FORMAT))));
 
     }
 

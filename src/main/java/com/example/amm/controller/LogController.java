@@ -1,6 +1,9 @@
 package com.example.amm.controller;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.amm.constant.BusinessType;
 import com.example.amm.domain.entity.LogDO;
 import com.example.amm.service.AccountService;
@@ -17,6 +21,11 @@ import com.example.amm.service.LogService;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.LocalDateTimeUtil;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.sync.RedisCommands;
+import io.lettuce.core.codec.ByteArrayCodec;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
@@ -81,53 +90,71 @@ public class LogController {
         
         Thread.sleep(2000);*/
 
-        Map<String, String> map = new HashMap<>();
-        map.put("pp25_accountlog_*", BusinessType.ACCOUNT.name());
-        map.put("pp25_grouplog_*", BusinessType.GROUP.name());
-        map.put("pp25_tasklog_*", BusinessType.TASK.name());
-        map.put("autopp_accountlog_*", BusinessType.AUTO_ACCOUNT.name());
-        map.put("autopp_grouplog_*", BusinessType.AUTO_GROUP.name());
-        map.put("autopp_tasklog_*", BusinessType.AUTO_TASK.name());
-        map.put("autopp_25_autologs", BusinessType.AUTO_USER.name());
+        RedisURI redisUri =
+            RedisURI.builder().withHost("w2.ad123.win").withPort(50879).withPassword("123456").withDatabase(6).build();
+        RedisClient client = RedisClient.create(redisUri);
+        StatefulRedisConnection<byte[], byte[]> connection = client.connect(ByteArrayCodec.INSTANCE);
+        // 获取 Redis 命令对象
+        RedisCommands<byte[], byte[]> commands = connection.sync();
 
-        List<LogDO> logDOList = new ArrayList<>();
+        Map<String, String> map = new HashMap<>();
+        // map.put("pp25_accountlog_*", BusinessType.ACCOUNT.name());
+        map.put("pp25_grouplog_*", BusinessType.GROUP.name());
+        // map.put("pp25_tasklog_*", BusinessType.TASK.name());
+        // map.put("autopp_accountlog_*", BusinessType.AUTO_ACCOUNT.name());
+        // map.put("autopp_grouplog_*", BusinessType.AUTO_GROUP.name());
+        // map.put("autopp_tasklog_*", BusinessType.AUTO_TASK.name());
+        // map.put("autopp_25_autologs", BusinessType.AUTO_USER.name());
 
         for (Map.Entry<String, String> entry : map.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
+            List<LogDO> logDOList = new ArrayList<>();
+            // Set<String> keys = redisTemplate.keys(key);
+            // 执行模糊匹配命令
+            List<byte[]> keys = commands.keys(key.getBytes());
 
-            Set<String> keys = redisTemplate.keys(key);
-            for (String rdsKey : keys) {
-                List<Object> rdsValues = redisTemplate.boundListOps(rdsKey).range(0, -1);
-                System.out.println(rdsValues);
+            for (byte[] rdsKey : keys) {
 
-                /*for (String rdsValue : rdsValues) {
-                    int firstIndex = rdsValue.indexOf("[");
-                    int secondIndex = rdsValue.indexOf("]");
-                    String logTimeStr = rdsValue.substring(firstIndex + 1, secondIndex);
-                    System.out.println(logTimeStr);
+                List<byte[]> rdsValues = commands.lrange(rdsKey, 0, -1);
+
+                String rk = new String(rdsKey);
+                System.out.println(rk);
+                for (byte[] rdsValue : rdsValues) {
+                    String rv = new String(rdsValue);
+
+                    System.out.println(rv);
+                    int firstIndex = rv.indexOf("[");
+                    int secondIndex = rv.indexOf("]");
+                    String logTimeStr = rv.substring(firstIndex + 1, secondIndex);
 
                     LogDO logDO = new LogDO();
                     logDO.setBusiness(value);
-                    if ("autopp_25_autologs".equals(rdsKey)) {
+                    if ("autopp_25_autologs".equals(rk)) {
                         logDO.setBusinessId("25");
                     } else {
-                        String[] arr = rdsKey.split("_");
+                        String[] arr = rk.split("_");
                         String lastElement = arr[arr.length - 1];
 
                         logDO.setBusinessId(lastElement);
                     }
 
-                    logDO.setMessage(rdsValue);
+                    logDO.setMessage(rv);
                     logDO.setLogTime(LocalDateTimeUtil.of(new DateTime(logTimeStr, DatePattern.NORM_DATETIME_FORMAT)));
 
-                    logDOList.add(logDO);
-
-                }*/
-
+                    if (logService.count(new QueryWrapper<LogDO>().lambda().eq(LogDO::getMessage, logDO.getMessage())
+                        .eq(LogDO::getBusiness, logDO.getBusiness()).eq(LogDO::getBusinessId, logDO.getBusinessId())
+                        .eq(LogDO::getLogTime, logDO.getLogTime())) < 1) {
+                        logDOList.add(logDO);
+                    }
+                }
             }
+
+            logService.saveBatch(logDOList);
         }
-        // System.out.println(JSONUtil.toJsonStr(logDOList));
-        logService.saveBatch(logDOList);
+
+        // 关闭连接和客户端
+        connection.close();
+        client.shutdown();
     }
 }

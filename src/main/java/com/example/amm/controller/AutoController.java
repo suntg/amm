@@ -59,7 +59,7 @@ public class AutoController {
     @Operation(summary = "自动养号逻辑 autorun()")
     @GetMapping("/autoRun")
     public void autoRun() {
-        Integer user = 25;
+        Integer user = Integer.valueOf(User.USER_ID_25);
 
         taskService.deleteAllTasks();
         String msg = "============================ Auto任务开始 ============================";
@@ -216,7 +216,7 @@ public class AutoController {
     @GetMapping("/autoXXX")
     public void autoXXX(String doParam) {
         String doParamUpper = doParam.toUpperCase(); // 转大写
-        int user = 25;
+        int user = Integer.parseInt(User.USER_ID_25);;
         taskService.deleteAllTasks();
 
         AutoInfoDTO autoInfoDTO = new AutoInfoDTO();

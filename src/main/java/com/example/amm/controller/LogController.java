@@ -25,6 +25,7 @@ import com.example.amm.service.LogService;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
@@ -151,8 +152,15 @@ public class LogController {
 
                     logDO.setMessage(rv);
 
-                    if (!LocalDateTimeUtil.isSameDay(LocalDateTimeUtil.now(),
-                        LocalDateTimeUtil.of(new DateTime(logTimeStr, DatePattern.NORM_DATETIME_FORMAT)))) {
+                    // if (!LocalDateTimeUtil.isSameDay(LocalDateTimeUtil.now(),
+                    // LocalDateTimeUtil.of(new DateTime(logTimeStr, DatePattern.NORM_DATETIME_FORMAT)))) {
+                    // continue;
+                    // }
+
+                    DateTime afterDate = DateUtil.parse("2023-05-11 00:00:00");
+                    boolean after =
+                        DateUtil.compare(new DateTime(logTimeStr, DatePattern.NORM_DATETIME_FORMAT), afterDate) < 0;
+                    if (after) {
                         continue;
                     }
 
@@ -168,7 +176,7 @@ public class LogController {
 
             logService.saveBatch(logDOList);
         }
-        // 关闭连接和客户端
+
         connection.close();
         client.shutdown();
     }

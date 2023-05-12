@@ -242,6 +242,30 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountDO> im
         }
     }
 
+    @Override
+    public void syncFirstTime() {
+        // 获取所有ID 不包括 group 2
+        List<AccountDO> accountDOList = accountMapper.selectList(
+            new QueryWrapper<AccountDO>().lambda().select(AccountDO::getId, AccountDO::getEmail, AccountDO::getTitle)
+                .isNull(AccountDO::getFirstTime).ne(AccountDO::getGroup, 2).orderByDesc(AccountDO::getId));
+        // 通过ID获取所有日志
+
+        for (AccountDO accountDO : accountDOList) {
+            List<LogDO> logDOList =
+                logService.list(new LambdaQueryWrapper<LogDO>().eq(LogDO::getBusiness, BusinessType.ACCOUNT.name())
+                    .eq(LogDO::getBusinessId, accountDO.getId()).orderByAsc(LogDO::getLogTime));
+            for (LogDO logDO : logDOList) {
+                if (CharSequenceUtil.containsAll(logDO.getMessage(), "[" + accountDO.getTitle() + "->",
+                    "从：" + accountDO.getEmail(), "发送", "成功")) {
+                    accountDO.setFirstTime(logDO.getLogTime());
+                    accountMapper.updateById(accountDO);
+                    break;
+                }
+            }
+        }
+
+    }
+
     /**
      * 在快捷创建task页面获取account信息
      *

@@ -1,9 +1,11 @@
 package com.example.amm;
 
 import java.io.IOException;
+import java.util.Date;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 
 public class Main {
@@ -107,9 +109,12 @@ public class Main {
         // connection.close();
         // client.shutdown();
 
-        System.out.println(LocalDateTimeUtil.isSameDay(LocalDateTimeUtil.now(),
-            LocalDateTimeUtil.of(new DateTime("2023-05-01 15:17:43", DatePattern.NORM_DATETIME_FORMAT))));
-
+        // System.out.println(LocalDateTimeUtil.isSameDay(LocalDateTimeUtil.now(),
+        //
+        //     LocalDateTimeUtil.of(new DateTime("2023-05-01 15:17:43", DatePattern.NORM_DATETIME_FORMAT))));
+        Date afterDate = DateUtil.parse("2023-05-08 00:00:00");
+        boolean after = DateUtil.compare( DateUtil.parse("2023-05-08 00:00:01"), afterDate) > 0;
+        System.out.println(after);
     }
 
 }

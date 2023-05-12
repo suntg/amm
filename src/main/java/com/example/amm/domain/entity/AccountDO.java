@@ -65,7 +65,7 @@ public class AccountDO {
 
     private Integer status;
 
-    private int succTimes;
+    private Integer succTimes;
 
     private String succMoney;
 

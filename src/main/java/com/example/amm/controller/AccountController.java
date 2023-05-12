@@ -253,4 +253,9 @@ public class AccountController {
         return accountService.list(wrapper);
     }
 
+    @Operation(summary = "Sync first time")
+    @GetMapping("syncFirstTime")
+    public void syncFirstTime() {
+        accountService.syncFirstTime();
+    }
 }

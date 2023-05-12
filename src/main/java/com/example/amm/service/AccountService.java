@@ -37,4 +37,6 @@ public interface AccountService extends IService<AccountDO> {
 
     int getNewGroup();
 
+    void syncFirstTime();
+
 }
